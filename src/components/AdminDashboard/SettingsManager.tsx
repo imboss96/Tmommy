@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { supabase } from '../../lib/supabase';
+import { getApiBaseUrl } from '../../lib/api';
 
 export const SettingsManager: React.FC = () => {
   const { siteConfig, updateSiteConfig, resetAllData, nannies, insights, bookings, emergencyRequests, mediaItems } = useContent();
@@ -38,11 +39,12 @@ export const SettingsManager: React.FC = () => {
 
   const handleUpdatePin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const apiUrl = getApiBaseUrl();
     if (!/^\d{4,6}$/.test(newPin)) {
       setPinErrorMsg('PIN must be 4 to 6 numeric digits');
       return;
     }
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/pin`, {
+    const response = await fetch(`${apiUrl}/api/admin/pin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,10 +75,11 @@ export const SettingsManager: React.FC = () => {
 
   const handleInviteAdmin = async (event: React.FormEvent) => {
     event.preventDefault();
+    const apiUrl = getApiBaseUrl();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
     if (!data.session) { setInviteError('Your administrator session has expired. Sign in again.'); return; }
     setIsInviting(true); setInviteError(''); setInviteMessage('');
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/invite`, {
+    const response = await fetch(`${apiUrl}/api/admin/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
       body: JSON.stringify({ email: inviteEmail, displayName: inviteName })

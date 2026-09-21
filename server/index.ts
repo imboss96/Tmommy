@@ -30,10 +30,18 @@ const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServic
 
 const allowedOrigins = new Set([
   appUrl,
+  appUrl.replace(/^https?:\/\//, 'https://www.'),
+  appUrl.replace(/^https?:\/\//, 'http://www.'),
+  appUrl.replace(/^https?:\/\//, 'https://'),
+  appUrl.replace(/^https?:\/\//, 'http://'),
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:5173',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
+  'https://tmommycares.com',
+  'https://www.tmommycares.com',
+  'http://tmommycares.com',
+  'http://www.tmommycares.com'
 ]);
 
 app.use((req, res, next) => {

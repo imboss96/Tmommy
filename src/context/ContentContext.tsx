@@ -20,6 +20,7 @@ import { DEFAULT_BOOKINGS, DEFAULT_EMERGENCY_REQUESTS, DEFAULT_SITE_CONFIG } fro
 import { DEFAULT_MEDIA } from '../data/defaultMedia';
 import { DEFAULT_REVIEWS } from '../data/defaultReviews';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { getApiBaseUrl } from '../lib/api';
 
 interface ContentContextType {
   // Staff / Nannies
@@ -216,7 +217,7 @@ function mapReviewRow(row: Record<string, unknown>): Review {
   };
 }
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const apiUrl = getApiBaseUrl();
 
 async function submitToApi(path: string, payload: unknown) {
   const response = await fetch(`${apiUrl}${path}`, {

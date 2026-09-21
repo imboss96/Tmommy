@@ -1,6 +1,7 @@
 import React, { FormEvent, useMemo, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, LoaderCircle, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
+import { getApiBaseUrl } from '../lib/api';
 
 interface ContactPageProps {
   onOpenBooking: () => void;
@@ -21,10 +22,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking, onOpenE
 
   const submitContactForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const apiUrl = getApiBaseUrl();
     setSubmissionState('sending');
     setSubmissionError('');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact-inquiries`, {
+      const response = await fetch(`${apiUrl}/api/contact-inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)

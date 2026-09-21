@@ -10,17 +10,20 @@ import {
   Search, 
   ExternalLink,
   Tag,
-  Info
+  Info,
+  Layers3
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { MediaItem } from '../../types';
 import { DEFAULT_MEDIA } from '../../data/defaultMedia';
+import { DEFAULT_CORE_SERVICE_CATEGORIES, getCoreServiceCategories, saveCoreServiceCategories, CoreServiceCategory } from '../../data/coreServiceCategories';
 
 export const MediaManager: React.FC = () => {
   const { mediaItems, addMediaItem, updateMediaItem, deleteMediaItem } = useContent();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [coreCategoryDrafts, setCoreCategoryDrafts] = useState<CoreServiceCategory[]>(() => getCoreServiceCategories());
 
   // New photo modal
   const [isAdding, setIsAdding] = useState(false);
@@ -143,6 +146,30 @@ export const MediaManager: React.FC = () => {
 
   const getHeroMedia = (id: string) => mediaItems.find(item => item.id === id) || DEFAULT_MEDIA.find(item => item.id === id);
 
+  const handleCoreCategoryImageUpdate = (id: string, image: string) => {
+    const next = coreCategoryDrafts.map((category) => category.id === id ? { ...category, image } : category);
+    setCoreCategoryDrafts(next);
+    saveCoreServiceCategories(next);
+  };
+
+  const handleCoreCategoryFileUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        handleCoreCategoryImageUpdate(id, reader.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveCoreCategoryEdits = () => {
+    saveCoreServiceCategories(coreCategoryDrafts);
+    window.location.reload();
+  };
+
   const handleHeroFileUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -208,6 +235,60 @@ export const MediaManager: React.FC = () => {
       </section>
       
       {/* Header */}
+      <section className="bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm">
+        <div className="flex items-start gap-3 mb-4">
+          <Layers3 className="w-5 h-5 text-[#D96B43] shrink-0 mt-0.5" />
+          <div>
+            <h2 className="text-lg font-bold font-['Outfit'] text-[#1A201C]">Core Service Category Images</h2>
+            <p className="text-xs text-[#635E59] mt-0.5">Update the images for each service card on the homepage. These values are stored in the browser and used instantly.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {coreCategoryDrafts.map((category) => (
+            <div key={category.id} className="rounded-xl border border-[#E8DFD3] overflow-hidden bg-[#FAF7F2]">
+              <div className="relative h-32 bg-[#EFE9DF]">
+                <img src={category.image} alt={category.title} className="w-full h-full object-cover" />
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="text-[11px] font-bold text-[#1A201C]">{category.title}</div>
+                <input
+                  type="url"
+                  value={category.image}
+                  onChange={(e) => handleCoreCategoryImageUpdate(category.id, e.target.value)}
+                  placeholder="Paste image URL"
+                  className="w-full px-2.5 py-2 bg-white border border-[#D5C9BA] rounded-lg text-[11px] font-mono"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg border border-[#D5C9BA] bg-white text-[#1D432D] text-[10px] font-bold cursor-pointer">
+                    <Upload className="w-3 h-3" />
+                    Upload
+                    <input type="file" accept="image/*" onChange={(e) => handleCoreCategoryFileUpload(category.id, e)} className="hidden" />
+                  </label>
+                  <select
+                    value={category.image}
+                    onChange={(e) => handleCoreCategoryImageUpdate(category.id, e.target.value)}
+                    className="w-full px-2 py-2 rounded-lg border border-[#D5C9BA] bg-white text-[10px] font-bold text-[#1A201C]"
+                    aria-label={`Choose image for ${category.title}`}
+                  >
+                    <option value="">Choose gallery image</option>
+                    {mediaItems.map((item) => (
+                      <option key={item.id} value={item.url}>{item.title}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button onClick={saveCoreCategoryEdits} className="px-4 py-2 rounded-lg bg-[#1D432D] text-white text-xs font-bold hover:bg-[#163322]">
+            Save core category images
+          </button>
+        </div>
+      </section>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm">
         <div>
           <h2 className="text-xl font-bold font-['Outfit'] text-[#1A201C] flex items-center gap-2">

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, Lock, Mail, ShieldAlert } from 'lucide-react';
 import { MommyCareLogo } from '../MommyCareLogo';
 import { supabase } from '../../lib/supabase';
+import { getApiBaseUrl } from '../../lib/api';
 
 interface AdminOtpGateProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const apiUrl = getApiBaseUrl();
 
 export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel }) => {
   const [email, setEmail] = useState('');
