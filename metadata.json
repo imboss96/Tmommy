@@ -1,0 +1,7 @@
+{
+  "name": "MommyCare Nairobi",
+  "description": "Nairobi's premier vetted agency connecting families and estates with certified Nannies, House Managers, House Girls, House Boys, Shamba Boys, Caretakers, and Domestic Cooks. Featuring forensic DCI clearance, 3-day trials, 90-day replacement guarantee, and household insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

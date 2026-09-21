@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%">
+  <!-- MommyCare Brand Colors: Deep Spruce Teal #234537 & Warm Coral Heart #DE6C5D -->
+  <g fill="#234537">
+    <!-- Roof with Chimney & Side Walls -->
+    <!-- Chimney -->
+    <path d="M 355 140 L 398 140 L 398 225 L 355 186 Z" />
+
+    <!-- Outer Roof Gable & Walls -->
+    <path d="M 15 255 
+             L 250 55 
+             L 485 255 
+             L 452 284 
+             L 426 262 
+             L 426 350 
+             L 394 350 
+             L 394 235 
+             L 250 112 
+             L 76 262 
+             L 48 284 Z" />
+
+    <!-- Left Wall Post -->
+    <path d="M 76 260 L 76 350 L 46 350 L 46 280 Z" />
+
+    <!-- Adult/Mother Head -->
+    <circle cx="188" cy="272" r="46" />
+
+    <!-- Child Head -->
+    <circle cx="320" cy="328" r="36" />
+
+    <!-- Mother Body & Embracing Arm -->
+    <path d="M 154 330 
+             C 118 360, 80 415, 84 485 
+             C 88 555, 160 600, 246 600 
+             C 275 600, 298 593, 312 585 
+             C 275 585, 230 568, 204 544 
+             C 165 508, 148 450, 158 395 
+             C 162 372, 172 350, 186 332 
+             C 172 330, 162 329, 154 330 Z" 
+          transform="matrix(0.85 0 0 0.85 38 12)" />
+
+    <!-- Mother Bottom Cradle Curve & Child Body Embracing -->
+    <!-- Unified stylized vector of Mother & Child silhouette embracing the heart -->
+    <path d="M 172 318
+             C 130 338, 92 388, 92 448
+             C 92 515, 155 565, 246 565
+             C 338 565, 402 508, 402 442
+             C 402 392, 370 348, 335 332
+             C 346 354, 350 378, 345 404
+             C 336 450, 298 488, 258 506
+             C 278 494, 296 472, 302 442
+             C 310 402, 288 375, 268 370
+             C 255 367, 242 372, 234 380
+             C 214 366, 185 366, 170 382
+             C 148 406, 148 446, 168 478
+             C 186 508, 218 528, 256 534
+             C 220 534, 180 520, 152 494
+             C 124 466, 118 426, 134 386
+             C 144 360, 160 338, 172 318 Z" />
+  </g>
+
+  <!-- Central Warm Coral Heart -->
+  <path d="M 245 490
+           C 240 485, 178 438, 178 395
+           C 178 368, 198 350, 224 350
+           C 238 350, 248 358, 254 368
+           C 260 358, 270 350, 284 350
+           C 310 350, 330 368, 330 395
+           C 330 438, 268 485, 263 490
+           C 258 495, 250 495, 245 490 Z" 
+        fill="#DE6C5D" />
+</svg>

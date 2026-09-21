@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 440" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&amp;family=Playfair+Display:ital,wght@1,500;1,600&amp;display=swap');
+      .mc-brand-title {
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 800;
+        font-size: 106px;
+        letter-spacing: -2px;
+      }
+      .mc-brand-tagline {
+        font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+        font-style: italic;
+        font-size: 38px;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </defs>
+
+  <!-- Left Icon: House + Mother + Child + Heart -->
+  <g transform="translate(10, 5) scale(0.92)">
+    <!-- House Roof, Chimney and Frame in Spruce Teal #234537 -->
+    <g fill="#234537">
+      <!-- Chimney on Right Roof Slope -->
+      <path d="M 336 125 L 382 125 L 382 210 L 336 172 Z" />
+
+      <!-- Roof Gable with overhangs -->
+      <path d="M 22 235 
+               L 242 45 
+               L 462 235 
+               L 432 260 
+               L 404 238 
+               L 404 315 
+               L 376 315 
+               L 376 215 
+               L 242 98 
+               L 80 238 
+               L 52 260 Z" />
+
+      <!-- Left Wall Post -->
+      <path d="M 80 236 L 80 315 L 52 315 L 52 258 Z" />
+
+      <!-- Mother Head -->
+      <circle cx="185" cy="245" r="44" />
+
+      <!-- Child Head -->
+      <circle cx="312" cy="298" r="34" />
+
+      <!-- Mother Silhouette Body Swoop -->
+      <path d="M 172 292
+               C 134 312, 88 358, 88 418
+               C 88 478, 148 524, 238 524
+               C 278 524, 308 514, 328 500
+               C 288 498, 250 484, 226 462
+               C 192 432, 178 382, 186 335
+               C 188 316, 196 298, 208 284
+               C 194 284, 182 286, 172 292 Z" />
+
+      <!-- Child Silhouette Body Swoop -->
+      <path d="M 312 342
+               C 336 360, 362 396, 362 436
+               C 362 486, 314 522, 238 522
+               C 264 518, 292 506, 312 484
+               C 334 458, 338 422, 326 388
+               C 320 370, 310 354, 298 342
+               C 304 340, 308 340, 312 342 Z" />
+    </g>
+
+    <!-- Warm Coral Center Heart -->
+    <path d="M 242 468
+             C 238 464, 185 422, 185 382
+             C 185 358, 204 340, 226 340
+             C 238 340, 246 346, 252 355
+             C 258 346, 266 340, 278 340
+             C 300 340, 319 358, 319 382
+             C 319 422, 266 464, 262 468
+             C 257 472, 247 472, 242 468 Z" 
+          fill="#DE6C5D" />
+  </g>
+
+  <!-- Right Typography: MommyCare + Tagline -->
+  <g transform="translate(435, 275)">
+    <!-- MommyCare in Deep Pine Teal -->
+    <text x="0" y="0" class="mc-brand-title" fill="#234537">MommyCare</text>
+    
+    <!-- Quality Care You Can Trust............ in Italic Coral -->
+    <text x="8" y="52" class="mc-brand-tagline" fill="#DE6C5D">Quality Care You Can Trust............</text>
+  </g>
+</svg>
