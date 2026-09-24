@@ -18,6 +18,41 @@ import { MediaItem } from '../../types';
 import { DEFAULT_MEDIA } from '../../data/defaultMedia';
 import { DEFAULT_CORE_SERVICE_CATEGORIES, getCoreServiceCategories, saveCoreServiceCategories, CoreServiceCategory } from '../../data/coreServiceCategories';
 
+const MAX_UPLOAD_DIMENSION = 1600;
+const JPEG_QUALITY = 0.82;
+
+function readCompressedImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Unable to read the selected image.'));
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error('Unable to read the selected image.'));
+        return;
+      }
+
+      const image = new Image();
+      image.onerror = () => reject(new Error('The selected file is not a valid image.'));
+      image.onload = () => {
+        const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Your browser could not prepare the image for upload.'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export const MediaManager: React.FC = () => {
   const { mediaItems, addMediaItem, updateMediaItem, deleteMediaItem } = useContent();
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,16 +109,14 @@ export const MediaManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setNewUrl(reader.result as string);
+    void readCompressedImage(file).then(url => {
+        setNewUrl(url);
         if (!newTitle) {
           setNewTitle(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
         }
-      }
-    };
-    reader.readAsDataURL(file);
+    }).catch(error => {
+      console.error('Gallery image preparation failed:', error);
+    });
   };
 
   const handleSaveMedia = (e: React.FormEvent) => {
@@ -124,11 +157,9 @@ export const MediaManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') setEditUrl(reader.result);
-    };
-    reader.readAsDataURL(file);
+    void readCompressedImage(file).then(setEditUrl).catch(error => {
+      console.error('Gallery image preparation failed:', error);
+    });
   };
 
   const handleUpdateMedia = (e: React.FormEvent) => {
@@ -156,13 +187,11 @@ export const MediaManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        handleCoreCategoryImageUpdate(id, reader.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    void readCompressedImage(file).then(image => {
+      handleCoreCategoryImageUpdate(id, image);
+    }).catch(error => {
+      console.error('Gallery image preparation failed:', error);
+    });
   };
 
   const saveCoreCategoryEdits = () => {
@@ -174,14 +203,12 @@ export const MediaManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setHeroDrafts(prev => ({ ...prev, [id]: reader.result as string }));
-        updateMediaItem(id, { url: reader.result as string });
-      }
-    };
-    reader.readAsDataURL(file);
+    void readCompressedImage(file).then(image => {
+      setHeroDrafts(prev => ({ ...prev, [id]: image }));
+      updateMediaItem(id, { url: image });
+    }).catch(error => {
+      console.error('Gallery image preparation failed:', error);
+    });
   };
 
   const saveHeroImage = (id: string) => {
