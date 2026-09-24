@@ -22,6 +22,38 @@ let activeAdminPin = process.env.ADMIN_PIN || '2540';
 const hasRealValue = (...values: Array<string | undefined>) =>
   values.every(value => Boolean(value && !value.includes('YOUR_')));
 
+async function uploadDataUrlToCloudinary(dataUrl: string) {
+  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(dataUrl);
+  if (!match) throw new Error('Media uploads must be valid base64 image data.');
+  if (!hasRealValue(cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret)) {
+    throw new Error('Cloudinary storage is not configured on the API server.');
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = 'mommycare';
+  const signature = crypto
+    .createHash('sha1')
+    .update(`folder=${folder}&timestamp=${timestamp}${cloudinaryApiSecret}`)
+    .digest('hex');
+  const form = new FormData();
+  form.append('file', new Blob([Buffer.from(match[2], 'base64')], { type: match[1] }), 'mommycare-image.jpg');
+  form.append('api_key', cloudinaryApiKey!);
+  form.append('timestamp', String(timestamp));
+  form.append('folder', folder);
+  form.append('signature', signature);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
+    method: 'POST',
+    body: form
+  });
+  const result = await response.json() as { secure_url?: string; public_id?: string; error?: { message?: string } };
+  if (!response.ok || !result.secure_url) {
+    throw new Error(result.error?.message || 'Cloudinary image upload failed.');
+  }
+
+  return { url: result.secure_url, publicId: result.public_id };
+}
+
 const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServiceRoleKey)
   ? createClient(supabaseUrl!, supabaseServiceRoleKey!, {
       auth: { autoRefreshToken: false, persistSession: false }
@@ -386,12 +418,24 @@ app.post('/api/admin/content', requireAdminPin, async (req, res) => {
     return res.status(400).json({ error: 'Invalid content mutation.' });
   }
 
+  let mutationData = data;
+  if (resource === 'media' && operation !== 'delete' && typeof data?.url === 'string' && data.url.startsWith('data:image/')) {
+    try {
+      const uploaded = await uploadDataUrlToCloudinary(data.url);
+      mutationData = { ...data, url: uploaded.url, cloudinary_public_id: uploaded.publicId || null };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Image upload failed.';
+      console.error(`[API] Cloudinary media upload failed: ${message}`);
+      return res.status(502).json({ error: message });
+    }
+  }
+
   const query = supabase!.from(table);
   const result = operation === 'delete'
     ? await query.delete().eq('id', id)
     : operation === 'update'
-      ? await query.update(data).eq('id', data?.id || id).select().single()
-      : await query.upsert(data, { onConflict: 'id' }).select().single();
+      ? await query.update(mutationData).eq('id', mutationData?.id || id).select().single()
+      : await query.upsert(mutationData, { onConflict: 'id' }).select().single();
 
   if (result.error) {
     console.error(`[API] Supabase ${operation} failed for ${table}: ${result.error.message}`);
