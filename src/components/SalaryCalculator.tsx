@@ -33,83 +33,6 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
   const [compoundSize, setCompoundSize] = useState<'quarter' | 'half' | 'one-plus'>('quarter');
   const [includesDriving, setIncludesDriving] = useState<boolean>(false);
 
-  // Dynamic salary calculation model for Nairobi based on role & Kenyan labor market
-  const calculateCompensation = () => {
-    let baseSalary = 20000;
-
-    // Role-specific base starting figures
-    switch (role) {
-      case 'house-manager':
-        baseSalary = 35000;
-        break;
-      case 'chef':
-        baseSalary = 40000;
-        break;
-      case 'home-driver':
-        baseSalary = 32000;
-        break;
-      case 'shamba-boy':
-        baseSalary = 19000;
-        break;
-      case 'caretaker':
-        baseSalary = 24000;
-        break;
-      case 'house-girl':
-        baseSalary = 18000;
-        break;
-      case 'house-boy':
-        baseSalary = 20000;
-        break;
-      case 'cook-chef':
-        baseSalary = 27000;
-        break;
-      case 'nanny':
-      default:
-        baseSalary = 20000;
-        break;
-    }
-
-    // Estate adjustments based on cost of living & transport in Nairobi
-    if (['Karen', 'Runda', 'Muthaiga'].includes(estate)) {
-      baseSalary += 5000;
-    } else if (['Westlands', 'Lavington', 'Gigiri'].includes(estate)) {
-      baseSalary += 3500;
-    } else if (['Kilimani', 'Kileleshwa', 'Parklands'].includes(estate)) {
-      baseSalary += 2000;
-    }
-
-    // Arrangement adjustment
-    if (arrangement === 'day-care') {
-      // Day staff receive a commuter transport allowance in Nairobi
-      baseSalary += 2500;
-    } else if (arrangement === 'night-nurse' && role === 'nanny') {
-      baseSalary += 8000;
-    }
-
-    // Specific duty modifiers
-    if (role === 'nanny') {
-      if (childrenCount > 1) baseSalary += (childrenCount - 1) * 3500;
-      if (includesCooking) baseSalary += 1500;
-      if (includesInfantCare) baseSalary += 2500;
-    } else if (role === 'house-girl') {
-      if (includesCooking) baseSalary += 2000;
-    } else if (role === 'shamba-boy') {
-      if (compoundSize === 'half') baseSalary += 3000;
-      if (compoundSize === 'one-plus') baseSalary += 6000;
-    } else if (role === 'house-manager' || role === 'caretaker' || role === 'house-boy') {
-      if (includesDriving) baseSalary += 5000;
-    }
-
-    return {
-      grossMonthly: baseSalary,
-      netTakeHome: baseSalary,
-      agencyFee: 18000 // Includes 90-day free replacement warranty, criminal background renewal, 3-day trial
-    };
-  };
-
-  const comp = calculateCompensation();
-  const currentEstateInfo = NAIROBI_ESTATES.find(e => e.name === estate);
-
   return (
     <section id="salary-calculator" className="py-16 lg:py-24 bg-[#FAF7F2] border-b border-[#E8DFD3]">
       <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -180,12 +103,10 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                   </option>
                 ))}
               </select>
-              {currentEstateInfo && (
-                <p className="text-[11px] text-[#7D766D] mt-1.5 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#D96B43]" />
-                  <span>Live-in: <strong>{currentEstateInfo.recommendedLiveInSalaryRange}</strong> • Day: {currentEstateInfo.recommendedDayNannySalaryRange}</span>
-                </p>
-              )}
+              <p className="text-[11px] text-[#7D766D] mt-1.5 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-[#D96B43]" />
+                <span>Pricing is tailored to your household requirements and shared after consultation.</span>
+              </p>
             </div>
 
             {/* Living Arrangement */}
@@ -247,7 +168,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                       onChange={(e) => setIncludesInfantCare(e.target.checked)}
                       className="rounded text-[#D96B43] focus:ring-[#D96B43]"
                     />
-                    <span>Infant under 12 months (+KES 2,500)</span>
+                    <span>Infant under 12 months</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#4A453F]">
                     <input
@@ -256,7 +177,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                       onChange={(e) => setIncludesCooking(e.target.checked)}
                       className="rounded text-[#D96B43] focus:ring-[#D96B43]"
                     />
-                    <span>Family Cooking Duties (+KES 1,500)</span>
+                    <span>Family Cooking Duties</span>
                   </label>
                 </div>
               </div>
@@ -302,7 +223,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                     onChange={(e) => setIncludesDriving(e.target.checked)}
                     className="rounded text-[#D96B43] focus:ring-[#D96B43]"
                   />
-                  <span>Includes Errands & Driving with Valid NTSA DL (+KES 5,000)</span>
+                  <span>Includes Errands & Driving with Valid NTSA DL</span>
                 </label>
               </div>
             )}
@@ -321,21 +242,17 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
               <div className="space-y-4">
                 <div>
                   <span className="text-xs uppercase font-bold text-[#7D766D] tracking-wider block">
-                    Recommended Monthly Take-Home Salary
+                    Private Placement Pricing
                   </span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="text-4xl font-extrabold text-[#1A201C] font-['Outfit']">
-                      KES {comp.grossMonthly.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-[#635E59]">/ month</span>
-                  </div>
+                  <p className="text-2xl font-extrabold text-[#1A201C] font-['Outfit'] mt-1">
+                    Contact us for a tailored quote
+                  </p>
                 </div>
 
                 {/* Line Items Table */}
                 <div className="border-t border-[#EFE9DF] pt-4 space-y-2.5 text-xs text-[#4A453F]">
-                  <div className="flex justify-between items-center py-1.5 bg-[#FAF7F2] px-3 rounded-xl font-bold text-sm text-[#1A201C]">
-                    <span>Final Employee Take-Home (M-Pesa / Bank)</span>
-                    <span className="text-[#1D432D]">KES {comp.netTakeHome.toLocaleString()}</span>
+                  <div className="py-1.5 bg-[#FAF7F2] px-3 rounded-xl font-bold text-sm text-[#1A201C]">
+                    Final pricing depends on role, schedule, duties, and household requirements.
                   </div>
                 </div>
 
@@ -355,7 +272,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                   onClick={onBookConsultation}
                   className="w-full py-3.5 px-4 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#D96B43]/20 transition-all hover:scale-[1.01]"
                 >
-                  <span>Request Staff Candidates at this Rate</span>
+                  <span>Contact us for staff pricing</span>
                 </button>
               </div>
 

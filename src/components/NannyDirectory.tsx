@@ -406,22 +406,19 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                       )}
                     </div>
 
-                    {/* Pricing Box */}
+                    {/* Private pricing prompt */}
                     <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#E8DFD3] flex items-center justify-between">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-[#7D766D] tracking-wider block">
-                          Fair Monthly Salary
+                          Private Placement Pricing
                         </span>
                         <span className="text-base font-extrabold text-[#1A201C] font-['Outfit']">
-                          KES {staff.monthlySalaryKsh.toLocaleString()}
+                          Contact us for pricing
                         </span>
-                        <span className="text-[10px] text-[#635E59]"> / month</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-[#7D766D] block">Hourly / Trial</span>
-                        <span className="text-xs font-bold text-[#1D432D]">
-                          KES {staff.hourlyRateKsh}/hr
-                        </span>
+                        <span className="text-[10px] text-[#7D766D] block">Tailored quote</span>
+                        <span className="text-xs font-bold text-[#1D432D]">On request</span>
                       </div>
                     </div>
 

@@ -43,7 +43,7 @@ export const NannyAcademySection: React.FC = () => {
             <p className="text-base sm:text-lg text-white/90 leading-relaxed max-w-2xl">
               MommyCare is rapidly expanding across Nairobi to redefine domestic childcare standards. 
               We never deduct commissions from a nanny’s hard-earned salary. We provide free Red Cross infant CPR 
-              training, fair living wages (KES 22,000 – 35,000+), written legal contracts with paid leave days, 
+              training, fair living wages, written legal contracts with paid leave days,
               statutory NSSF/SHA medical cover, and direct placements with verified, respectful families.
             </p>
 

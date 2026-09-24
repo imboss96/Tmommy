@@ -97,7 +97,7 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
               <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8DFD3] text-xs space-y-1 text-left">
                 <p><strong>Hotline:</strong> +254 700 666 227</p>
                 <p><strong>Requested Role:</strong> <span className="capitalize font-bold">{formData.requestedRole?.replace('-', ' ')}</span></p>
-                <p><strong>Standby Daily Rate:</strong> From KES 2,500 / day</p>
+                <p><strong>Standby Pricing:</strong> Shared by our coordinator after consultation</p>
                 <p><strong>DCI & Clinical Checks:</strong> 100% Pre-cleared before dispatch</p>
               </div>
 

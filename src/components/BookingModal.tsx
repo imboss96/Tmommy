@@ -179,8 +179,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       <p className="text-[11px] text-[#635E59]">{preSelectedNanny.tagline}</p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-[#D96B43]">
-                    KES {preSelectedNanny.monthlySalaryKsh.toLocaleString()}/mo
+                  <span className="text-[11px] font-bold text-[#D96B43] text-right">
+                    Pricing shared after consultation
                   </span>
                 </div>
               ) : (

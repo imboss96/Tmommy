@@ -181,9 +181,9 @@ export const VettingBadgeModal: React.FC<VettingBadgeModalProps> = ({
         {/* Footer Action */}
         <div className="p-4 sm:p-6 bg-[#FAF7F2] border-t border-[#E8DFD3] flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-[#7D766D] uppercase tracking-wider block">Fair Monthly Compensation</span>
-            <span className="text-base font-extrabold text-[#1A201C] font-['Outfit']">
-              KES {nanny.monthlySalaryKsh.toLocaleString()} / month
+            <span className="text-[10px] text-[#7D766D] uppercase tracking-wider block">Private Placement Pricing</span>
+            <span className="text-sm font-extrabold text-[#1A201C] font-['Outfit']">
+              Shared after consultation
             </span>
           </div>
 
