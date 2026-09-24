@@ -35,13 +35,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { siteConfig } = useContent();
 
   const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     const next = logoClicks + 1;
     setLogoClicks(next);
     if (next >= 4) {
-      e.preventDefault();
       setLogoClicks(0);
       window.dispatchEvent(new CustomEvent('open-admin-gate'));
     } else {
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
       setTimeout(() => {
         setLogoClicks(0);
       }, 2500);

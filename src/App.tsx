@@ -41,6 +41,7 @@ function MainWebsite() {
 
   const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminPath);
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('mommycare_admin_authenticated') === 'true');
+  const [, setRouteVersion] = useState(0);
   const pathname = window.location.pathname.replace(/\/$/, '') || '/';
   const requestedRole = new URLSearchParams(window.location.search).get('role') || 'all';
 
@@ -114,6 +115,7 @@ function MainWebsite() {
   useEffect(() => {
     const handleRouteCheck = () => {
       setIsAdminRoute(checkIsAdminPath());
+      setRouteVersion(version => version + 1);
     };
 
     const handleCustomTrigger = () => {
