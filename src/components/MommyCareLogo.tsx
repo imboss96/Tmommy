@@ -37,14 +37,15 @@ export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
 
   if (variant === 'icon') {
     return (
-      <div onClick={onClick} className={`inline-flex items-center ${className}`}>
+      <a href="/" onClick={onClick} className={`inline-flex items-center cursor-pointer ${className}`} aria-label="Go to MommyCare home page">
         <img src="/logo-icon.svg" alt="MommyCare" className={`${iconDimensions} object-contain ${iconClassName}`} />
-      </div>
+      </a>
     );
   }
 
   return (
-    <div 
+    <a
+      href="/"
       onClick={onClick}
       className={`inline-flex items-center cursor-pointer group select-none ${className}`}
     >
@@ -53,6 +54,6 @@ export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
         alt="MommyCare - Quality Care. Safer Homes."
         className={`${logoDimensions} object-contain object-left`}
       />
-    </div>
+    </a>
   );
 };
