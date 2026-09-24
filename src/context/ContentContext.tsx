@@ -217,6 +217,13 @@ function mapReviewRow(row: Record<string, unknown>): Review {
   };
 }
 
+function mapMediaRow(row: Record<string, unknown>): MediaItem {
+  return {
+    ...(row as unknown as MediaItem),
+    uploadedAt: row.uploaded_at as string
+  };
+}
+
 const apiUrl = getApiBaseUrl();
 
 async function submitToApi(path: string, payload: unknown) {
@@ -299,9 +306,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isSupabaseConfigured ? [] : safeStorageGet(STORAGE_KEYS.REVIEWS, DEFAULT_REVIEWS)
   );
 
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() => 
-    isSupabaseConfigured ? [] : safeStorageGet(STORAGE_KEYS.MEDIA, DEFAULT_MEDIA)
-  );
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => 
     isSupabaseConfigured
@@ -329,16 +334,32 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [emergencyRequests]);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) safeStorageSet(STORAGE_KEYS.MEDIA, mediaItems);
-  }, [mediaItems]);
-
-  useEffect(() => {
     if (!isSupabaseConfigured) safeStorageSet(STORAGE_KEYS.CONFIG, siteConfig);
   }, [siteConfig]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) safeStorageSet(STORAGE_KEYS.REVIEWS, reviews);
   }, [reviews]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadMedia = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/media`);
+        if (!response.ok) throw new Error(`Media request failed with status ${response.status}`);
+        const rows = await response.json() as Record<string, unknown>[];
+        if (isActive) setMediaItems(rows.map(mapMediaRow));
+      } catch (error) {
+        console.error('Unable to load media from the backend:', error);
+      }
+    };
+
+    void loadMedia();
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!supabase) return;
@@ -367,15 +388,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const loadLiveContent = async () => {
-      const [staffResult, insightsResult, mediaResult, configResult, reviewsResult] = await Promise.all([
+      const [staffResult, insightsResult, configResult, reviewsResult] = await Promise.all([
         client.from('staff_profiles').select('*').eq('is_available_now', true).order('created_at', { ascending: false }),
         client.from('insights').select('*').eq('status', 'published').order('published_date', { ascending: false }),
-        client.from('media_items').select('*').order('uploaded_at', { ascending: false }),
         client.from('site_config').select('*').eq('id', true).maybeSingle()
         ,client.from('reviews').select('*').eq('status', 'published').order('submitted_at', { ascending: false })
       ]);
 
-      const firstError = staffResult.error || insightsResult.error || mediaResult.error || configResult.error || reviewsResult.error;
+      const firstError = staffResult.error || insightsResult.error || configResult.error || reviewsResult.error;
       if (firstError) {
         console.error('Unable to load live content from Supabase:', firstError);
         return;
@@ -384,12 +404,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!isActive) return;
       if (staffResult.data) setNannies(staffResult.data.map(row => mapStaffRow(row)));
       if (insightsResult.data) setInsights(insightsResult.data.map(row => mapInsightRow(row)));
-      if (mediaResult.data) {
-        setMediaItems(mediaResult.data.map(row => ({
-          ...(row as unknown as MediaItem),
-          uploadedAt: row.uploaded_at as string
-        })));
-      }
       if (configResult.data) {
         setSiteConfig({
           hotlinePhone: configResult.data.hotline_phone,
@@ -704,42 +718,54 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       uploadedAt: new Date().toISOString().split('T')[0]
     };
     setMediaItems(prev => [newMedia, ...prev]);
-    if (supabase) void adminMutation('media', 'upsert', {
+    void adminMutation('media', 'upsert', {
       id: newMedia.id, title: newMedia.title, url: newMedia.url, category: newMedia.category,
       tags: newMedia.tags, dimensions: newMedia.dimensions, uploaded_at: newMedia.uploadedAt
-    }).catch(error => triggerAlert(error.message));
-    triggerAlert(`Added photo "${item.title}" to media library`);
+    }).then(() => {
+      triggerAlert(`Added photo "${item.title}" to media library`);
+    }).catch(error => {
+      setMediaItems(prev => prev.filter(media => media.id !== newMedia.id));
+      triggerAlert(`Photo was not saved: ${error.message}`);
+    });
   };
 
   const updateMediaItem = (id: string, updates: Partial<MediaItem>) => {
-    setMediaItems(prev => {
-      const current = prev.find(item => item.id === id);
-      const updated: MediaItem = {
-        id,
-        title: updates.title || current?.title || 'Homepage Hero Slide',
-        url: updates.url || current?.url || '',
-        category: updates.category || current?.category || 'general',
-        tags: updates.tags || current?.tags || ['hero-slider', 'homepage'],
-        uploadedAt: current?.uploadedAt || new Date().toISOString().split('T')[0],
-        dimensions: updates.dimensions || current?.dimensions
-      };
-      const next = current
-        ? prev.map(item => item.id === id ? { ...item, ...updated } : item)
-        : [updated, ...prev];
+    const current = mediaItems.find(item => item.id === id);
+    const updated: MediaItem = {
+      id,
+      title: updates.title || current?.title || 'Homepage Hero Slide',
+      url: updates.url || current?.url || '',
+      category: updates.category || current?.category || 'general',
+      tags: updates.tags || current?.tags || ['hero-slider', 'homepage'],
+      uploadedAt: current?.uploadedAt || new Date().toISOString().split('T')[0],
+      dimensions: updates.dimensions || current?.dimensions
+    };
+    setMediaItems(prev => current
+      ? prev.map(item => item.id === id ? { ...item, ...updated } : item)
+      : [updated, ...prev]);
 
-      if (supabase) void adminMutation('media', 'upsert', {
-        id: updated.id, title: updated.title, url: updated.url, category: updated.category,
-        tags: updated.tags, dimensions: updated.dimensions, uploaded_at: updated.uploadedAt
-      }).catch(error => triggerAlert(error.message));
-      return next;
+    void adminMutation('media', 'upsert', {
+      id: updated.id, title: updated.title, url: updated.url, category: updated.category,
+      tags: updated.tags, dimensions: updated.dimensions, uploaded_at: updated.uploadedAt
+    }).then(() => {
+      triggerAlert('Hero slider image updated');
+    }).catch(error => {
+      setMediaItems(prev => current
+        ? prev.map(item => item.id === id ? current : item)
+        : prev.filter(item => item.id !== id));
+      triggerAlert(`Media update was not saved: ${error.message}`);
     });
-    triggerAlert('Hero slider image updated');
   };
 
   const deleteMediaItem = (id: string) => {
+    const deleted = mediaItems.find(item => item.id === id);
     setMediaItems(prev => prev.filter(m => m.id !== id));
-    if (supabase) void adminMutation('media', 'delete', undefined, id).catch(error => triggerAlert(error.message));
-    triggerAlert('Media item removed');
+    void adminMutation('media', 'delete', undefined, id).then(() => {
+      triggerAlert('Media item removed');
+    }).catch(error => {
+      if (deleted) setMediaItems(prev => [deleted, ...prev]);
+      triggerAlert(`Media removal was not saved: ${error.message}`);
+    });
   };
 
   // Site Config operations
