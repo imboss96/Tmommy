@@ -12,6 +12,10 @@ dotenv.config({ path: path.join(projectRoot, '.env') });
 const app = express();
 const port = Number(process.env.PORT || 5000);
 const appUrl = process.env.APP_URL || 'http://localhost:3000';
+const configuredAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -62,6 +66,7 @@ const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServic
   : null;
 
 const allowedOrigins = new Set([
+  ...configuredAllowedOrigins,
   appUrl,
   appUrl.replace(/^https?:\/\//, 'https://www.'),
   appUrl.replace(/^https?:\/\//, 'http://www.'),
@@ -74,7 +79,11 @@ const allowedOrigins = new Set([
   'https://tmommycares.com',
   'https://www.tmommycares.com',
   'http://tmommycares.com',
-  'http://www.tmommycares.com'
+  'http://www.tmommycares.com',
+  'https://179.198.201.64',
+  'http://179.198.201.64',
+  'https://179.198.201.64:3000',
+  'http://179.198.201.64:3000'
 ]);
 
 const isLocalDevelopmentOrigin = (origin: string) => {
