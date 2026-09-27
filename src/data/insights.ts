@@ -10,11 +10,11 @@ export const PARENTING_INSIGHTS: ParentingInsight[] = [
     author: {
       name: 'Dr. Brenda Cherotich',
       role: 'Clinical Pediatric Nutritionist (Nairobi)',
-      avatar: 'https://images.unsplash.com/photo-1594824813501-4475e02206aa?q=80&w=200&auto=format&fit=crop'
+      avatar: ''
     },
     readTime: '6 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800&auto=format&fit=crop',
+    coverImage: '',
     tags: ['Infant Weaning', 'Kenyan Superfoods', 'Iron Absorption', 'Baby Diet Plan', '6-12 Months'],
     relatedNairobiTopic: 'Nutritional Care in Nairobi Households',
     keyTakeaways: [
@@ -39,11 +39,11 @@ export const PARENTING_INSIGHTS: ParentingInsight[] = [
     author: {
       name: 'Dr. Allan Mutua, MBChB',
       role: 'Child Development & Behavioral Pediatrician',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=200&auto=format&fit=crop'
+      avatar: ''
     },
     readTime: '8 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+    coverImage: '',
     tags: ['Milestones Guide', 'Speech Development', 'Motor Skills', 'Cognitive Growth', 'Bilingual Kenya'],
     relatedNairobiTopic: 'Early Childhood Stimulation at Home',
     keyTakeaways: [
@@ -68,11 +68,11 @@ export const PARENTING_INSIGHTS: ParentingInsight[] = [
     author: {
       name: 'Sister Grace Nduta',
       role: 'Kenya Red Cross Certified Pediatric Instructor',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop'
+      avatar: ''
     },
     readTime: '7 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop',
+    coverImage: '',
     tags: ['Pediatric First Aid', 'Nairobi High-Rise Safety', 'Choking Protocol', 'Burn Prevention', 'Emergency Numbers'],
     relatedNairobiTopic: 'Safety Protocols for High-Rise Apartments (Kilimani, Kileleshwa, Westlands)',
     keyTakeaways: [
@@ -97,11 +97,11 @@ export const PARENTING_INSIGHTS: ParentingInsight[] = [
     author: {
       name: 'Faith Mwangi',
       role: 'Family & Caregiver Placement Director, MommyCare',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'
+      avatar: ''
     },
     readTime: '5 min read',
     publishedDate: 'September 2026',
-    coverImage: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800&auto=format&fit=crop',
+    coverImage: '',
     tags: ['Nanny Management', 'Daily Routines', 'Fair Employment', 'Communication', 'Work-Life Balance'],
     relatedNairobiTopic: 'Domestic Harmony & Caregiver Retention in Kenya',
     keyTakeaways: [

@@ -152,7 +152,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
                 {/* Image Cover */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#F2EDE4]">
                   <img
-                    src={article.coverImage}
+                    src={article.coverImage || undefined}
                     alt={article.title}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-contain object-center transition-opacity duration-300"
@@ -197,7 +197,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
                   <div className="pt-6 mt-6 border-t border-[#F2ECE3] flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <img
-                        src={article.author.avatar}
+                        src={article.author.avatar || undefined}
                         alt={article.author.name}
                         referrerPolicy="no-referrer"
                         className="w-10 h-10 rounded-full object-cover border border-[#E8DFD3]"
@@ -255,7 +255,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
             {/* Header Image with close button */}
             <div className="relative h-64 sm:h-72 w-full">
               <img
-                src={activeArticle.coverImage}
+                src={activeArticle.coverImage || undefined}
                 alt={activeArticle.title}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
@@ -294,7 +294,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
               <div className="flex items-center justify-between py-3 px-4 bg-[#FAF7F2] rounded-2xl border border-[#E8DFD3]">
                 <div className="flex items-center gap-3">
                   <img
-                    src={activeArticle.author.avatar}
+                    src={activeArticle.author.avatar || undefined}
                     alt={activeArticle.author.name}
                     referrerPolicy="no-referrer"
                     className="w-12 h-12 rounded-full object-cover border border-[#D5C9BA]"

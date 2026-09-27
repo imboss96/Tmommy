@@ -165,7 +165,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="p-3.5 rounded-2xl bg-[#FAF0EB] border border-[#F2C2B2] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <img
-                      src={preSelectedNanny.avatar}
+                      src={preSelectedNanny.avatar || undefined}
                       alt={preSelectedNanny.name}
                       className="w-12 h-12 rounded-xl object-cover"
                     />

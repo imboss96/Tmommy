@@ -17,15 +17,18 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
+import { compressImageToJpeg } from '../../lib/imageUpload';
 import { ParentingInsight } from '../../types';
 
 export const PostsManager: React.FC = () => {
-  const { insights, addInsight, updateInsight, deleteInsight, mediaItems } = useContent();
+  const { insights, addInsight, updateInsight, deleteInsight, mediaItems, uploadImage } = useContent();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [editingPost, setEditingPost] = useState<ParentingInsight | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [previewPost, setPreviewPost] = useState<ParentingInsight | null>(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState('');
 
   // Form state
   const [formData, setFormData] = useState<Partial<ParentingInsight>>({
@@ -34,11 +37,11 @@ export const PostsManager: React.FC = () => {
     excerpt: '',
     readTime: '5 min read',
     publishedDate: new Date().toISOString().split('T')[0],
-    coverImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop',
+    coverImage: '',
     author: {
       name: 'Dr. Stella Njoki, MD',
       role: 'Consultant Pediatrician & Child Health Advisor',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=400&auto=format&fit=crop'
+      avatar: ''
     },
     tags: ['Nairobi Parenting', 'Nutrition'],
     keyTakeaways: ['Key advice point 1', 'Key advice point 2'],
@@ -70,11 +73,11 @@ export const PostsManager: React.FC = () => {
       excerpt: '',
       readTime: '5 min read',
       publishedDate: new Date().toISOString().split('T')[0],
-      coverImage: 'https://images.unsplash.com/photo-1594488518001-0810787e8fd0?q=80&w=1000&auto=format&fit=crop',
+      coverImage: '',
       author: {
         name: 'Dr. Stella Njoki, MD',
         role: 'Consultant Pediatrician & Child Health Advisor',
-        avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=400&auto=format&fit=crop'
+        avatar: ''
       },
       tags: ['Nairobi Parenting'],
       keyTakeaways: ['Clear communication with your domestic staff ensures consistent care.'],
@@ -125,14 +128,13 @@ export const PostsManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert file to Base64 Data URL for persistent storage
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setFormData(prev => ({ ...prev, coverImage: reader.result as string }));
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingCover(true);
+    setCoverUploadError('');
+    void compressImageToJpeg(file).then(uploadImage).then(url => {
+      setFormData(prev => ({ ...prev, coverImage: url }));
+    }).catch(error => {
+      setCoverUploadError(error instanceof Error ? error.message : 'Unable to upload the cover image.');
+    }).finally(() => setIsUploadingCover(false));
   };
 
   return (
@@ -198,7 +200,7 @@ export const PostsManager: React.FC = () => {
             <div>
               <div className="relative h-44 w-full overflow-hidden bg-[#FAF7F2]">
                 <img
-                  src={post.coverImage}
+                  src={post.coverImage || undefined}
                   alt={post.title}
                   className="w-full h-full object-cover"
                 />
@@ -221,7 +223,7 @@ export const PostsManager: React.FC = () => {
 
                 <div className="flex items-center gap-2 pt-2 border-t border-[#F2ECE1]">
                   <img
-                    src={post.author.avatar}
+                    src={post.author.avatar || undefined}
                     alt={post.author.name}
                     className="w-6 h-6 rounded-full object-cover"
                   />
@@ -365,8 +367,15 @@ export const PostsManager: React.FC = () => {
                     type="url"
                     required
                     value={formData.coverImage || ''}
-                    onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    onChange={(e) => {
+                      if (e.target.value.startsWith('data:')) {
+                        setCoverUploadError('Inline image data is not supported. Upload to Cloudinary first.');
+                        return;
+                      }
+                      setFormData({ ...formData, coverImage: e.target.value });
+                      setCoverUploadError('');
+                    }}
+                    placeholder="Paste image URL"
                     className="flex-1 px-3.5 py-2 bg-white border border-[#D5C9BA] rounded-xl text-xs font-mono focus:ring-2 focus:ring-[#D96B43]"
                   />
 
@@ -376,13 +385,16 @@ export const PostsManager: React.FC = () => {
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={isUploadingCover}
                       onChange={handleFileUpload}
                       className="hidden"
                     />
                   </label>
                 </div>
+                {isUploadingCover && <p className="text-[11px] text-[#7D766D]">Uploading to Cloudinary...</p>}
+                {coverUploadError && <p role="alert" className="text-[11px] text-red-700">{coverUploadError}</p>}
 
-                {formData.coverImage && (
+                {formData.coverImage && !formData.coverImage.startsWith('data:') && (
                   <div className="flex items-center gap-3 pt-1">
                     <img
                       src={formData.coverImage}
@@ -511,7 +523,8 @@ export const PostsManager: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs shadow-md shadow-[#D96B43]/25 transition-all"
+                  disabled={isUploadingCover}
+                  className="px-6 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs shadow-md shadow-[#D96B43]/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingPost ? 'Save Updates' : 'Publish Article'}
                 </button>
@@ -538,7 +551,7 @@ export const PostsManager: React.FC = () => {
 
             <div className="p-6 overflow-y-auto space-y-4">
               <img
-                src={previewPost.coverImage}
+                src={previewPost.coverImage || undefined}
                 alt={previewPost.title}
                 className="w-full h-56 object-cover rounded-2xl"
               />

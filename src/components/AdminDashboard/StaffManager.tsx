@@ -17,18 +17,21 @@ import {
   Award
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
+import { compressImageToJpeg } from '../../lib/imageUpload';
 import { NannyProfile, HomecareRole, NairobiEstate, NannyType } from '../../types';
 
 export const StaffManager: React.FC = () => {
-  const { nannies, addNanny, updateNanny, deleteNanny } = useContent();
+  const { nannies, addNanny, updateNanny, deleteNanny, uploadImage } = useContent();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [editingStaff, setEditingStaff] = useState<NannyProfile | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoUploadError, setPhotoUploadError] = useState('');
 
   const [formData, setFormData] = useState<Partial<NannyProfile>>({
     name: '',
-    avatar: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+    avatar: '',
     age: 30,
     role: 'nanny',
     roleTitle: 'Certified Infant & Childcare Professional',
@@ -84,7 +87,7 @@ export const StaffManager: React.FC = () => {
   const handleOpenCreate = () => {
     setFormData({
       name: '',
-      avatar: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+      avatar: '',
       age: 29,
       role: 'nanny',
       roleTitle: 'Certified Infant & Childcare Professional',
@@ -135,13 +138,13 @@ export const StaffManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setFormData(prev => ({ ...prev, avatar: reader.result as string }));
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingPhoto(true);
+    setPhotoUploadError('');
+    void compressImageToJpeg(file).then(uploadImage).then(url => {
+      setFormData(prev => ({ ...prev, avatar: url }));
+    }).catch(error => {
+      setPhotoUploadError(error instanceof Error ? error.message : 'Unable to upload the profile photo.');
+    }).finally(() => setIsUploadingPhoto(false));
   };
 
   return (
@@ -218,7 +221,7 @@ export const StaffManager: React.FC = () => {
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={staff.avatar}
+                        src={staff.avatar || undefined}
                         alt={staff.name}
                         className="w-10 h-10 rounded-xl object-cover border border-[#D5C9BA]"
                       />
@@ -340,18 +343,27 @@ export const StaffManager: React.FC = () => {
                   Candidate Profile Photo (URL or Device Upload) *
                 </label>
                 <div className="flex flex-col sm:flex-row gap-3 items-center">
-                  <img
-                    src={formData.avatar}
-                    alt="Preview"
-                    className="w-16 h-16 rounded-2xl object-cover border border-[#D5C9BA] shrink-0"
-                  />
+                  {formData.avatar && !formData.avatar.startsWith('data:') && (
+                    <img
+                      src={formData.avatar}
+                      alt="Preview"
+                      className="w-16 h-16 rounded-2xl object-cover border border-[#D5C9BA] shrink-0"
+                    />
+                  )}
                   <div className="flex-1 w-full space-y-2">
                     <input
                       type="url"
                       required
                       value={formData.avatar || ''}
-                      onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                      placeholder="https://images.unsplash.com/..."
+                      onChange={(e) => {
+                        if (e.target.value.startsWith('data:')) {
+                          setPhotoUploadError('Inline image data is not supported. Upload to Cloudinary first.');
+                          return;
+                        }
+                        setFormData({ ...formData, avatar: e.target.value });
+                        setPhotoUploadError('');
+                      }}
+                      placeholder="Paste image URL"
                       className="w-full px-3.5 py-2 bg-white border border-[#D5C9BA] rounded-xl text-xs font-mono"
                     />
                     <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#D5C9BA] hover:bg-[#F2ECE1] rounded-xl text-xs font-semibold cursor-pointer text-[#1A201C] transition-colors">
@@ -360,10 +372,13 @@ export const StaffManager: React.FC = () => {
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={isUploadingPhoto}
                         onChange={handleFileUpload}
                         className="hidden"
                       />
                     </label>
+                    {isUploadingPhoto && <p className="text-[11px] text-[#7D766D]">Uploading to Cloudinary...</p>}
+                    {photoUploadError && <p role="alert" className="text-[11px] text-red-700">{photoUploadError}</p>}
                   </div>
                 </div>
               </div>
@@ -553,7 +568,8 @@ export const StaffManager: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs shadow-md shadow-[#D96B43]/25 transition-all"
+                  disabled={isUploadingPhoto}
+                  className="px-6 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs shadow-md shadow-[#D96B43]/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingStaff ? 'Update Candidate Profile' : 'Save Candidate'}
                 </button>

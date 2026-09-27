@@ -29,7 +29,7 @@ const heroSlides = [
     highlight: 'Homecare Professionals in the City',
     description: 'Protect your home and family with trusted care from professionals selected around your household needs.',
     points: ['DCI Biometric Clearance', 'Reference Verified', '90-Day Replacement Support'],
-    image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=max',
+    image: '',
     alt: 'MommyCare vetted homecare professional in Nairobi',
     caption: 'Care matched to your household',
     captionDetail: 'Nannies, household staff, and emergency cover'
@@ -40,7 +40,7 @@ const heroSlides = [
     highlight: 'Every Family Routine',
     description: 'Meet trained nannies and household professionals who bring calm, capable support to busy Nairobi homes.',
     points: ['Infant and Childcare', 'CPR and First Aid', 'Experienced Professionals'],
-    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=1000&auto=format&fit=max',
+    image: '',
     alt: 'Trusted care professional ready to support Nairobi families',
     caption: 'Support that fits your family',
     captionDetail: 'Childcare, household routines, and family care'
@@ -51,7 +51,7 @@ const heroSlides = [
     highlight: 'Home, Holidays and Busy Days',
     description: 'Choose dependable professionals for daily care, holiday cover, household management, and urgent support.',
     points: ['Holiday Relievers', 'Household Management', 'Emergency Availability'],
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1000&auto=format&fit=max',
+    image: '',
     alt: 'Experienced homecare professional for Nairobi households',
     caption: 'Practical support when needed',
     captionDetail: 'Holiday relievers, household staff, and cover'
@@ -248,15 +248,18 @@ export const Hero: React.FC<HeroProps> = ({
                 onPointerUp={handlePointerUp}
                 onPointerCancel={() => { pointerStartX.current = null; }}
               >
-                {heroSlides.map((slide, index) => (
-                  <img
-                    key={slide.image}
-                    src={getSlideImage(index)}
-                    alt={slide.alt}
-                    draggable="false"
-                    className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-[4000ms] ease-in-out ${index === activeSlide ? 'opacity-100' : 'opacity-0'}`}
-                  />
-                ))}
+                {heroSlides.map((slide, index) => {
+                  const image = getSlideImage(index);
+                  return image ? (
+                    <img
+                      key={slide.eyebrow}
+                      src={image}
+                      alt={slide.alt}
+                      draggable="false"
+                      className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-[4000ms] ease-in-out ${index === activeSlide ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                  ) : null;
+                })}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 
                 {/* Overlay Caption with Multiple Roles Tagged */}
@@ -274,7 +277,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5" aria-label="Hero carousel slides">
                   {heroSlides.map((slide, index) => (
                     <button
-                      key={slide.image}
+                      key={slide.eyebrow}
                       type="button"
                       aria-label={`Show slide ${index + 1}`}
                       aria-pressed={index === activeSlide}

@@ -5,7 +5,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hm-001',
     name: 'Patrick Kimani M.',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 39,
     role: 'house-manager',
     roleTitle: 'Executive House Manager & Estate Steward',
@@ -42,7 +42,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hm-002',
     name: 'Catherine Njeri N.',
-    avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 42,
     role: 'house-manager',
     roleTitle: 'Senior Housekeeper & Family Estate Manager',
@@ -81,7 +81,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hg-001',
     name: 'Mercy Ndunge K.',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 29,
     role: 'house-girl',
     roleTitle: 'Professional Housekeeper & Domestic Maid',
@@ -117,7 +117,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hg-002',
     name: 'Sarah Moraa O.',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 32,
     role: 'house-girl',
     roleTitle: 'Full-Time Day/Live-In Housekeeper & Cook',
@@ -155,7 +155,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hb-001',
     name: 'Samuel Otieno O.',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 31,
     role: 'house-boy',
     roleTitle: 'Domestic Steward & Household Assistant',
@@ -192,7 +192,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'hb-002',
     name: 'Emmanuel Kiprono K.',
-    avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 28,
     role: 'house-boy',
     roleTitle: 'Energetic Indoor/Outdoor House Assistant',
@@ -230,7 +230,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'sb-001',
     name: 'Joseph Mwangi N.',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 36,
     role: 'shamba-boy',
     roleTitle: 'Head Groundskeeper & Organic Garden Specialist ("Shamba Boy")',
@@ -267,7 +267,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'sb-002',
     name: 'David Ondiek M.',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 34,
     role: 'shamba-boy',
     roleTitle: 'Horticulturist, Compound Landscaper & Shamba Steward',
@@ -305,7 +305,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'ct-001',
     name: 'Dennis Kipkoech R.',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 37,
     role: 'caretaker',
     roleTitle: 'Technical Compound Caretaker & Facility Custodian',
@@ -342,7 +342,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'ct-002',
     name: 'Peter Kamau G.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 41,
     role: 'caretaker',
     roleTitle: 'Senior Residential Property Caretaker & Gate Steward',
@@ -381,7 +381,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'mc-001',
     name: 'Faith Wangari M.',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 32,
     role: 'nanny',
     roleTitle: 'Certified Early Childhood Infant & Toddler Nanny',
@@ -418,7 +418,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'mc-002',
     name: 'Grace Achieng O.',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 38,
     role: 'nanny',
     roleTitle: 'Registered Enrolled Nurse & Newborn Night Specialist',
@@ -455,7 +455,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'mc-004',
     name: 'Christine Mutheu N.',
-    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 35,
     role: 'nanny',
     roleTitle: 'Special Needs & Neurodivergent Childcare Specialist',
@@ -494,7 +494,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'ck-001',
     name: 'Beatrice Muthoni W.',
-    avatar: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 35,
     role: 'cook-chef',
     roleTitle: 'Private Family Cook & Culinary Specialist',
@@ -530,7 +530,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'chf-001',
     name: 'Chef Samuel Gitau N.',
-    avatar: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 38,
     role: 'chef',
     roleTitle: 'Executive Private Chef & Culinary Director',
@@ -569,7 +569,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'drv-001',
     name: 'John Kariuki Mwangi',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 39,
     role: 'home-driver',
     roleTitle: 'Executive Family & Diplomatic Chauffeur',
@@ -607,7 +607,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
   {
     id: 'drv-002',
     name: 'Evans Omondi O.',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
+    avatar: '',
     age: 34,
     role: 'home-driver',
     roleTitle: 'Private Estate & School Transport Driver',

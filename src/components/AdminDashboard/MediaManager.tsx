@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Image as ImageIcon, 
   Upload, 
@@ -14,51 +14,19 @@ import {
   Layers3
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
+import { compressImageToJpeg } from '../../lib/imageUpload';
 import { MediaItem } from '../../types';
-import { DEFAULT_MEDIA } from '../../data/defaultMedia';
-import { DEFAULT_CORE_SERVICE_CATEGORIES, getCoreServiceCategories, saveCoreServiceCategories, CoreServiceCategory } from '../../data/coreServiceCategories';
-
-const MAX_UPLOAD_DIMENSION = 1600;
-const JPEG_QUALITY = 0.82;
-
-function readCompressedImage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Unable to read the selected image.'));
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        reject(new Error('Unable to read the selected image.'));
-        return;
-      }
-
-      const image = new Image();
-      image.onerror = () => reject(new Error('The selected file is not a valid image.'));
-      image.onload = () => {
-        const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-        const context = canvas.getContext('2d');
-        if (!context) {
-          reject(new Error('Your browser could not prepare the image for upload.'));
-          return;
-        }
-
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
-      };
-      image.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+import { getCoreServiceCategories, saveCoreServiceCategories, CoreServiceCategory } from '../../data/coreServiceCategories';
 
 export const MediaManager: React.FC = () => {
-  const { mediaItems, addMediaItem, updateMediaItem, deleteMediaItem } = useContent();
+  const { mediaItems, uploadImage, addMediaItem, updateMediaItem, deleteMediaItem } = useContent();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [coreCategoryDrafts, setCoreCategoryDrafts] = useState<CoreServiceCategory[]>(() => getCoreServiceCategories());
+  const [coreCategoryDrafts, setCoreCategoryDrafts] = useState<CoreServiceCategory[]>(() =>
+    getCoreServiceCategories().map(category => ({ ...category, image: '' }))
+  );
+  const [isSavingCoreCategories, setIsSavingCoreCategories] = useState(false);
 
   // New photo modal
   const [isAdding, setIsAdding] = useState(false);
@@ -71,14 +39,9 @@ export const MediaManager: React.FC = () => {
   const [editUrl, setEditUrl] = useState('');
   const [editCategory, setEditCategory] = useState<MediaItem['category']>('general');
   const [editTags, setEditTags] = useState('');
-  const [heroDrafts, setHeroDrafts] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      ['hero-slide-1', 'hero-slide-2', 'hero-slide-3'].map(id => [
-        id,
-        DEFAULT_MEDIA.find(item => item.id === id)?.url || ''
-      ])
-    )
-  );
+  const [imageUploadError, setImageUploadError] = useState('');
+  const [isPreparingImage, setIsPreparingImage] = useState(false);
+  const [heroDrafts, setHeroDrafts] = useState<Record<string, string>>({});
 
   const categories = [
     { value: 'all', label: 'All Photos' },
@@ -97,7 +60,18 @@ export const MediaManager: React.FC = () => {
     return matchesCat && matchesSearch;
   });
 
+  useEffect(() => {
+    setCoreCategoryDrafts(current => current.map(category => {
+      const savedImage = mediaItems.find(item => item.id === `core-category-${category.id}`)?.url;
+      return savedImage && savedImage !== category.image ? { ...category, image: savedImage } : category;
+    }));
+  }, [mediaItems]);
+
   const handleCopy = (id: string, url: string) => {
+    if (url.startsWith('data:')) {
+      setImageUploadError('This image has not been processed. Replace it with a Cloudinary image before copying.');
+      return;
+    }
     navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => {
@@ -105,17 +79,24 @@ export const MediaManager: React.FC = () => {
     }, 2000);
   };
 
+  const uploadSelectedImage = async (file: File) => uploadImage(await compressImageToJpeg(file));
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    void readCompressedImage(file).then(url => {
+    setImageUploadError('');
+    setIsPreparingImage(true);
+    void uploadSelectedImage(file).then(url => {
         setNewUrl(url);
         if (!newTitle) {
           setNewTitle(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
         }
+        setIsPreparingImage(false);
     }).catch(error => {
       console.error('Gallery image preparation failed:', error);
+      setImageUploadError(error instanceof Error ? error.message : 'Unable to upload the selected image.');
+      setIsPreparingImage(false);
     });
   };
 
@@ -144,6 +125,7 @@ export const MediaManager: React.FC = () => {
     setEditUrl(item.url);
     setEditCategory(item.category);
     setEditTags(item.tags.join(', '));
+    setImageUploadError(item.url.startsWith('data:') ? 'This legacy image must be replaced with a Cloudinary upload.' : '');
   };
 
   const closeEditMedia = () => {
@@ -157,8 +139,15 @@ export const MediaManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    void readCompressedImage(file).then(setEditUrl).catch(error => {
+    setImageUploadError('');
+    setIsPreparingImage(true);
+    void uploadSelectedImage(file).then(url => {
+      setEditUrl(url);
+      setIsPreparingImage(false);
+    }).catch(error => {
       console.error('Gallery image preparation failed:', error);
+      setImageUploadError(error instanceof Error ? error.message : 'Unable to upload the selected image.');
+      setIsPreparingImage(false);
     });
   };
 
@@ -175,45 +164,83 @@ export const MediaManager: React.FC = () => {
     closeEditMedia();
   };
 
-  const getHeroMedia = (id: string) => mediaItems.find(item => item.id === id) || DEFAULT_MEDIA.find(item => item.id === id);
+  const getHeroMedia = (id: string) => mediaItems.find(item => item.id === id);
 
   const handleCoreCategoryImageUpdate = (id: string, image: string) => {
+    if (image.startsWith('data:')) {
+      setImageUploadError('Inline image data is not supported. Upload the image to Cloudinary first.');
+      return;
+    }
     const next = coreCategoryDrafts.map((category) => category.id === id ? { ...category, image } : category);
     setCoreCategoryDrafts(next);
-    saveCoreServiceCategories(next);
   };
 
   const handleCoreCategoryFileUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    void readCompressedImage(file).then(image => {
-      handleCoreCategoryImageUpdate(id, image);
+    setImageUploadError('');
+    setIsPreparingImage(true);
+    void uploadSelectedImage(file).then(async image => {
+      const category = coreCategoryDrafts.find(item => item.id === id);
+      if (!category) throw new Error('Service category was not found.');
+
+      const saved = await updateMediaItem(`core-category-${id}`, {
+        title: category.title,
+        url: image,
+        category: 'general',
+        tags: ['core-service-category', id],
+        dimensions: 'Homepage category'
+      });
+      if (!saved) {
+        setImageUploadError('Image uploaded to Cloudinary, but its URL was not saved to Supabase.');
+        return;
+      }
+
+      const next = coreCategoryDrafts.map(item => item.id === id ? { ...item, image } : item);
+      setCoreCategoryDrafts(next);
+      saveCoreServiceCategories(next);
     }).catch(error => {
       console.error('Gallery image preparation failed:', error);
+      setImageUploadError(error instanceof Error ? error.message : 'Unable to upload the selected image.');
+    }).finally(() => {
+      setIsPreparingImage(false);
     });
   };
 
-  const saveCoreCategoryEdits = () => {
-    saveCoreServiceCategories(coreCategoryDrafts);
-    window.location.reload();
+  const saveCoreCategoryEdits = async () => {
+    setIsSavingCoreCategories(true);
+    const results = await Promise.all(coreCategoryDrafts.map(category => updateMediaItem(`core-category-${category.id}`, {
+      title: category.title,
+      url: category.image,
+      category: 'general',
+      tags: ['core-service-category', category.id],
+      dimensions: 'Homepage category'
+    })));
+    if (results.every(Boolean)) saveCoreServiceCategories(coreCategoryDrafts);
+    setIsSavingCoreCategories(false);
   };
 
   const handleHeroFileUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    void readCompressedImage(file).then(image => {
+    setImageUploadError('');
+    setIsPreparingImage(true);
+    void uploadSelectedImage(file).then(image => {
       setHeroDrafts(prev => ({ ...prev, [id]: image }));
       updateMediaItem(id, { url: image });
+      setIsPreparingImage(false);
     }).catch(error => {
       console.error('Gallery image preparation failed:', error);
+      setImageUploadError(error instanceof Error ? error.message : 'Unable to upload the selected image.');
+      setIsPreparingImage(false);
     });
   };
 
-  const saveHeroImage = (id: string) => {
+  const saveHeroImage = (id: string, savedUrl?: string) => {
     const url = heroDrafts[id]?.trim();
-    if (!url) return;
+    if (!url || url.startsWith('data:') || url === savedUrl) return;
     updateMediaItem(id, { url });
   };
 
@@ -233,27 +260,38 @@ export const MediaManager: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {['hero-slide-1', 'hero-slide-2', 'hero-slide-3'].map((id, index) => {
             const heroMedia = getHeroMedia(id);
+            const savedHeroUrl = heroMedia?.url.startsWith('data:') ? '' : heroMedia?.url || '';
+            const heroUrl = heroDrafts[id] || savedHeroUrl;
             return (
               <div key={id} className="rounded-xl border border-[#E8DFD3] overflow-hidden bg-[#FAF7F2]">
                 <div className="relative h-36 bg-[#EFE9DF]">
-                  <img src={heroDrafts[id] || heroMedia?.url} alt={`Hero slide ${index + 1}`} className="w-full h-full object-cover" />
+                  {heroUrl && <img src={heroUrl} alt={`Hero slide ${index + 1}`} className="w-full h-full object-cover" />}
                   <span className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/65 text-white text-[10px] font-bold uppercase">Slide {index + 1}</span>
                 </div>
                 <div className="p-3 space-y-2">
                   <input
                     type="url"
-                    value={heroDrafts[id] || ''}
-                    onChange={e => setHeroDrafts(prev => ({ ...prev, [id]: e.target.value }))}
+                    value={heroDrafts[id] ?? savedHeroUrl}
+                    onChange={e => {
+                      if (e.target.value.startsWith('data:')) {
+                        setImageUploadError('Inline image data is not supported. Upload the image to Cloudinary first.');
+                        return;
+                      }
+                      setImageUploadError('');
+                      setHeroDrafts(prev => ({ ...prev, [id]: e.target.value }));
+                    }}
                     placeholder="Paste image URL"
                     className="w-full px-2.5 py-2 bg-white border border-[#D5C9BA] rounded-lg text-[11px] font-mono"
                   />
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => saveHeroImage(id)} className="flex-1 px-2 py-2 rounded-lg bg-[#1D432D] text-white text-[11px] font-bold hover:bg-[#163322]">Save Image</button>
+                    <button type="button" onClick={() => saveHeroImage(id, savedHeroUrl)} disabled={isPreparingImage || !heroDrafts[id] || heroDrafts[id] === savedHeroUrl} className="flex-1 px-2 py-2 rounded-lg bg-[#1D432D] text-white text-[11px] font-bold hover:bg-[#163322] disabled:opacity-50 disabled:cursor-not-allowed">Save Image</button>
                     <label className="inline-flex items-center justify-center px-2.5 rounded-lg border border-[#D5C9BA] bg-white text-[#1D432D] cursor-pointer" title="Upload replacement image">
                       <Upload className="w-3.5 h-3.5" />
-                      <input type="file" accept="image/*" onChange={e => handleHeroFileUpload(id, e)} className="hidden" />
+                      <input type="file" accept="image/*" disabled={isPreparingImage} onChange={e => handleHeroFileUpload(id, e)} className="hidden" />
                     </label>
                   </div>
+                  {isPreparingImage && <p className="text-[11px] text-[#7D766D]">Uploading to Cloudinary...</p>}
+                  {imageUploadError && <p role="alert" className="text-[11px] text-red-700">{imageUploadError}</p>}
                 </div>
               </div>
             );
@@ -267,7 +305,9 @@ export const MediaManager: React.FC = () => {
           <Layers3 className="w-5 h-5 text-[#D96B43] shrink-0 mt-0.5" />
           <div>
             <h2 className="text-lg font-bold font-['Outfit'] text-[#1A201C]">Core Service Category Images</h2>
-            <p className="text-xs text-[#635E59] mt-0.5">Update the images for each service card on the homepage. These values are stored in the browser and used instantly.</p>
+            <p className="text-xs text-[#635E59] mt-0.5">Update homepage service images. Saved images are shared across browsers.</p>
+            {isPreparingImage && <p className="text-xs text-[#7D766D] mt-1">Uploading image to Cloudinary...</p>}
+            {imageUploadError && <p role="alert" className="text-xs text-red-700 mt-1">{imageUploadError}</p>}
           </div>
         </div>
 
@@ -290,7 +330,7 @@ export const MediaManager: React.FC = () => {
                   <label className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg border border-[#D5C9BA] bg-white text-[#1D432D] text-[10px] font-bold cursor-pointer">
                     <Upload className="w-3 h-3" />
                     Upload
-                    <input type="file" accept="image/*" onChange={(e) => handleCoreCategoryFileUpload(category.id, e)} className="hidden" />
+                    <input type="file" accept="image/*" disabled={isPreparingImage} onChange={(e) => handleCoreCategoryFileUpload(category.id, e)} className="hidden" />
                   </label>
                   <select
                     value={category.image}
@@ -310,8 +350,8 @@ export const MediaManager: React.FC = () => {
         </div>
 
         <div className="mt-4 flex justify-end">
-          <button onClick={saveCoreCategoryEdits} className="px-4 py-2 rounded-lg bg-[#1D432D] text-white text-xs font-bold hover:bg-[#163322]">
-            Save core category images
+          <button onClick={saveCoreCategoryEdits} disabled={isSavingCoreCategories || isPreparingImage} className="px-4 py-2 rounded-lg bg-[#1D432D] text-white text-xs font-bold hover:bg-[#163322] disabled:opacity-50 disabled:cursor-not-allowed">
+            {isSavingCoreCategories ? 'Saving images...' : 'Save core category images'}
           </button>
         </div>
       </section>
@@ -383,11 +423,18 @@ export const MediaManager: React.FC = () => {
           >
             <div>
               <div className="relative h-44 w-full bg-[#FAF7F2] overflow-hidden">
-                <img
-                  src={item.url}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                {item.url ? (
+                  <img
+                    src={item.url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-[#7D766D]">
+                    <ImageIcon className="w-6 h-6" />
+                    <span className="text-[10px] font-semibold">Replace with a Cloudinary image</span>
+                  </div>
+                )}
                 <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase">
                   {item.category}
                 </span>
@@ -508,7 +555,14 @@ export const MediaManager: React.FC = () => {
                 <input
                   type="url"
                   value={editUrl}
-                  onChange={e => setEditUrl(e.target.value)}
+                  onChange={e => {
+                    if (e.target.value.startsWith('data:')) {
+                      setImageUploadError('Inline image data is not supported. Upload the image to Cloudinary first.');
+                      return;
+                    }
+                    setEditUrl(e.target.value);
+                    setImageUploadError('');
+                  }}
                   required
                   className="w-full px-3 py-2 bg-white border border-[#D5C9BA] rounded-xl text-xs font-mono"
                 />
@@ -520,7 +574,9 @@ export const MediaManager: React.FC = () => {
                     <input type="file" accept="image/*" onChange={handleEditFileUpload} className="hidden" />
                   </label>
                 </div>
-                {editUrl && <img src={editUrl} alt="Edited photo preview" className="w-full h-32 object-cover rounded-lg border border-[#D5C9BA]" />}
+                {isPreparingImage && <p className="text-[11px] text-[#7D766D]">Uploading to Cloudinary...</p>}
+                {imageUploadError && <p role="alert" className="text-[11px] text-red-700">{imageUploadError}</p>}
+                {editUrl && !editUrl.startsWith('data:') && <img src={editUrl} alt="Edited photo preview" className="w-full h-32 object-cover rounded-lg border border-[#D5C9BA]" />}
               </div>
 
               <div>
@@ -535,7 +591,7 @@ export const MediaManager: React.FC = () => {
 
               <div className="pt-3 border-t border-[#E8DFD3] flex justify-end gap-2">
                 <button type="button" onClick={closeEditMedia} className="px-4 py-2 rounded-xl border border-[#D5C9BA] text-[#524D47] font-semibold">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold">Save Changes</button>
+                <button type="submit" disabled={isPreparingImage} className="px-4 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed">Save Changes</button>
               </div>
             </form>
           </div>
@@ -598,9 +654,17 @@ export const MediaManager: React.FC = () => {
                 
                 <input
                   type="url"
+                  required
                   value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/photo-..."
+                  onChange={(e) => {
+                    if (e.target.value.startsWith('data:')) {
+                      setImageUploadError('Inline image data is not supported. Upload the image to Cloudinary first.');
+                      return;
+                    }
+                    setNewUrl(e.target.value);
+                    setImageUploadError('');
+                  }}
+                  placeholder="Paste image URL"
                   className="w-full px-3 py-2 bg-white border border-[#D5C9BA] rounded-xl text-xs font-mono"
                 />
 
@@ -617,6 +681,8 @@ export const MediaManager: React.FC = () => {
                     />
                   </label>
                 </div>
+                {isPreparingImage && <p className="text-[11px] text-[#7D766D]">Uploading to Cloudinary...</p>}
+                {imageUploadError && <p role="alert" className="text-[11px] text-red-700">{imageUploadError}</p>}
 
                 {newUrl && (
                   <div className="pt-2">
@@ -652,7 +718,8 @@ export const MediaManager: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold shadow-md shadow-[#D96B43]/20"
+                  disabled={isPreparingImage}
+                  className="px-5 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold shadow-md shadow-[#D96B43]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add Photo to Library
                 </button>

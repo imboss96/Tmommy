@@ -1,4 +1,4 @@
-import { MediaItem } from '../types';
+import { MediaItem } from '../src/types';
 
 export const DEFAULT_MEDIA: MediaItem[] = [
   {

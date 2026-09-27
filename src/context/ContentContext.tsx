@@ -17,7 +17,6 @@ import {
 import { VETTED_NANNIES } from '../data/nannies';
 import { PARENTING_INSIGHTS } from '../data/insights';
 import { DEFAULT_BOOKINGS, DEFAULT_EMERGENCY_REQUESTS, DEFAULT_SITE_CONFIG } from '../data/defaultSubmissions';
-import { DEFAULT_MEDIA } from '../data/defaultMedia';
 import { DEFAULT_REVIEWS } from '../data/defaultReviews';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
@@ -60,8 +59,9 @@ interface ContentContextType {
 
   // Media Library
   mediaItems: MediaItem[];
+  uploadImage: (image: Blob) => Promise<string>;
   addMediaItem: (item: Omit<MediaItem, 'id' | 'uploadedAt'>) => void;
-  updateMediaItem: (id: string, updates: Partial<MediaItem>) => void;
+  updateMediaItem: (id: string, updates: Partial<MediaItem>) => Promise<boolean>;
   deleteMediaItem: (id: string) => void;
 
   // Site Config
@@ -107,9 +107,14 @@ function safeStorageSet<T>(key: string, value: T): void {
   }
 }
 
+function safeImageUrl(value: unknown): string {
+  return typeof value === 'string' && !value.startsWith('data:') ? value : '';
+}
+
 function mapStaffRow(row: Record<string, unknown>): NannyProfile {
   return {
     ...(row as unknown as NannyProfile),
+    avatar: safeImageUrl(row.avatar),
     roleTitle: row.role_title as string,
     categoryLabel: row.category_label as string,
     nannyType: row.nanny_type as NannyProfile['nannyType'],
@@ -132,10 +137,15 @@ function mapStaffRow(row: Record<string, unknown>): NannyProfile {
 }
 
 function mapInsightRow(row: Record<string, unknown>): ParentingInsight {
+  const author = row.author as ParentingInsight['author'] | undefined;
   return {
     ...(row as unknown as ParentingInsight),
+    author: author ? {
+      ...author,
+      avatar: safeImageUrl(author.avatar)
+    } : { name: '', role: '', avatar: '' },
     readTime: row.read_time as string,
-    coverImage: row.cover_image as string,
+    coverImage: safeImageUrl(row.cover_image),
     keyTakeaways: row.key_takeaways as string[],
     relatedNairobiTopic: row.related_nairobi_topic as string,
     viewsCount: row.views_count as number
@@ -220,6 +230,7 @@ function mapReviewRow(row: Record<string, unknown>): Review {
 function mapMediaRow(row: Record<string, unknown>): MediaItem {
   return {
     ...(row as unknown as MediaItem),
+    url: safeImageUrl(row.url),
     uploadedAt: row.uploaded_at as string
   };
 }
@@ -254,7 +265,25 @@ function adminMutation(resource: string, operation: 'upsert' | 'update' | 'delet
       throw new Error(body.error || 'Live save failed');
     }
     console.info(`[API] Admin ${operation} succeeded: ${resource} ${mutationId}`);
+    return body as Record<string, unknown>;
   });
+}
+
+async function uploadImageToCloudinary(image: Blob): Promise<string> {
+  const response = await fetch(`${apiUrl}/api/admin/cloudinary/upload`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'x-admin-pin': localStorage.getItem('mommycare_admin_pin') || sessionStorage.getItem('mommycare_admin_pin') || ''
+    },
+    body: image
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || 'Cloudinary upload failed');
+  if (typeof body.url !== 'string' || !body.url.startsWith('https://res.cloudinary.com/')) {
+    throw new Error('Cloudinary did not return a valid image URL.');
+  }
+  return body.url;
 }
 
 function staffRow(staff: NannyProfile) {
@@ -286,10 +315,16 @@ function insightRow(post: ParentingInsight) {
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [nannies, setNannies] = useState<NannyProfile[]>(() => 
     isSupabaseConfigured ? [] : safeStorageGet(STORAGE_KEYS.NANNIES, VETTED_NANNIES)
+      .map(staff => ({ ...staff, avatar: '' }))
   );
 
   const [insights, setInsights] = useState<ParentingInsight[]>(() => 
     isSupabaseConfigured ? [] : safeStorageGet(STORAGE_KEYS.INSIGHTS, PARENTING_INSIGHTS)
+      .map(post => ({
+        ...post,
+        coverImage: '',
+        author: { ...post.author, avatar: '' }
+      }))
   );
 
   const [bookings, setBookings] = useState<BookingSubmission[]>(() => 
@@ -461,7 +496,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const newNanny: NannyProfile = {
       id,
       name: newNannyData.name || 'New Staff Member',
-      avatar: newNannyData.avatar || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+      avatar: newNannyData.avatar || '',
       age: newNannyData.age || 28,
       role: newNannyData.role || 'nanny',
       roleTitle: newNannyData.roleTitle || 'Domestic Professional',
@@ -513,7 +548,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resetNannies = () => {
-    setNannies(VETTED_NANNIES);
+    setNannies(VETTED_NANNIES.map(staff => ({ ...staff, avatar: '' })));
     triggerAlert('Reset staff profiles to initial vetted directory');
   };
 
@@ -530,11 +565,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       author: data.author || {
         name: 'Dr. Stella Njoki, MD',
         role: 'Consultant Pediatrician & Child Health Advisor',
-        avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=400&auto=format&fit=crop'
+        avatar: ''
       },
       readTime: data.readTime || '5 min read',
       publishedDate: data.publishedDate || new Date().toISOString().split('T')[0],
-      coverImage: data.coverImage || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop',
+      coverImage: data.coverImage || '',
       tags: data.tags && data.tags.length > 0 ? data.tags : ['Nairobi Parenting', 'Household Safety'],
       keyTakeaways: data.keyTakeaways && data.keyTakeaways.length > 0 ? data.keyTakeaways : [
         'Establish standard operating procedures for household staff.',
@@ -568,7 +603,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resetInsights = () => {
-    setInsights(PARENTING_INSIGHTS);
+    setInsights(PARENTING_INSIGHTS.map(post => ({
+      ...post,
+      coverImage: '',
+      author: { ...post.author, avatar: '' }
+    })));
     triggerAlert('Reset parenting insights to original articles');
   };
 
@@ -711,6 +750,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Media Library operations
   const addMediaItem = (item: Omit<MediaItem, 'id' | 'uploadedAt'>) => {
+    if (item.url.startsWith('data:')) {
+      triggerAlert('Upload this image to Cloudinary before adding it to the media library.');
+      return;
+    }
+
     const id = `media-${Date.now()}`;
     const newMedia: MediaItem = {
       ...item,
@@ -721,7 +765,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     void adminMutation('media', 'upsert', {
       id: newMedia.id, title: newMedia.title, url: newMedia.url, category: newMedia.category,
       tags: newMedia.tags, dimensions: newMedia.dimensions, uploaded_at: newMedia.uploadedAt
-    }).then(() => {
+    }).then(savedMedia => {
+      const savedUrl = typeof savedMedia.url === 'string' ? savedMedia.url : newMedia.url;
+      setMediaItems(prev => prev.map(media => media.id === newMedia.id ? { ...media, url: savedUrl } : media));
       triggerAlert(`Added photo "${item.title}" to media library`);
     }).catch(error => {
       setMediaItems(prev => prev.filter(media => media.id !== newMedia.id));
@@ -729,7 +775,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
-  const updateMediaItem = (id: string, updates: Partial<MediaItem>) => {
+  const updateMediaItem = async (id: string, updates: Partial<MediaItem>): Promise<boolean> => {
+    if (updates.url?.startsWith('data:')) {
+      triggerAlert('Upload this image to Cloudinary before saving media.');
+      return false;
+    }
+
     const current = mediaItems.find(item => item.id === id);
     const updated: MediaItem = {
       id,
@@ -744,17 +795,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ? prev.map(item => item.id === id ? { ...item, ...updated } : item)
       : [updated, ...prev]);
 
-    void adminMutation('media', 'upsert', {
+    try {
+      const savedMedia = await adminMutation('media', 'upsert', {
       id: updated.id, title: updated.title, url: updated.url, category: updated.category,
       tags: updated.tags, dimensions: updated.dimensions, uploaded_at: updated.uploadedAt
-    }).then(() => {
-      triggerAlert('Hero slider image updated');
-    }).catch(error => {
+      });
+      const savedUrl = typeof savedMedia.url === 'string' ? savedMedia.url : updated.url;
+      setMediaItems(prev => prev.map(item => item.id === id ? { ...item, url: savedUrl } : item));
+      triggerAlert('Media image updated');
+      return true;
+    } catch (error) {
       setMediaItems(prev => current
         ? prev.map(item => item.id === id ? current : item)
         : prev.filter(item => item.id !== id));
-      triggerAlert(`Media update was not saved: ${error.message}`);
-    });
+      triggerAlert(`Media update was not saved: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return false;
+    }
   };
 
   const deleteMediaItem = (id: string) => {
@@ -785,11 +841,21 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Global reset
   const resetAllData = () => {
-    setNannies(VETTED_NANNIES);
-    setInsights(PARENTING_INSIGHTS);
+    setNannies(VETTED_NANNIES.map(staff => ({ ...staff, avatar: '' })));
+    setInsights(PARENTING_INSIGHTS.map(post => ({
+      ...post,
+      coverImage: '',
+      author: { ...post.author, avatar: '' }
+    })));
     setBookings(DEFAULT_BOOKINGS);
     setEmergencyRequests(DEFAULT_EMERGENCY_REQUESTS);
-    setMediaItems(DEFAULT_MEDIA);
+    setMediaItems([]);
+    void fetch(`${apiUrl}/api/media`).then(async response => {
+      if (!response.ok) throw new Error(`Media request failed with status ${response.status}`);
+      return await response.json() as Record<string, unknown>[];
+    }).then(rows => setMediaItems(rows.map(mapMediaRow))).catch(error => {
+      triggerAlert(`Unable to reload images from Supabase: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    });
     setReviews(DEFAULT_REVIEWS);
     setSiteConfig(DEFAULT_SITE_CONFIG);
     triggerAlert('All frontend data and submissions restored to initial state');
@@ -827,6 +893,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       deleteReview,
 
       mediaItems,
+      uploadImage: uploadImageToCloudinary,
       addMediaItem,
       updateMediaItem,
       deleteMediaItem,

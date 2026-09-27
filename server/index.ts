@@ -22,9 +22,8 @@ let activeAdminPin = process.env.ADMIN_PIN || '2540';
 const hasRealValue = (...values: Array<string | undefined>) =>
   values.every(value => Boolean(value && !value.includes('YOUR_')));
 
-async function uploadDataUrlToCloudinary(dataUrl: string) {
-  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(dataUrl);
-  if (!match) throw new Error('Media uploads must be valid base64 image data.');
+async function uploadImageBufferToCloudinary(imageBuffer: Buffer) {
+  if (!imageBuffer.length) throw new Error('The uploaded image is empty.');
   if (!hasRealValue(cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret)) {
     throw new Error('Cloudinary storage is not configured on the API server.');
   }
@@ -36,7 +35,9 @@ async function uploadDataUrlToCloudinary(dataUrl: string) {
     .update(`folder=${folder}&timestamp=${timestamp}${cloudinaryApiSecret}`)
     .digest('hex');
   const form = new FormData();
-  form.append('file', new Blob([Buffer.from(match[2], 'base64')], { type: match[1] }), 'mommycare-image.jpg');
+  const fileBytes = new Uint8Array(imageBuffer.length);
+  fileBytes.set(imageBuffer);
+  form.append('file', new Blob([fileBytes.buffer], { type: 'image/jpeg' }), 'mommycare-image.jpg');
   form.append('api_key', cloudinaryApiKey!);
   form.append('timestamp', String(timestamp));
   form.append('folder', folder);
@@ -76,9 +77,18 @@ const allowedOrigins = new Set([
   'http://www.tmommycares.com'
 ]);
 
+const isLocalDevelopmentOrigin = (origin: string) => {
+  try {
+    const { protocol, hostname } = new URL(origin);
+    return protocol === 'http:' && ['localhost', '127.0.0.1', '0.0.0.0'].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && allowedOrigins.has(origin)) {
+  if (origin && (allowedOrigins.has(origin) || isLocalDevelopmentOrigin(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
@@ -410,6 +420,21 @@ const adminTables = {
   reviews: 'reviews'
 } as const;
 
+app.post('/api/admin/cloudinary/upload', requireAdminPin, express.raw({ type: 'image/jpeg', limit: '10mb' }), async (req, res) => {
+  if (!Buffer.isBuffer(req.body)) {
+    return res.status(400).json({ error: 'Image data is required.' });
+  }
+
+  try {
+    const uploaded = await uploadImageBufferToCloudinary(req.body);
+    res.json({ url: uploaded.url, cloudinary_public_id: uploaded.publicId || null });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Image upload failed.';
+    console.error(`[API] Cloudinary image upload failed: ${message}`, error);
+    res.status(502).json({ error: message });
+  }
+});
+
 app.post('/api/admin/content', requireAdminPin, async (req, res) => {
   const { resource, operation, id, data } = req.body || {};
   const table = adminTables[resource as keyof typeof adminTables];
@@ -418,24 +443,23 @@ app.post('/api/admin/content', requireAdminPin, async (req, res) => {
     return res.status(400).json({ error: 'Invalid content mutation.' });
   }
 
-  let mutationData = data;
-  if (resource === 'media' && operation !== 'delete' && typeof data?.url === 'string' && data.url.startsWith('data:image/')) {
-    try {
-      const uploaded = await uploadDataUrlToCloudinary(data.url);
-      mutationData = { ...data, url: uploaded.url, cloudinary_public_id: uploaded.publicId || null };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Image upload failed.';
-      console.error(`[API] Cloudinary media upload failed: ${message}`);
-      return res.status(502).json({ error: message });
-    }
+  const imageFields = resource === 'media'
+    ? [data?.url]
+    : resource === 'nannies'
+      ? [data?.avatar]
+      : resource === 'insights'
+        ? [data?.cover_image, data?.author?.avatar]
+        : [];
+  if (operation !== 'delete' && imageFields.some(value => typeof value === 'string' && value.startsWith('data:'))) {
+    return res.status(400).json({ error: 'Upload this image to Cloudinary before saving content.' });
   }
 
   const query = supabase!.from(table);
   const result = operation === 'delete'
     ? await query.delete().eq('id', id)
     : operation === 'update'
-      ? await query.update(mutationData).eq('id', mutationData?.id || id).select().single()
-      : await query.upsert(mutationData, { onConflict: 'id' }).select().single();
+      ? await query.update(data).eq('id', data?.id || id).select().single()
+      : await query.upsert(data, { onConflict: 'id' }).select().single();
 
   if (result.error) {
     console.error(`[API] Supabase ${operation} failed for ${table}: ${result.error.message}`);

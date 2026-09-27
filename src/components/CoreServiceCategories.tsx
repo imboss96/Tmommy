@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useContent } from '../context/ContentContext';
 import {
   ArrowRight,
   Baby,
@@ -24,13 +25,15 @@ const iconMap = {
 } as const;
 
 export const CoreServiceCategories: React.FC = () => {
+  const { mediaItems } = useContent();
   const serviceCategories = useMemo(() => {
     const saved = getCoreServiceCategories();
     return saved.map((category) => ({
       ...category,
+      image: mediaItems.find(item => item.id === `core-category-${category.id}`)?.url || '',
       icon: iconMap[category.id as keyof typeof iconMap] || Home
     }));
-  }, []);
+  }, [mediaItems]);
 
   return (
     <section className="border-b border-[#E8DFD3] bg-[#FCFAF7] py-12 sm:py-16" aria-labelledby="core-services-title">
@@ -50,7 +53,7 @@ export const CoreServiceCategories: React.FC = () => {
           {serviceCategories.map(({ title, description, action, icon: Icon, image, href }) => (
             <article key={title} className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#E8DFD3] bg-white shadow-sm transition-shadow hover:shadow-lg">
               <div className="relative aspect-[4/3] overflow-hidden bg-[#F2EDE4]">
-                <img src={image} alt={`${title} in Nairobi`} className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                {image && <img src={image} alt={`${title} in Nairobi`} className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy" />}
                 <div className="absolute left-3 top-3 rounded-full bg-white/95 p-2 text-[#B82958] shadow-sm">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>

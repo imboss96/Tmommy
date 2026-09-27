@@ -305,7 +305,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                   {/* Top Image & Badge Header */}
                   <div className="relative h-64 overflow-hidden bg-stone-100">
                     <img
-                      src={staff.avatar}
+                      src={staff.avatar || undefined}
                       alt={`${staff.name} - MommyCare Vetted ${staff.categoryLabel} in Nairobi`}
                       className="w-full h-full object-contain object-center"
                     />

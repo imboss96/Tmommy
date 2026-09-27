@@ -2,12 +2,14 @@ import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import { VETTED_NANNIES } from '../src/data/nannies';
 import { PARENTING_INSIGHTS } from '../src/data/insights';
-import { DEFAULT_MEDIA } from '../src/data/defaultMedia';
+import { DEFAULT_MEDIA } from './defaultDemoMedia';
+import { DEFAULT_CORE_SERVICE_CATEGORIES } from '../src/data/coreServiceCategories';
 import {
   DEFAULT_BOOKINGS,
   DEFAULT_EMERGENCY_REQUESTS,
   DEFAULT_SITE_CONFIG
 } from '../src/data/defaultSubmissions';
+import { DEMO_CORE_CATEGORY_IMAGES, DEMO_INSIGHT_IMAGES, DEMO_STAFF_AVATARS } from './demoImageUrls';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -26,7 +28,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 const staffRows = VETTED_NANNIES.map(staff => ({
   id: staff.id,
   name: staff.name,
-  avatar: staff.avatar,
+  avatar: DEMO_STAFF_AVATARS[staff.id] || staff.avatar,
   age: staff.age,
   role: staff.role,
   role_title: staff.roleTitle,
@@ -62,10 +64,13 @@ const insightRows = PARENTING_INSIGHTS.map(insight => ({
   title: insight.title,
   excerpt: insight.excerpt,
   category: insight.category,
-  author: insight.author,
+  author: {
+    ...insight.author,
+    avatar: DEMO_INSIGHT_IMAGES[insight.id]?.author || insight.author.avatar
+  },
   read_time: insight.readTime,
   published_date: insight.publishedDate,
-  cover_image: insight.coverImage,
+  cover_image: DEMO_INSIGHT_IMAGES[insight.id]?.cover || insight.coverImage,
   tags: insight.tags,
   key_takeaways: insight.keyTakeaways,
   content: insight.content,
@@ -75,15 +80,26 @@ const insightRows = PARENTING_INSIGHTS.map(insight => ({
   featured: insight.featured || false
 }));
 
-const mediaRows = DEFAULT_MEDIA.map(media => ({
-  id: media.id,
-  title: media.title,
-  url: media.url,
-  category: media.category,
-  tags: media.tags,
-  dimensions: media.dimensions,
-  uploaded_at: media.uploadedAt
-}));
+const mediaRows = [
+  ...DEFAULT_MEDIA.map(media => ({
+    id: media.id,
+    title: media.title,
+    url: media.url,
+    category: media.category,
+    tags: media.tags,
+    dimensions: media.dimensions,
+    uploaded_at: media.uploadedAt
+  })),
+  ...DEFAULT_CORE_SERVICE_CATEGORIES.map(category => ({
+    id: `core-category-${category.id}`,
+    title: category.title,
+    url: DEMO_CORE_CATEGORY_IMAGES[category.id],
+    category: 'general' as const,
+    tags: ['core-service-category', category.id],
+    dimensions: 'Homepage category',
+    uploaded_at: '2025-01-01'
+  }))
+];
 
 const bookingRows = DEFAULT_BOOKINGS.map(booking => ({
   id: booking.id,
@@ -127,17 +143,17 @@ const emergencyRows = DEFAULT_EMERGENCY_REQUESTS.map(request => ({
   submitted_at: request.submittedAt
 }));
 
-async function upsertTable(table: string, rows: unknown[]) {
+async function upsertTable(table: string, rows: unknown[], ignoreDuplicates = false) {
   if (!rows.length) return;
-  const { error } = await supabase.from(table).upsert(rows, { onConflict: 'id' });
+  const { error } = await supabase.from(table).upsert(rows, { onConflict: 'id', ignoreDuplicates });
   if (error) throw new Error(`${table}: ${error.message}`);
   console.log(`Seeded ${rows.length} ${table} record(s).`);
 }
 
 async function seed() {
-  await upsertTable('staff_profiles', staffRows);
-  await upsertTable('insights', insightRows);
-  await upsertTable('media_items', mediaRows);
+  await upsertTable('staff_profiles', staffRows, true);
+  await upsertTable('insights', insightRows, true);
+  await upsertTable('media_items', mediaRows, true);
   await upsertTable('bookings', bookingRows);
   await upsertTable('emergency_requests', emergencyRows);
 

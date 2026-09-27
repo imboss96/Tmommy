@@ -8,6 +8,7 @@
     "server": "tsx server/index.ts",
     "dev:server": "tsx watch server/index.ts",
     "db:seed": "tsx scripts/seed-supabase.ts",
+    "db:seed:media": "tsx scripts/seed-media.ts",
     "start": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",

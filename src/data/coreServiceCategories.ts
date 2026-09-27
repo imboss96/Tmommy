@@ -15,7 +15,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'Nannies and Caregivers',
     description: "Compassionate, trained caregivers providing safe, nurturing support for your children's growth.",
     action: 'Find a Nanny',
-    image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=nanny'
   },
   {
@@ -23,7 +23,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'House Girls and Housekeepers',
     description: 'Reliable household professionals providing cleaning, laundry, organization, and daily home support.',
     action: 'Find a Housekeeper',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=house-girl'
   },
   {
@@ -31,7 +31,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'House Boys and Domestic Stewards',
     description: 'Dependable domestic stewards supporting cleaning, errands, hospitality, maintenance, and household routines.',
     action: 'Find a House Boy',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=house-boy'
   },
   {
@@ -39,7 +39,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'Compound Caretakers and Custodians',
     description: 'Vetted property custodians supporting gate access, compound upkeep, security routines, and maintenance.',
     action: 'Find a Caretaker',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=caretaker'
   },
   {
@@ -47,7 +47,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'Gardeners and Groundskeepers',
     description: 'Experienced gardeners maintaining healthy, beautiful outdoor spaces through expert routine care.',
     action: 'Find a Gardener',
-    image: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=shamba-boy'
   },
   {
@@ -55,7 +55,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'Home and Family Drivers',
     description: 'Professional drivers supporting safe school runs, family errands, appointments, and household logistics.',
     action: 'Find a Driver',
-    image: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=home-driver'
   },
   {
@@ -63,7 +63,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'Private Chefs and Culinary Experts',
     description: "Skilled culinary experts crafting personalized meals tailored to your family's tastes daily.",
     action: 'Find a Chef',
-    image: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=chef'
   },
   {
@@ -71,7 +71,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
     title: 'House Managers for Expatriates',
     description: 'House managers bring their expertise and passion to enhance home operations for busy families.',
     action: 'Find a House Manager',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=900&auto=format&fit=crop',
+    image: '',
     href: '/nannies?role=house-manager'
   }
 ];
@@ -91,7 +91,10 @@ export function getCoreServiceCategories(): CoreServiceCategory[] {
     return parsed.map((item, index) => ({
       ...DEFAULT_CORE_SERVICE_CATEGORIES[index % DEFAULT_CORE_SERVICE_CATEGORIES.length],
       ...item,
-      id: item.id || DEFAULT_CORE_SERVICE_CATEGORIES[index % DEFAULT_CORE_SERVICE_CATEGORIES.length].id
+      id: item.id || DEFAULT_CORE_SERVICE_CATEGORIES[index % DEFAULT_CORE_SERVICE_CATEGORIES.length].id,
+      image: typeof item.image === 'string' && item.image.trim().length > 0 && !item.image.startsWith('data:')
+        ? item.image
+        : DEFAULT_CORE_SERVICE_CATEGORIES[index % DEFAULT_CORE_SERVICE_CATEGORIES.length].image
     }));
   } catch (error) {
     console.warn('Could not read core service categories from localStorage.', error);

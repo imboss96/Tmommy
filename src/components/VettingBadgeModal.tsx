@@ -70,7 +70,7 @@ export const VettingBadgeModal: React.FC<VettingBadgeModalProps> = ({
           {/* Top Profile Summary */}
           <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8DFD3]">
             <img
-              src={nanny.avatar}
+              src={nanny.avatar || undefined}
               alt={nanny.name}
               className="w-16 h-16 rounded-2xl object-cover shrink-0"
             />
