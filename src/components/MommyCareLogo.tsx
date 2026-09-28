@@ -22,17 +22,17 @@ export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
   onClick
 }) => {
   const logoDimensions = {
-    sm: 'w-44 h-22',
-    md: 'w-56 h-28',
-    lg: 'w-72 h-36',
-    xl: 'w-80 h-40'
+    sm: 'w-36 h-18',
+    md: 'w-48 h-24',
+    lg: 'w-64 h-32',
+    xl: 'w-72 h-36'
   }[size];
 
   const iconDimensions = {
-    sm: 'w-8 h-8',
-    md: 'w-11 h-11',
-    lg: 'w-14 h-14',
-    xl: 'w-20 h-20'
+    sm: 'w-7 h-7',
+    md: 'w-9 h-9',
+    lg: 'w-12 h-12',
+    xl: 'w-16 h-16'
   }[size];
 
   if (variant === 'icon') {

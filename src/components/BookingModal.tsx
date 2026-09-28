@@ -131,7 +131,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <span className="font-bold text-[#1A201C] capitalize">{formData.role?.replace('-', ' ')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#635E59]">Estate:</span>
+                  <span className="text-[#635E59]">Neighbourhood:</span>
                   <span className="font-bold text-[#1A201C]">{formData.estate}</span>
                 </div>
                 <div className="flex justify-between">

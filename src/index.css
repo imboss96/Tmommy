@@ -1,9 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    --font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'Outfit', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --nav-bg: #f7f3ef;
+    --nav-text: #0f172a;
+    --muted: #5f6b7a;
+    --primary: #f57c1f;
+    --primary-dark: #e96f10;
+    --soft-bg: #f9f7f4;
+    --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
@@ -14,9 +26,15 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.06em;
+    margin: 0;
+    font-weight: 800;
   }
 
-  /* Keep legacy utility classes on the same typography system. */
+  p, a, li, span, button, input, select {
+    font-family: var(--font-body);
+  }
+
   [class*="font-['Outfit']"] {
     font-family: var(--font-heading);
   }
@@ -24,6 +42,127 @@
   [class*="font-['Plus_Jakarta_Sans']"] {
     font-family: var(--font-body);
   }
+}
+
+.site-header {
+  background: rgba(250, 247, 242, 0.96);
+  border-bottom: 1px solid rgba(28, 39, 52, 0.08);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  border-top: 0;
+}
+
+.site-header .main-nav {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--nav-text);
+  flex: 0 0 auto;
+  max-width: 760px;
+  gap: 0.45rem;
+  margin-right: 0;
+}
+
+.site-header .nav-link {
+  color: var(--nav-text);
+  text-decoration: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.site-header .nav-link:hover {
+  color: var(--primary-dark);
+}
+
+.site-header .nav-cta,
+.hero-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f78a2e 0%, #eb6d1c 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(235, 109, 28, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.site-header .nav-cta {
+  padding: 0.82rem 1.5rem;
+  font-size: 0.98rem;
+}
+
+.site-header .nav-cta:hover,
+.hero-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(235, 109, 28, 0.34);
+}
+
+.hero-shell {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15));
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 194, 178, 0.8);
+  background: rgba(250, 240, 235, 0.9);
+  color: var(--primary-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  box-shadow: 0 4px 12px rgba(245, 124, 31, 0.06);
+}
+
+.hero-headline {
+  font-family: var(--font-heading);
+  letter-spacing: -0.07em;
+  line-height: 0.94;
+  font-weight: 800;
+  color: #101a2b;
+  font-size: clamp(3.25rem, 5vw, 7rem);
+  text-wrap: balance;
+}
+
+.hero-headline .highlight {
+  color: var(--primary);
+}
+
+.hero-subhead {
+  font-family: var(--font-body);
+  font-size: clamp(1.15rem, 1.9vw, 1.9rem);
+  line-height: 1.42;
+  color: #2d3a4f;
+  max-width: 900px;
+  font-weight: 500;
+}
+
+.hero-subhead .accent {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.hero-subhead .green {
+  color: #0d9b8f;
+  font-weight: 700;
+}
+
+.hero-primary-btn {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.98rem;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-search-form {
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
 }
 
 /* Custom scrollbar */

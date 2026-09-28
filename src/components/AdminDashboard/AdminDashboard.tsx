@@ -18,7 +18,8 @@ import {
   TrendingUp,
   FileText,
   Lock
-  ,MessageSquareQuote
+  ,MessageSquareQuote,
+  UserPlus
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { PostsManager } from './PostsManager';
@@ -28,6 +29,7 @@ import { MediaManager } from './MediaManager';
 import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
 import { MommyCareLogo } from '../MommyCareLogo';
+import { ProviderApplicationsManager } from './ProviderApplicationsManager';
 
 interface AdminDashboardProps {
   onBackToWebsite: () => void;
@@ -46,7 +48,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
     dismissAlert 
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'staff' | 'submissions' | 'media' | 'reviews' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'staff' | 'applications' | 'submissions' | 'media' | 'reviews' | 'settings'>('overview');
 
   const newBookings = bookings.filter(b => b.status === 'New');
   const pendingEmergency = emergencyRequests.filter(e => e.status === 'Pending Dispatch');
@@ -114,115 +116,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
 
         </div>
 
-        {/* Tab Navigation Menu */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#163322] border-t border-white/10">
-          <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-2 no-scrollbar">
-            
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'overview'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>Overview</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('posts')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'posts'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Posts & Articles</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-black/20 text-[10px]">
-                {insights.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('staff')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'staff'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Domestic Staff Directory</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-black/20 text-[10px]">
-                {nannies.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('submissions')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'submissions'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Inbox className="w-4 h-4" />
-              <span>Form Submissions</span>
-              {(newBookings.length > 0 || pendingEmergency.length > 0) && (
-                <span className="px-2 py-0.5 rounded-full bg-[#D96B43] text-white text-[10px] font-extrabold animate-pulse">
-                  {newBookings.length + pendingEmergency.length} NEW
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('media')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'media'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <ImageIcon className="w-4 h-4" />
-              <span>Photos & Media</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-black/20 text-[10px]">
-                {mediaItems.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'reviews'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <MessageSquareQuote className="w-4 h-4" />
-              <span>Reviews</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-black/20 text-[10px]">{reviews.filter(review => review.status === 'pending').length}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'settings'
-                  ? 'bg-white text-[#1D432D] shadow'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>Site Settings</span>
-            </button>
-
-          </nav>
-        </div>
       </header>
 
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col lg:flex-row">
+        {/* Side navigation; it becomes a horizontal menu on narrow screens. */}
+        <aside className="border-b border-[#E8DFD3] bg-white px-3 py-3 lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r lg:px-4 lg:py-6">
+          <p className="mb-3 hidden px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#8E877D] lg:block">Workspace</p>
+          <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto lg:sticky lg:top-20 lg:flex-col lg:overflow-visible">
+            {[
+              { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
+              { id: 'posts' as const, label: 'Posts & Articles', icon: BookOpen, count: insights.length },
+              { id: 'staff' as const, label: 'Domestic Staff Directory', icon: Users, count: nannies.length },
+              { id: 'applications' as const, label: 'Provider Applications', icon: UserPlus },
+              { id: 'submissions' as const, label: 'Form Submissions', icon: Inbox, alert: newBookings.length + pendingEmergency.length },
+              { id: 'media' as const, label: 'Photos & Media', icon: ImageIcon, count: mediaItems.length },
+              { id: 'reviews' as const, label: 'Reviews', icon: MessageSquareQuote, count: reviews.filter(review => review.status === 'pending').length },
+              { id: 'settings' as const, label: 'Site Settings', icon: Settings }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold transition-colors lg:w-full ${isActive ? 'bg-[#E8F0EA] text-[#1D432D] shadow-sm' : 'text-[#635E59] hover:bg-[#FAF7F2] hover:text-[#1A201C]'}`}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#1D432D]' : 'text-[#8E877D]'}`} />
+                  <span className="whitespace-nowrap lg:whitespace-normal">{item.label}</span>
+                  {item.alert ? (
+                    <span className="ml-auto rounded-full bg-[#D96B43] px-2 py-0.5 text-[9px] font-extrabold text-white">{item.alert} NEW</span>
+                  ) : item.count !== undefined ? (
+                    <span className="ml-auto rounded-full bg-[#F2EDE4] px-2 py-0.5 text-[10px] font-bold text-[#635E59]">{item.count}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
       {/* MAIN BODY CONTENT */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
         
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
@@ -463,6 +397,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
         {/* STAFF TAB */}
         {activeTab === 'staff' && <StaffManager />}
 
+        {activeTab === 'applications' && <ProviderApplicationsManager />}
+
         {/* SUBMISSIONS TAB */}
         {activeTab === 'submissions' && <SubmissionsManager />}
 
@@ -476,6 +412,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
         {activeTab === 'settings' && <SettingsManager />}
 
       </main>
+      </div>
 
     </div>
   );

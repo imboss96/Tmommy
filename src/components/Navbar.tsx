@@ -31,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectEstate
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navMenuOpen, setNavMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
   const { siteConfig } = useContent();
 
@@ -51,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8DFD3] transition-all">
+    <header className="site-header sticky top-0 z-40 backdrop-blur-md transition-all">
       {/* Top Notification Bar for Nairobi Residents */}
       <div className="bg-[#25D366] text-[#075E54] text-[10px] sm:text-xs lg:text-sm py-1.5 px-3 sm:px-4 font-medium">
         <div className="w-full flex items-center gap-2 sm:gap-3 overflow-hidden">
@@ -85,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Navigation Bar */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center justify-between h-16 sm:h-20 lg:h-24 gap-3 sm:gap-4">
+        <div className="flex min-w-0 items-center justify-between h-14 sm:h-16 lg:h-20 gap-1 sm:gap-2">
           
           {/* Logo & Brand Identity (4 quick clicks triggers secret admin access) */}
           <div className="shrink-0 py-1">
@@ -98,60 +99,70 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex min-w-0 flex-1 items-center justify-center gap-2 xl:gap-3 2xl:gap-5 overflow-hidden text-xs xl:text-[13px] font-semibold text-[#3D3A36]">
+          <nav className="main-nav hidden lg:flex ml-auto min-w-0 items-center justify-center gap-0.5 xl:gap-1 2xl:gap-1.5 overflow-hidden text-[10px] xl:text-[11px] font-semibold text-[#3D3A36]">
             <a 
               href="/nannies" 
-              className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
+              className="nav-link hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
             >
               <Users className="w-4 h-4 text-[#D96B43]" />
               <span className="whitespace-nowrap">Browse Staff</span>
             </a>
             <a
-              href="/vetting"
-              className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-4 h-4 text-[#1D432D]" />
-              <span className="whitespace-nowrap">7-Pillar Vetting</span>
-            </a>
-            <a
-              href="/salary-guide"
-              className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
-            >
-              <Calculator className="w-4 h-4 text-[#1D432D]" />
-              <span className="whitespace-nowrap">Salary Guide</span>
-            </a>
-            <a
               href="/mission-vision"
-              className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
+              className="nav-link hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
             >
               <Compass className="w-4 h-4 text-[#D96B43]" />
               <span className="whitespace-nowrap">Mission & Vision</span>
             </a>
             <a
               href="/insights"
-              className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
+              className="nav-link hover:text-[#D96B43] transition-colors flex items-center gap-1.5"
             >
               <BookOpen className="w-4 h-4 text-[#D96B43]" />
               <span>Insights</span>
             </a>
-            <a href="/contact" className="hover:text-[#D96B43] transition-colors flex items-center gap-1.5">
+            <a href="/contact" className="nav-link hover:text-[#D96B43] transition-colors flex items-center gap-1.5">
               <Phone className="w-4 h-4 text-[#1D432D]" />
               <span>Contact</span>
             </a>
-            <a
-              href="/compare-care"
-              className="hidden 2xl:flex shrink-0 items-center gap-1.5 hover:text-[#D96B43] transition-colors"
+            <div
+              className="relative"
+              onMouseEnter={() => setNavMenuOpen(true)}
+              onMouseLeave={() => setNavMenuOpen(false)}
             >
-              <Award className="w-4 h-4 text-[#1D432D]" />
-              <span className="whitespace-nowrap">Compare Care Options</span>
+              <button
+                type="button"
+                className="nav-link flex shrink-0 items-center gap-1.5 hover:text-[#D96B43] transition-colors"
+              >
+                <span className="whitespace-nowrap">More</span>
+              </button>
+
+              {navMenuOpen && (
+                <div className="absolute left-1/2 top-full z-50 mt-2 w-52 -translate-x-1/2 rounded-2xl border border-[#E8DFD3] bg-white p-2 shadow-xl shadow-stone-200/80">
+                  <div className="space-y-1">
+                    <a href="/pricing" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Pricing</a>
+                    <a href="/careers" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Careers</a>
+                    <a href="/salary-guide" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Salary Guide</a>
+                    <a href="/compare-care" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Compare Care</a>
+                    <a href="/privacy-policy" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Privacy Policy</a>
+                    <a href="/terms-of-placement" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Terms of Placement</a>
+                    <a href="/safety-policy" className="block rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1A201C] hover:bg-[#FAF7F2] hover:text-[#D96B43]">Safety Policy</a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <a href="/provider-apply" className="nav-link flex shrink-0 items-center gap-1.5 hover:text-[#D96B43] transition-colors">
+              <Users className="w-4 h-4 text-[#1D432D]" />
+              <span className="whitespace-nowrap">Apply to Work</span>
             </a>
           </nav>
 
           {/* Action CTAs */}
-          <div className="hidden lg:flex shrink-0 items-center gap-2 xl:gap-3">
+          <div className="hidden lg:flex shrink-0 items-center pl-1.5 xl:pl-2">
             <button
               onClick={onOpenBooking}
-              className="inline-flex items-center justify-center px-3 xl:px-5 py-2.5 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs xl:text-sm tracking-wide shadow-md shadow-[#D96B43]/25 transition-all hover:translate-y-[-1px] active:translate-y-[0px] whitespace-nowrap"
+              className="nav-cta inline-flex items-center justify-center px-3 xl:px-5 py-2.5 text-xs xl:text-sm tracking-wide whitespace-nowrap"
             >
               Hire Now
             </button>
@@ -184,22 +195,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Browse Homecare Staff</span>
             </a>
             <a
-              href="/vetting"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]"
-            >
-              <ShieldCheck className="w-5 h-5 text-[#1D432D]" />
-              <span>7-Pillar Vetting Standards</span>
-            </a>
-            <a
-              href="/salary-guide"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]"
-            >
-              <Calculator className="w-5 h-5 text-[#1D432D]" />
-              <span>Nairobi Salary Guide</span>
-            </a>
-            <a
               href="/mission-vision"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]"
@@ -226,6 +221,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]">
               <Phone className="w-5 h-5 text-[#D96B43]" />
               <span>Contact us</span>
+            </a>
+            <a href="/provider-apply" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]">
+              <Users className="w-5 h-5 text-[#1D432D]" />
+              <span>Apply as a Provider</span>
             </a>
           </div>
 

@@ -50,20 +50,20 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-sm flex items-start sm:items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
-      <div className="my-0 sm:my-6 bg-white rounded-3xl border border-[#F2C2B2] max-w-xl w-full max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)] shadow-2xl overflow-y-auto relative">
-        
-        {/* Emergency Alert Header */}
-        <div className="sticky top-0 z-10 p-6 bg-gradient-to-r from-[#D96B43] to-[#B8532F] text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
-              <AlertCircle className="w-6 h-6 animate-pulse" />
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#0F1F1C]/70 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="relative my-0 max-h-[calc(100vh-1.5rem)] w-full max-w-2xl overflow-hidden rounded-[30px] border border-[#F2D0BA] bg-[#F7F3EE] shadow-[0_26px_80px_rgba(7,25,20,0.25)] sm:my-6 sm:max-h-[calc(100vh-3rem)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.48),transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(188,217,209,0.34),transparent_28%)]" />
+
+        <div className="relative sticky top-0 z-10 flex items-center justify-between gap-4 bg-gradient-to-r from-[#D96B43] via-[#CB6435] to-[#B95D2E] p-5 text-white sm:p-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/18 shadow-inner shadow-white/10 ring-1 ring-white/20">
+              <AlertCircle className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-['Outfit'] flex items-center gap-2">
-                <span>Emergency Domestic & Homecare Dispatch</span>
+              <h2 className="font-['Outfit'] text-lg font-bold tracking-[-0.03em] sm:text-2xl">
+                Emergency Domestic & Homecare Dispatch
               </h2>
-              <p className="text-xs text-white/90">
+              <p className="text-[11px] text-white/90 sm:text-xs">
                 Arrives at your Nairobi home in 2 to 4 hours • 100% DCI Pre-cleared
               </p>
             </div>
@@ -71,30 +71,29 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Form Body */}
-        <div className="p-6 sm:p-8">
+        <div className="relative p-4 sm:p-6">
           {isDispatched ? (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
-                <CheckCircle2 className="w-10 h-10" />
+            <div className="space-y-4 py-6 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F0EA] text-[#1D432D] shadow-inner shadow-[#1D432D]/10">
+                <CheckCircle2 className="h-10 w-10" />
               </div>
-              <h3 className="text-2xl font-bold text-[#1A201C] font-['Outfit']">
+              <h3 className="font-['Outfit'] text-2xl font-bold tracking-[-0.03em] text-[#1A201C]">
                 Dispatch Alert Transmitted!
               </h3>
-              <p className="text-sm text-[#524D47] leading-relaxed">
-                Emergency dispatch alert has been routed to our on-call coordinator in 
-                <strong> {formData.estate}</strong>. You will receive an immediate phone call on 
+              <p className="text-sm leading-relaxed text-[#524D47]">
+                Emergency dispatch alert has been routed to our on-call coordinator in
+                <strong> {formData.estate}</strong>. You will receive an immediate phone call on
                 <strong> {formData.phone}</strong> within 15 minutes with the candidate's verified profile and ETA.
               </p>
 
-              <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8DFD3] text-xs space-y-1 text-left">
+              <div className="space-y-1 rounded-2xl border border-[#E8DFD3] bg-[#FAF7F2] p-4 text-left text-xs text-[#3D3A36]">
                 <p><strong>Hotline:</strong> +254 700 666 227</p>
                 <p><strong>Requested Role:</strong> <span className="capitalize font-bold">{formData.requestedRole?.replace('-', ' ')}</span></p>
                 <p><strong>Standby Pricing:</strong> Shared by our coordinator after consultation</p>
@@ -103,30 +102,29 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
 
               <button
                 onClick={handleReset}
-                className="mt-4 px-8 py-3 rounded-xl bg-[#D96B43] text-white font-bold text-sm"
+                className="mt-2 rounded-xl bg-[#D96B43] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-[#D96B43]/25 transition-transform hover:-translate-y-0.5 hover:bg-[#C9582E]"
               >
                 Close Window
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
-              <div className="p-3.5 rounded-2xl bg-[#FFF8F5] border border-[#FAD9CE] text-xs text-[#8C3419] flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#D96B43] shrink-0" />
+              <div className="flex items-start gap-2 rounded-2xl border border-[#F3D8C9] bg-[#FFFAF6] p-3 text-xs text-[#8C3419] shadow-[0_10px_24px_rgba(217,107,67,0.05)] sm:p-3.5">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#D96B43]" />
                 <span>
-                  Has your regular staff suddenly fallen ill or failed to report? We maintain active standby professionals across Nairobi estates for instant relief.
+                  Has your regular staff suddenly fallen ill or failed to report? We maintain active standby professionals across Nairobi neighbourhoods for instant relief.
                 </span>
               </div>
 
-              {/* Service Requested */}
-              <div>
-                <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1 flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5 text-[#1D432D]" />
+              <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                <label className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
+                  <Briefcase className="h-3.5 w-3.5 text-[#1D432D]" />
                   Emergency Staff Needed *
                 </label>
                 <select
                   value={formData.requestedRole}
                   onChange={(e) => setFormData({ ...formData, requestedRole: e.target.value as HomecareRole })}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold focus:ring-2 focus:ring-[#D96B43]"
+                  className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-semibold text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                 >
                   <option value="nanny">Emergency Backup Nanny & Childcare</option>
                   <option value="nanny">Au Pairs / Elite Nannies</option>
@@ -139,10 +137,9 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                 </select>
               </div>
 
-              {/* Name & Phone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                     Your Name *
                   </label>
                   <input
@@ -151,12 +148,12 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                     value={formData.parentName}
                     onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
                     placeholder="e.g. Susan Mutua"
-                    className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#D96B43]"
+                    className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-medium text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
+                <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                     Emergency Phone Number *
                   </label>
                   <input
@@ -165,21 +162,20 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+254 7..."
-                    className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#D96B43]"
+                    className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-medium text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                   />
                 </div>
               </div>
 
-              {/* Estate & Timing */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
-                    Nairobi Estate *
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
+                    Neighbourhood *
                   </label>
                   <select
                     value={formData.estate}
                     onChange={(e) => setFormData({ ...formData, estate: e.target.value as NairobiEstate })}
-                    className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold focus:ring-2 focus:ring-[#D96B43]"
+                    className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-semibold text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                   >
                     <option value="Kilimani">Kilimani</option>
                     <option value="Westlands">Westlands</option>
@@ -195,14 +191,14 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
+                <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                     Required Arrival Time
                   </label>
                   <select
                     value={formData.requiredTime}
                     onChange={(e) => setFormData({ ...formData, requiredTime: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold focus:ring-2 focus:ring-[#D96B43]"
+                    className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-semibold text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                   >
                     <option value="Immediate (Within 2-3 Hours)">Immediate (Within 2-3 Hours)</option>
                     <option value="Today Evening (After 5 PM)">Today Evening (After 5 PM)</option>
@@ -212,9 +208,8 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                 </div>
               </div>
 
-              {/* Duration & Notes */}
-              <div>
-                <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
+              <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                   Estimated Standby Coverage Needed (Days)
                 </label>
                 <input
@@ -223,13 +218,12 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                   max="14"
                   value={formData.durationDays}
                   onChange={(e) => setFormData({ ...formData, durationDays: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#D96B43]"
+                  className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-medium text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                 />
               </div>
 
-              {/* Urgent Notes */}
-              <div>
-                <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
+              <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                   Urgent Household Instructions
                 </label>
                 <textarea
@@ -237,26 +231,24 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                   value={formData.urgentNotes}
                   onChange={(e) => setFormData({ ...formData, urgentNotes: e.target.value })}
                   placeholder="e.g. Need help with infant twins + laundry, or need compound cleanup for guest arrival."
-                  className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#D96B43]"
+                  className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-medium text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                 />
               </div>
 
-              {/* Submit CTA */}
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#D96B43]/30 transition-all flex items-center justify-center gap-2"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D96B43] px-4 py-3.5 text-sm font-bold tracking-wide text-white shadow-[0_18px_34px_rgba(217,107,67,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[#C85B2D]"
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
                 <span>Trigger Immediate Standby Dispatch</span>
               </button>
 
-              <p className="text-[11px] text-center text-[#7D766D]">
+              <p className="text-center text-[11px] text-[#7D766D]">
                 Or call our rapid dispatch desk directly at <strong>+254 700 666 227</strong>
               </p>
             </form>
           )}
         </div>
-
       </div>
     </div>
   );

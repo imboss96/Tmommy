@@ -109,7 +109,7 @@ export const Hero: React.FC<HeroProps> = ({
   };
 
   return (
-    <section className="relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-14 lg:pb-24">
+    <section className="hero-shell relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-14 lg:pb-24">
       {/* Subtle organic background glow */}
       <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 rounded-full bg-[#E76F51]/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 rounded-full bg-[#1D432D]/10 blur-3xl pointer-events-none" />
@@ -121,7 +121,7 @@ export const Hero: React.FC<HeroProps> = ({
           <div key={activeSlide} className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left animate-in fade-in duration-[4000ms]" aria-live="polite">
             
             {/* Trust Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF0EB] border border-[#F2C2B2] text-[#D96B43] text-xs sm:text-sm font-bold shadow-xs">
+            <div className="hero-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF0EB] border border-[#F2C2B2] text-[#D96B43] text-xs sm:text-sm font-bold shadow-xs">
               <ShieldCheck className="w-4 h-4 text-[#D96B43]" aria-hidden="true" />
               <span>{activeHeroSlide.eyebrow}</span>
               <span className="inline-flex items-center rounded-full border border-[#1D432D]/20 bg-[#E8F0EA] px-2.5 py-1 text-xs font-extrabold text-[#1D432D] shadow-sm">
@@ -130,16 +130,16 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl xl:text-6xl font-extrabold text-[#1A201C] tracking-tight leading-[1.12] sm:leading-[1.15] font-['Outfit']">
+            <h1 className="hero-headline text-3xl sm:text-5xl xl:text-6xl font-extrabold text-[#1A201C] tracking-tight leading-[1.12] sm:leading-[1.15]">
               {activeHeroSlide.headline} <br className="hidden sm:inline" />
-              <span className="text-[#D96B43] underline decoration-[#F4A261]/40 decoration-wavy decoration-2">
+              <span className="highlight">
                 {activeHeroSlide.highlight}
               </span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-xl text-[#4A453F] leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              {activeHeroSlide.description} Enjoy our signature <span className="font-bold text-[#D96B43]">90-day free replacement guarantee</span>.
+            <p className="hero-subhead text-base sm:text-xl text-[#4A453F] leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              {activeHeroSlide.description} Enjoy our signature <span className="accent">90-day free replacement guarantee</span>.
             </p>
 
             {/* Key Trust Pillars Checklist */}
@@ -156,7 +156,7 @@ export const Hero: React.FC<HeroProps> = ({
             <div className="pt-4">
               <form 
                 onSubmit={handleHeroSearch}
-                className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-stone-200/60 border border-[#E8DFD3] grid grid-cols-1 sm:grid-cols-12 gap-3"
+                className="hero-search-form bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-stone-200/60 border border-[#E8DFD3] grid grid-cols-1 sm:grid-cols-12 gap-3"
               >
                 {/* Role / Profession Select */}
                 <div className="sm:col-span-5 text-left">
@@ -187,14 +187,14 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="sm:col-span-4 text-left">
                   <label className="block text-[11px] uppercase font-bold text-[#7D766D] tracking-wider mb-1 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#D96B43]" />
-                    Nairobi Estate
+                    City Neighbourhood
                   </label>
                   <select
                     value={selectedEstate}
                     onChange={(e) => setSelectedEstate(e.target.value as NairobiEstate | 'All Nairobi')}
                     className="w-full bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl px-3 py-2.5 text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
                   >
-                    <option value="All Nairobi">All Nairobi Estates</option>
+                    <option value="All Nairobi">All City Neighbourhoods</option>
                     <option value="Kilimani">Kilimani</option>
                     <option value="Westlands">Westlands</option>
                     <option value="Karen">Karen</option>
@@ -214,7 +214,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="sm:col-span-3 flex items-end">
                   <button
                     type="submit"
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[#D96B43]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="hero-primary-btn w-full py-2.5 px-4 text-sm flex items-center justify-center gap-2"
                   >
                     <Search className="w-4 h-4" />
                     <span>Hire Now</span>

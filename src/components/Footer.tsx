@@ -110,6 +110,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
               <a href="/reviews" className="block hover:text-white transition-colors">Parent Reviews</a>
               <a href="/academy" className="block hover:text-white transition-colors">Homecare Academy</a>
               <a href="/compare-care" className="block hover:text-white transition-colors">Compare Care Options</a>
+              <a href="/provider-apply" className="block hover:text-white transition-colors">Apply as a Homecare Provider</a>
             </div>
 
             <button

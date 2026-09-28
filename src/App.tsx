@@ -19,6 +19,9 @@ import { EmergencyBackupModal } from './components/EmergencyBackupModal';
 import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
 import { ContactPage } from './components/ContactPage';
 import { CoreServiceCategories } from './components/CoreServiceCategories';
+import { HiringGuide } from './components/HiringGuide';
+import { ProviderApplicationPage } from './components/ProviderApplicationPage';
+import { InfoPage } from './components/InfoPage';
 import { NairobiEstate, NannyProfile, NannyType } from './types';
 
 function MainWebsite() {
@@ -105,6 +108,30 @@ function MainWebsite() {
       '/contact': {
         title: 'Contact MommyCare Nairobi | Nanny & Homecare Placement',
         description: 'Contact MommyCare for vetted nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
+      },
+      '/pricing': {
+        title: 'Private Placement Pricing | MommyCare Nairobi',
+        description: 'Learn how MommyCare structures private placement pricing, trial arrangements, and tailored household staffing quotes.'
+      },
+      '/careers': {
+        title: 'Careers at MommyCare | Domestic Staffing & Homecare Jobs',
+        description: 'Explore domestic staffing and homecare career opportunities with MommyCare in Nairobi and beyond.'
+      },
+      '/privacy-policy': {
+        title: 'Privacy Policy | MommyCare Nairobi',
+        description: 'Read how MommyCare protects your personal data, householder information, and staff records.'
+      },
+      '/terms-of-placement': {
+        title: 'Terms of Placement | MommyCare Nairobi',
+        description: 'Review the placement, replacement, and service terms for nannies, household staff, and homecare professionals.'
+      },
+      '/safety-policy': {
+        title: 'Child & Household Safety Policy | MommyCare Nairobi',
+        description: 'Learn about MommyCare’s safety commitments, vetting standards, and household care policies.'
+      },
+      '/provider-apply': {
+        title: 'Apply as a Homecare Provider | MommyCare Nairobi',
+        description: 'Apply to be considered for the MommyCare public directory. Submit your professional details and supporting documents for admin review.'
       }
     };
     const seo = routeSeo[pathname] || routeSeo['/'];
@@ -203,6 +230,90 @@ function MainWebsite() {
       return <ContactPage onOpenBooking={handleOpenGeneralBooking} onOpenEmergency={() => setIsEmergencyOpen(true)} />;
     }
 
+    if (pathname === '/provider-apply') {
+      return <ProviderApplicationPage />;
+    }
+
+    if (pathname === '/pricing') {
+      return (
+        <InfoPage
+          kicker="Pricing"
+          title="Private placement pricing"
+          intro="Every household is different, so our pricing is tailored to the role, number of responsibilities, schedule, required experience, and the level of live-in or live-out support needed."
+          items={[
+            'Trial placement and short-term coverage pricing is discussed after a consultation with our team.',
+            'Live-in roles, child-specific care, household management, and specialist roles are quoted individually.',
+            'All pricing is confirmed in writing before placement or onboarding is finalised.',
+            'Replacement guarantee conditions and terms are outlined in your placement agreement before any trial begins.'
+          ]}
+        />
+      );
+    }
+
+    if (pathname === '/careers') {
+      return (
+        <InfoPage
+          kicker="Careers"
+          title="Work with MommyCare"
+          intro="We are building a more dignified, better-trained future for domestic and homecare professionals across Nairobi."
+          items={[
+            'We hire vetted household professionals, nannies, caregivers, housekeepers, gardeners, cooks, and home managers.',
+            'We look for professionalism, reliability, warmth, communication, and a commitment to family wellbeing.',
+            'If you are experienced and ready to work in a structured, trained environment, we would love to hear from you.',
+            'Send your details and supporting documents through the provider application form or contact our team directly.'
+          ]}
+        />
+      );
+    }
+
+    if (pathname === '/privacy-policy') {
+      return (
+        <InfoPage
+          kicker="Privacy"
+          title="Privacy policy"
+          intro="We treat your personal and household information with strict care. We only use it to assess your needs, arrange suitable staff, and provide safe service support."
+          items={[
+            'Contact details are used only to arrange staff placement, communication, and support.',
+            'Uploaded documents are reviewed privately by the admin team only and not shared publicly.',
+            'Your information is not sold to third parties for unrelated commercial purposes.',
+            'We retain records only as long as needed for service, compliance, or operational requirements.'
+          ]}
+        />
+      );
+    }
+
+    if (pathname === '/terms-of-placement') {
+      return (
+        <InfoPage
+          kicker="Terms"
+          title="Terms of placement"
+          intro="Our placements are structured to help families and professionals work with clarity and confidence from the start."
+          items={[
+            'Trial, placement, and replacement support terms are confirmed before onboarding begins.',
+            'Working hours, duties, leave, salary expectations, and role scope should be agreed in writing.',
+            'Our team supports transparent communication between families and staff to reduce confusion and protect both sides.',
+            'Replacement, suspension, or termination conditions are governed by the agreed placement terms and communication between the parties.'
+          ]}
+        />
+      );
+    }
+
+    if (pathname === '/safety-policy') {
+      return (
+        <InfoPage
+          kicker="Safety"
+          title="Child & household safety policy"
+          intro="Safety is at the centre of every placement we arrange. We screen and verify staff before they are introduced into your home."
+          items={[
+            'Every candidate is checked for DCI, identity, and reference integrity before admission to the registry.',
+            'We do not place staff whose records are inconsistent, expired, or incomplete.',
+            'Families are encouraged to communicate clearly about duties, routines, boundaries, and household expectations.',
+            'We maintain a high standard for professionalism, discretion, and respectful family support.'
+          ]}
+        />
+      );
+    }
+
     if (pathname === '/nannies') {
       return (
         <NannyDirectory
@@ -238,6 +349,7 @@ function MainWebsite() {
               onOpenEmergency={() => setIsEmergencyOpen(true)}
             />
             <CoreServiceCategories />
+            <HiringGuide onOpenBooking={handleOpenGeneralBooking} />
             <VettingProcess />
             <NannyDirectory
               initialEstate={globalEstate}

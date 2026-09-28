@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { DEFAULT_CORE_SERVICE_CATEGORIES, type CoreServiceCategory } from '../src/data/coreServiceCategories';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 dotenv.config({ path: path.join(projectRoot, '.env.local') });
@@ -64,6 +65,63 @@ const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServic
       auth: { autoRefreshToken: false, persistSession: false }
     })
   : null;
+
+let coreServiceCategories: CoreServiceCategory[] = [...DEFAULT_CORE_SERVICE_CATEGORIES];
+
+const readCoreServiceCategories = async (): Promise<CoreServiceCategory[]> => {
+  if (!supabase) return coreServiceCategories;
+
+  const { data, error } = await supabase
+    .from('core_service_categories')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.warn('[API] Unable to read core service categories from Supabase, using in-memory fallback.', error.message);
+    return coreServiceCategories;
+  }
+
+  const nextCategories = (data || []).map((item: any) => ({
+    id: String(item.id),
+    title: String(item.title || ''),
+    description: String(item.description || ''),
+    action: String(item.action || 'Learn More'),
+    href: String(item.href || '/nannies'),
+    image: String(item.image || '')
+  }));
+
+  if (nextCategories.length > 0) {
+    coreServiceCategories = nextCategories;
+  }
+
+  return coreServiceCategories;
+};
+
+const normalizeCoreServiceCategory = (payload: Partial<CoreServiceCategory>, fallbackId?: string): CoreServiceCategory => {
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  const description = typeof payload.description === 'string' ? payload.description.trim() : '';
+  const action = typeof payload.action === 'string' ? payload.action.trim() : 'Learn More';
+  const href = typeof payload.href === 'string' && payload.href.trim() ? payload.href.trim() : '/nannies';
+  const image = typeof payload.image === 'string' ? payload.image.trim() : '';
+
+  if (!title || !description) {
+    throw new Error('Title and description are required for a core service category.');
+  }
+
+  const computedId = typeof payload.id === 'string' && payload.id.trim()
+    ? payload.id.trim()
+    : (fallbackId || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `category-${Date.now()}`);
+
+  return {
+    id: computedId,
+    title,
+    description,
+    action,
+    href,
+    image
+  };
+};
 
 const allowedOrigins = new Set([
   ...configuredAllowedOrigins,
@@ -193,6 +251,141 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.get('/api/core-service-categories', async (_req, res) => {
+  const categories = await readCoreServiceCategories();
+  res.json({ categories });
+});
+
+app.get('/api/admin/core-service-categories', requireAdminPin, async (_req, res) => {
+  const categories = await readCoreServiceCategories();
+  res.json({ categories });
+});
+
+app.post('/api/admin/core-service-categories', requireAdminPin, async (req, res) => {
+  try {
+    const nextCategory = normalizeCoreServiceCategory(req.body || {});
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('core_service_categories')
+        .insert({
+          id: nextCategory.id,
+          title: nextCategory.title,
+          description: nextCategory.description,
+          action: nextCategory.action,
+          href: nextCategory.href,
+          image: nextCategory.image,
+          sort_order: coreServiceCategories.length
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') {
+          return res.status(409).json({ error: 'A core service category with this id already exists.' });
+        }
+        throw new Error(error.message);
+      }
+
+      coreServiceCategories = await readCoreServiceCategories();
+      return res.status(201).json({ category: data });
+    }
+
+    if (coreServiceCategories.some(category => category.id === nextCategory.id)) {
+      return res.status(409).json({ error: 'A core service category with this id already exists.' });
+    }
+
+    coreServiceCategories = [...coreServiceCategories, nextCategory];
+    return res.status(201).json({ category: nextCategory });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to create the core service category.';
+    return res.status(400).json({ error: message });
+  }
+});
+
+app.put('/api/admin/core-service-categories/:id', requireAdminPin, async (req, res) => {
+  try {
+    const categoryId = String(req.params.id || '');
+
+    if (supabase) {
+      const payload = normalizeCoreServiceCategory({
+        ...req.body,
+        id: categoryId
+      }, categoryId);
+
+      const { data, error } = await supabase
+        .from('core_service_categories')
+        .update({
+          title: payload.title,
+          description: payload.description,
+          action: payload.action,
+          href: payload.href,
+          image: payload.image,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', categoryId)
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return res.status(404).json({ error: 'Core service category not found.' });
+        }
+        throw new Error(error.message);
+      }
+
+      coreServiceCategories = await readCoreServiceCategories();
+      return res.json({ category: data });
+    }
+
+    const targetIndex = coreServiceCategories.findIndex(category => category.id === categoryId);
+    if (targetIndex === -1) {
+      return res.status(404).json({ error: 'Core service category not found.' });
+    }
+
+    const updatedCategory = normalizeCoreServiceCategory({
+      ...coreServiceCategories[targetIndex],
+      ...req.body,
+      id: categoryId
+    }, categoryId);
+
+    coreServiceCategories = coreServiceCategories.map(category =>
+      category.id === categoryId ? updatedCategory : category
+    );
+
+    return res.json({ category: updatedCategory });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to update the core service category.';
+    return res.status(400).json({ error: message });
+  }
+});
+
+app.delete('/api/admin/core-service-categories/:id', requireAdminPin, async (req, res) => {
+  const categoryId = String(req.params.id || '');
+
+  if (supabase) {
+    const { error } = await supabase
+      .from('core_service_categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    coreServiceCategories = await readCoreServiceCategories();
+    return res.json({ deleted: true, id: categoryId });
+  }
+
+  const existing = coreServiceCategories.find(category => category.id === categoryId);
+  if (!existing) {
+    return res.status(404).json({ error: 'Core service category not found.' });
+  }
+
+  coreServiceCategories = coreServiceCategories.filter(category => category.id !== categoryId);
+  return res.json({ deleted: true, id: categoryId });
+});
+
 app.get('/api/nannies', requireSupabase, async (_req, res) => {
   const { data, error } = await supabase!
     .from('staff_profiles')
@@ -202,6 +395,114 @@ app.get('/api/nannies', requireSupabase, async (_req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
+});
+
+const providerRoles = new Set(['nanny', 'house-manager', 'house-girl', 'house-boy', 'shamba-boy', 'caretaker', 'cook-chef', 'home-driver']);
+const providerArrangements = new Set(['live-in', 'day-care', 'night-nurse', 'temporary-backup']);
+const providerEstates = new Set(['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka']);
+
+app.post('/api/provider-applications', requireSupabase, async (req, res) => {
+  const { id, profile, documents } = req.body || {};
+  if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return res.status(400).json({ error: 'A valid application reference is required.' });
+  }
+  if (!profile || typeof profile !== 'object' || typeof profile.name !== 'string' || profile.name.trim().length < 2 ||
+      typeof profile.phone !== 'string' || profile.phone.trim().length < 7 ||
+      typeof profile.email !== 'string' || !profile.email.includes('@') ||
+      !providerRoles.has(profile.role) || !providerArrangements.has(profile.nannyType) ||
+      !providerEstates.has(profile.primaryEstate) || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
+    return res.status(400).json({ error: 'Complete the required contact, role, availability, and document fields.' });
+  }
+  const safeDocuments = documents.filter((doc: any) => doc && typeof doc.path === 'string' && doc.path.startsWith(`${id}/`) &&
+    typeof doc.name === 'string' && typeof doc.kind === 'string');
+  if (safeDocuments.length !== documents.length || !safeDocuments.some((doc: any) => doc.kind === 'identity') || !safeDocuments.some((doc: any) => doc.kind === 'good-conduct')) {
+    return res.status(400).json({ error: 'Upload identity and good-conduct documents before submitting.' });
+  }
+  const { data: storedFiles, error: storageError } = await supabase!.storage.from('provider-documents').list(id, { limit: 10 });
+  if (storageError || safeDocuments.some((doc: any) => !storedFiles?.some(file => `${id}/${file.name}` === doc.path))) {
+    return res.status(400).json({ error: 'One or more uploaded documents could not be verified. Please upload them again.' });
+  }
+
+  const submittedProfile = {
+    name: profile.name.trim().slice(0, 100), email: profile.email.trim().slice(0, 160), phone: profile.phone.trim().slice(0, 40),
+    role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate,
+    age: Math.max(18, Math.min(75, Number(profile.age) || 18)),
+    experienceYears: Math.max(0, Math.min(60, Number(profile.experienceYears) || 0)),
+    monthlySalaryKsh: Math.max(0, Math.min(1000000, Number(profile.monthlySalaryKsh) || 0)),
+    languages: Array.isArray(profile.languages) ? profile.languages.filter((v: unknown) => typeof v === 'string').slice(0, 10) : [],
+    skills: Array.isArray(profile.skills) ? profile.skills.filter((v: unknown) => typeof v === 'string').slice(0, 20) : [],
+    bio: typeof profile.bio === 'string' ? profile.bio.trim().slice(0, 1500) : '',
+    dciGoodConductNumber: typeof profile.dciGoodConductNumber === 'string' ? profile.dciGoodConductNumber.trim().slice(0, 100) : ''
+  };
+  const { error } = await supabase!.from('provider_applications').insert({ id, profile: submittedProfile, documents: safeDocuments });
+  if (error) {
+    if (error.code === '23505') return res.status(409).json({ error: 'This application has already been submitted.' });
+    console.error(`[API] Provider application save failed: ${error.message}`);
+    return res.status(500).json({ error: 'We could not save your application. Please try again.' });
+  }
+  res.status(201).json({ id, status: 'pending' });
+});
+
+app.get('/api/admin/provider-applications', requireAdminPin, async (_req, res) => {
+  const { data, error } = await supabase!.from('provider_applications').select('*').order('submitted_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  const applications = await Promise.all((data || []).map(async application => {
+    const docs = Array.isArray(application.documents) ? application.documents : [];
+    const documents = await Promise.all(docs.map(async (doc: any) => {
+      const { data: signed } = await supabase!.storage.from('provider-documents').createSignedUrl(doc.path, 900);
+      return { ...doc, signedUrl: signed?.signedUrl || '' };
+    }));
+    return { ...application, documents };
+  }));
+  res.json({ applications });
+});
+
+app.post('/api/admin/provider-applications/:id/:action', requireAdminPin, async (req, res) => {
+  const { id, action } = req.params;
+  const allowedActions = new Set(['approve', 'reject', 'disable', 'enable', 'note']);
+  if (!allowedActions.has(action)) return res.status(400).json({ error: 'Unknown application action.' });
+  const { data: application, error: loadError } = await supabase!.from('provider_applications').select('*').eq('id', id).single();
+  if (loadError || !application) return res.status(404).json({ error: 'Application not found.' });
+  const profile = application.profile as Record<string, any>;
+  let status = application.status;
+  let staffProfileId = application.staff_profile_id;
+
+  if (action === 'approve') {
+    if (application.status !== 'pending' && application.status !== 'rejected') return res.status(409).json({ error: 'Only pending or rejected applications can be approved.' });
+    if (req.body?.documentsReviewed !== true) return res.status(400).json({ error: 'Confirm that you reviewed the submitted documents before approval.' });
+    staffProfileId = staffProfileId || `provider-${id}`;
+    const roleTitle = ({ nanny: 'Nanny & Childcare Professional', 'house-manager': 'House Manager', 'house-girl': 'Housekeeper', 'house-boy': 'Domestic Steward', 'shamba-boy': 'Gardener & Groundskeeper', caretaker: 'Compound Caretaker', 'cook-chef': 'Cook & Chef', 'home-driver': 'Family Driver' } as Record<string, string>)[profile.role] || 'Homecare Professional';
+    const publicStaff = {
+      id: staffProfileId, name: profile.name, avatar: '', age: profile.age, role: profile.role,
+      role_title: roleTitle, category_label: roleTitle, nanny_type: profile.nannyType,
+      primary_estate: profile.primaryEstate, available_estates: [profile.primaryEstate],
+      experience_years: profile.experienceYears, rating: 0, review_count: 0,
+      monthly_salary_ksh: profile.monthlySalaryKsh, hourly_rate_ksh: 0,
+      tagline: `${profile.experienceYears} years of experience. Contact MommyCare to discuss availability.`, bio: profile.bio,
+      certifications: [], skills: profile.skills || [], languages: profile.languages || [], education: '',
+      dci_good_conduct_number: profile.dciGoodConductNumber || '', dci_issue_date: '', first_aid_cert_number: '',
+      medical_clearance_date: '', verified_reference_count: 0, is_available_now: true,
+      can_swim: false, has_special_needs_training: false, can_drive: profile.role === 'home-driver'
+    };
+    const { error: staffError } = await supabase!.from('staff_profiles').upsert(publicStaff, { onConflict: 'id' });
+    if (staffError) return res.status(500).json({ error: `Could not publish provider profile: ${staffError.message}` });
+    status = 'approved';
+  } else if (action === 'disable' || action === 'enable') {
+    if (!application.staff_profile_id) return res.status(409).json({ error: 'This application has no published provider profile.' });
+    const isEnabled = action === 'enable';
+    const { error: staffError } = await supabase!.from('staff_profiles').update({ is_available_now: isEnabled }).eq('id', application.staff_profile_id);
+    if (staffError) return res.status(500).json({ error: staffError.message });
+    status = isEnabled ? 'approved' : 'disabled';
+  } else if (action === 'reject') {
+    if (application.status !== 'pending' && application.status !== 'rejected') return res.status(409).json({ error: 'Only pending applications can be rejected.' });
+    status = 'rejected';
+  }
+  const adminNotes = typeof req.body?.adminNotes === 'string' ? req.body.adminNotes.slice(0, 2000) : application.admin_notes;
+  const updates: Record<string, unknown> = { status, admin_notes: adminNotes, staff_profile_id: staffProfileId };
+  if (action !== 'note') updates.reviewed_at = new Date().toISOString();
+  const { error: updateError } = await supabase!.from('provider_applications').update(updates).eq('id', id);
+  if (updateError) return res.status(500).json({ error: updateError.message });
+  res.json({ id, status, staffProfileId, adminNotes });
 });
 
 app.get('/api/insights', requireSupabase, async (_req, res) => {

@@ -94,6 +94,7 @@ Supabase migrations are stored in `supabase/migrations/`. Apply them in order, i
 - `003_whatsapp_site_config.sql`
 - `004_contact_inquiries.sql`
 - `005_reviews.sql`
+- `006_provider_applications.sql` (creates the provider review queue and private document bucket)
 
 Never commit `.env`, `.env.local`, Supabase service-role keys, Cloudinary secrets, or the admin PIN.
 

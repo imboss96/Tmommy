@@ -115,4 +115,4 @@ npm run build
 pm2 restart mommycare-api
 ```
 
-Apply Supabase migrations separately from the VPS using the Supabase dashboard or Supabase CLI, especially `supabase/migrations/005_reviews.sql`.
+Apply Supabase migrations separately from the VPS using the Supabase dashboard or Supabase CLI, including `supabase/migrations/006_provider_applications.sql` for provider applications and private documents.

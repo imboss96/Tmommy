@@ -160,11 +160,11 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                 onClick={() => setSelectedRole(tab.id)}
                 className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition-all shrink-0 ${
                   isActive
-                    ? 'bg-[#1D432D] text-white shadow-md shadow-[#1D432D]/20 scale-[1.02]'
+                    ? 'bg-[#D96B43] text-white shadow-md shadow-[#D96B43]/20 scale-[1.02]'
                     : 'bg-[#FAF7F2] text-[#635E59] hover:bg-[#F0EBE1] hover:text-[#1A201C] border border-[#E8DFD3]'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#F4A261]' : 'text-[#8E877D]'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#8E877D]'}`} />
                 <span>{tab.label}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                   isActive ? 'bg-white/20 text-white' : 'bg-stone-200 text-[#4A453F]'
@@ -199,7 +199,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                 onChange={(e) => setSelectedEstate(e.target.value as NairobiEstate | 'All Nairobi')}
                 className="w-full px-3.5 py-2.5 bg-white border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
               >
-                <option value="All Nairobi">All Nairobi Estates</option>
+                <option value="All Nairobi">All City Neighbourhoods</option>
                 <option value="Kilimani">Kilimani</option>
                 <option value="Westlands">Westlands</option>
                 <option value="Karen">Karen</option>
