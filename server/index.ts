@@ -400,6 +400,15 @@ app.get('/api/nannies', requireSupabase, async (_req, res) => {
 const providerRoles = new Set(['nanny', 'house-manager', 'house-girl', 'house-boy', 'shamba-boy', 'caretaker', 'cook-chef', 'home-driver']);
 const providerArrangements = new Set(['live-in', 'day-care', 'night-nurse', 'temporary-backup']);
 const providerEstates = new Set(['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka']);
+const providerSalaryRanges: Record<string, number> = {
+  'KES 10,000–12,000': 11000,
+  'KES 12,001–15,000': 13500,
+  'KES 15,001–20,000': 17500,
+  'KES 20,001–25,000': 22500,
+  'KES 25,001–30,000': 27500,
+  'Above KES 30,000': 30000,
+  Negotiable: 0
+};
 
 app.post('/api/provider-applications', requireSupabase, async (req, res) => {
   const { id, profile, documents } = req.body || {};
@@ -412,6 +421,11 @@ app.post('/api/provider-applications', requireSupabase, async (req, res) => {
       !providerRoles.has(profile.role) || !providerArrangements.has(profile.nannyType) ||
       !providerEstates.has(profile.primaryEstate) || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
     return res.status(400).json({ error: 'Complete the required contact, role, availability, and document fields.' });
+  }
+  const monthlySalaryRange = profile.monthlySalaryRange === undefined ? '' : profile.monthlySalaryRange;
+  if (typeof monthlySalaryRange !== 'string' ||
+      (monthlySalaryRange !== '' && !Object.prototype.hasOwnProperty.call(providerSalaryRanges, monthlySalaryRange))) {
+    return res.status(400).json({ error: 'Select a valid expected salary range.' });
   }
   const safeDocuments = documents.filter((doc: any) => doc && typeof doc.path === 'string' && doc.path.startsWith(`${id}/`) &&
     typeof doc.name === 'string' && typeof doc.kind === 'string');
@@ -428,7 +442,10 @@ app.post('/api/provider-applications', requireSupabase, async (req, res) => {
     role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate,
     age: Math.max(18, Math.min(75, Number(profile.age) || 18)),
     experienceYears: Math.max(0, Math.min(60, Number(profile.experienceYears) || 0)),
-    monthlySalaryKsh: Math.max(0, Math.min(1000000, Number(profile.monthlySalaryKsh) || 0)),
+    monthlySalaryRange,
+    monthlySalaryKsh: monthlySalaryRange
+      ? providerSalaryRanges[monthlySalaryRange]
+      : Math.max(0, Math.min(1000000, Number(profile.monthlySalaryKsh) || 0)),
     languages: Array.isArray(profile.languages) ? profile.languages.filter((v: unknown) => typeof v === 'string').slice(0, 10) : [],
     skills: Array.isArray(profile.skills) ? profile.skills.filter((v: unknown) => typeof v === 'string').slice(0, 20) : [],
     bio: typeof profile.bio === 'string' ? profile.bio.trim().slice(0, 1500) : '',

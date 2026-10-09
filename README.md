@@ -19,6 +19,10 @@ The platform supports nanny placement, domestic staff browsing, bookings, emerge
 - Supabase-backed production content and submissions
 - SEO routes, metadata, sitemap, and robots.txt
 
+## Product plan
+
+See [docs/MVP_AND_IMPLEMENTATION_ROADMAP.md](docs/MVP_AND_IMPLEMENTATION_ROADMAP.md) for the MVP scope, user journeys, launch criteria, success measures, and phased implementation roadmap.
+
 ## Technology
 
 - React 19

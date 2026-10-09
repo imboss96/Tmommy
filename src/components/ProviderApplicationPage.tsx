@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from 'react';
-import { BadgeCheck, FileLock2, LoaderCircle, UploadCloud } from 'lucide-react';
+import { ArrowRight, BadgeCheck, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
 import { HomecareRole, NairobiEstate, NannyType } from '../types';
@@ -19,10 +19,19 @@ const roles: { value: HomecareRole; label: string }[] = [
   { value: 'cook-chef', label: 'Cook / chef' }, { value: 'home-driver', label: 'Family driver' }
 ];
 const estates: NairobiEstate[] = ['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka'];
-const inputClass = 'mt-1.5 w-full rounded-xl border border-[#D5C9BA] bg-white px-3.5 py-3 text-sm text-[#1A201C] outline-none focus:ring-2 focus:ring-[#D96B43]/40';
+const salaryRanges = [
+  'KES 10,000–12,000',
+  'KES 12,001–15,000',
+  'KES 15,001–20,000',
+  'KES 20,001–25,000',
+  'KES 25,001–30,000',
+  'Above KES 30,000',
+  'Negotiable'
+];
+const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryKsh: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
   const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ identity: null, 'good-conduct': null, training: null, cv: null, other: null });
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [error, setError] = useState('');
@@ -51,7 +60,7 @@ export const ProviderApplicationPage: React.FC = () => {
       const response = await fetch(`${getApiBaseUrl()}/api/provider-applications`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, profile: {
-          ...form, age: Number(form.age), experienceYears: Number(form.experienceYears), monthlySalaryKsh: Number(form.monthlySalaryKsh),
+          ...form, age: Number(form.age), experienceYears: Number(form.experienceYears),
           languages: form.languages.split(',').map(value => value.trim()).filter(Boolean),
           skills: form.skills.split(',').map(value => value.trim()).filter(Boolean)
         }, documents: uploaded })
@@ -65,42 +74,88 @@ export const ProviderApplicationPage: React.FC = () => {
     }
   };
 
-  return <main className="flex-1 bg-[#FAF7F2] px-4 py-12 sm:px-6 lg:py-16">
-    <div className="mx-auto max-w-4xl">
-      <header className="mb-8 text-center">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#E8F0EA] px-3 py-1.5 text-xs font-bold text-[#1D432D]"><BadgeCheck className="h-4 w-4" /> Provider applications</div>
-        <h1 className="font-['Outfit'] text-3xl font-extrabold text-[#1A201C] sm:text-4xl">Apply to work with MommyCare</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#635E59]">Homecare professionals can apply to be considered for the public directory. Submitting an application does not publish your profile; our team reviews applications and documents first.</p>
+  return <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_#f1e9dc_0%,_#faf7f2_45%)] px-4 py-10 sm:px-6 sm:py-14 lg:py-20">
+    <div className="mx-auto max-w-6xl">
+      <header className="mb-9 grid gap-7 lg:mb-12 lg:grid-cols-[1fr_340px] lg:items-end">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm"><Sparkles className="h-4 w-4" /> PROVIDER APPLICATIONS</div>
+          <h1 className="max-w-3xl font-['Outfit'] text-4xl font-extrabold leading-[1.05] tracking-tight text-[#1A201C] sm:text-5xl lg:text-6xl">Your next chapter in <span className="text-[#D96B43]">homecare</span> starts here.</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Our team reviews every application before a profile is considered for the MommyCare directory.</p>
+        </div>
+        <aside className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white/80 p-5 shadow-[0_12px_32px_rgba(42,35,25,0.05)]">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><LockKeyhole className="h-5 w-5" /></span>
+          <div><h2 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Your information stays protected</h2><p className="mt-1.5 text-sm leading-6 text-[#635E59]">Your contact details and uploaded documents are private and only shared with our review team.</p></div>
+        </aside>
       </header>
 
-      {status === 'sent' ? <section className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-sm"><BadgeCheck className="mx-auto h-12 w-12 text-emerald-700" /><h2 className="mt-4 font-['Outfit'] text-2xl font-bold text-[#1A201C]">Application received</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-[#635E59]">Your documents are stored privately for review. Your profile will only appear in the public directory if the admin team verifies and approves it.</p></section> :
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl border border-[#E8DFD3] bg-white p-5 shadow-sm sm:p-8">
-          <section>
-            <h2 className="font-['Outfit'] text-xl font-bold text-[#1A201C]">Your details</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="text-xs font-bold text-[#635E59]">Full legal name *<input required autoComplete="name" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Phone / WhatsApp *<input required type="tel" autoComplete="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Email address *<input required type="email" autoComplete="email" value={form.email} onChange={e => setField('email', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Profession *<select value={form.role} onChange={e => setField('role', e.target.value as HomecareRole)} className={inputClass}>{roles.map(role => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
-              <label className="text-xs font-bold text-[#635E59]">Preferred arrangement *<select value={form.nannyType} onChange={e => setField('nannyType', e.target.value as NannyType)} className={inputClass}><option value="live-in">Live-in</option><option value="day-care">Day work</option><option value="night-nurse">Night shifts</option><option value="temporary-backup">Temporary / relief</option></select></label>
-              <label className="text-xs font-bold text-[#635E59]">Home area / neighbourhood *<select value={form.primaryEstate} onChange={e => setField('primaryEstate', e.target.value as NairobiEstate)} className={inputClass}>{estates.map(estate => <option key={estate}>{estate}</option>)}</select></label>
-              <label className="text-xs font-bold text-[#635E59]">Age *<input required type="number" min="18" max="75" value={form.age} onChange={e => setField('age', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Years of experience *<input required type="number" min="0" max="60" value={form.experienceYears} onChange={e => setField('experienceYears', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Expected monthly salary (KES)<input type="number" min="0" value={form.monthlySalaryKsh} onChange={e => setField('monthlySalaryKsh', e.target.value)} className={inputClass} /></label>
-              <label className="text-xs font-bold text-[#635E59]">Languages, comma separated<input value={form.languages} onChange={e => setField('languages', e.target.value)} placeholder="Kiswahili, English" className={inputClass} /></label>
-            </div>
-            <label className="mt-4 block text-xs font-bold text-[#635E59]">Skills and experience, comma separated<textarea rows={2} value={form.skills} onChange={e => setField('skills', e.target.value)} placeholder="Infant care, first aid, meal preparation" className={inputClass} /></label>
-            <label className="mt-4 block text-xs font-bold text-[#635E59]">Short introduction<textarea rows={4} value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder="Tell us about your work experience and the kind of role you are looking for." className={inputClass} /></label>
-            <label className="mt-4 block text-xs font-bold text-[#635E59]">Certificate of Good Conduct reference (if available)<input value={form.dciGoodConductNumber} onChange={e => setField('dciGoodConductNumber', e.target.value)} className={inputClass} /></label>
-          </section>
+      {status === 'sent' ? <section className="rounded-[2rem] border border-[#DCE7DE] bg-white px-6 py-14 text-center shadow-[0_24px_70px_rgba(42,35,25,0.08)] sm:px-12">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#E8F0EA] text-[#1D432D]"><BadgeCheck className="h-8 w-8" /></span>
+        <h2 className="mt-6 font-['Outfit'] text-3xl font-bold text-[#1A201C]">Application received</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#635E59]">Your documents are stored privately for review. Your profile will only appear in the public directory if the admin team verifies and approves it.</p>
+      </section> :
+        <form onSubmit={handleSubmit} className="overflow-hidden rounded-[2rem] border border-[#E8DFD3] bg-white shadow-[0_24px_70px_rgba(42,35,25,0.08)]">
+          <div className="flex flex-col gap-5 border-b border-[#F0EBE5] bg-[#FEFDFC] px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-9">
+            <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D96B43]">A little about you</p><h2 className="mt-1 font-['Outfit'] text-2xl font-bold text-[#1A201C]">Let’s get your application started</h2></div>
+            <p className="flex items-center gap-2 text-xs font-medium text-[#777067]"><span className="h-2 w-2 rounded-full bg-[#D96B43]" /> Required fields are marked with *</p>
+          </div>
 
-          <section className="border-t border-[#E8DFD3] pt-6">
-            <div className="flex gap-3"><FileLock2 className="h-5 w-5 shrink-0 text-[#1D432D]" /><div><h2 className="font-['Outfit'] text-xl font-bold text-[#1A201C]">Supporting documents</h2><p className="mt-1 text-xs leading-relaxed text-[#635E59]">Documents are private and only shared with administrators for application review. Accepted formats: PDF, JPG, PNG; 8 MB maximum each.</p></div></div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">{documentFields.map(field => <label key={field.kind} className="rounded-2xl border border-dashed border-[#D5C9BA] bg-[#FAF7F2] p-4 text-xs font-bold text-[#3D3A36]">{field.label}{field.required ? ' *' : ''}<span className="mt-1 block font-normal text-[#7D766D]">{field.hint}</span><span className="mt-3 flex items-center gap-2 text-[#1D432D]"><UploadCloud className="h-4 w-4" />{documents[field.kind]?.name || 'Choose file'}</span><input required={Boolean(field.required)} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e => setDocuments(current => ({ ...current, [field.kind]: e.target.files?.[0] || null }))} className="mt-2 block w-full text-[11px] font-normal" /></label>)}</div>
-          </section>
-          <label className="flex items-start gap-3 rounded-xl bg-[#FAF7F2] p-4 text-xs leading-relaxed text-[#635E59]"><input type="checkbox" required className="mt-0.5 accent-[#1D432D]" /><span>I confirm the information is accurate and consent to MommyCare reviewing these details and documents. If approved, I agree that my name, role, area, arrangement, experience, skills, introduction, and expected salary may appear in the public directory. My contact details and uploaded documents will remain private.</span></label>
-          {status === 'error' && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-          <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-5 py-3.5 text-sm font-bold text-white hover:bg-[#143020] disabled:opacity-60">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Submitting securely…</> : 'Submit provider application'}</button>
+          <div className="space-y-10 px-5 py-7 sm:px-9 sm:py-9">
+            <section>
+              <div className="mb-5 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7EEE8] text-[#B8532F]"><UserRound className="h-5 w-5" /></span>
+                <div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9A7160]">01 · About you</p><h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Personal details</h3></div>
+              </div>
+              <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                <label className="text-xs font-bold text-[#514B44]">Full legal name *<input required autoComplete="name" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Phone / WhatsApp *<input required type="tel" autoComplete="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Email address *<input required type="email" autoComplete="email" value={form.email} onChange={e => setField('email', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Age *<input required type="number" min="18" max="75" value={form.age} onChange={e => setField('age', e.target.value)} className={inputClass} /></label>
+              </div>
+            </section>
+
+            <section className="border-t border-[#F0EBE5] pt-8">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><BriefcaseBusiness className="h-5 w-5" /></span>
+                <div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#66816D]">02 · Your work</p><h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Experience & preferences</h3></div>
+              </div>
+              <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                <label className="text-xs font-bold text-[#514B44]">Profession *<select value={form.role} onChange={e => setField('role', e.target.value as HomecareRole)} className={inputClass}>{roles.map(role => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
+                <label className="text-xs font-bold text-[#514B44]">Preferred arrangement *<select value={form.nannyType} onChange={e => setField('nannyType', e.target.value as NannyType)} className={inputClass}><option value="live-in">Live-in</option><option value="day-care">Day work</option><option value="night-nurse">Night shifts</option><option value="temporary-backup">Temporary / relief</option></select></label>
+                <label className="text-xs font-bold text-[#514B44]">Home area / neighbourhood *<select value={form.primaryEstate} onChange={e => setField('primaryEstate', e.target.value as NairobiEstate)} className={inputClass}>{estates.map(estate => <option key={estate}>{estate}</option>)}</select></label>
+                <label className="text-xs font-bold text-[#514B44]">Years of experience *<input required type="number" min="0" max="60" value={form.experienceYears} onChange={e => setField('experienceYears', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Expected monthly salary<select value={form.monthlySalaryRange} onChange={e => setField('monthlySalaryRange', e.target.value)} className={inputClass}><option value="">Select a salary range</option>{salaryRanges.map(range => <option key={range} value={range}>{range}</option>)}</select></label>
+                <label className="text-xs font-bold text-[#514B44]">Languages<span className="font-normal text-[#91897F]"> · comma separated</span><input value={form.languages} onChange={e => setField('languages', e.target.value)} placeholder="Kiswahili, English" className={inputClass} /></label>
+              </div>
+              <div className="mt-4 grid gap-4">
+                <label className="text-xs font-bold text-[#514B44]">Skills and experience<span className="font-normal text-[#91897F]"> · comma separated</span><textarea rows={2} value={form.skills} onChange={e => setField('skills', e.target.value)} placeholder="Infant care, first aid, meal preparation" className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Short introduction<textarea rows={4} value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder="Tell us about your work experience and the kind of role you are looking for." className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Certificate of Good Conduct reference <span className="font-normal text-[#91897F]">· if available</span><input value={form.dciGoodConductNumber} onChange={e => setField('dciGoodConductNumber', e.target.value)} className={inputClass} /></label>
+              </div>
+            </section>
+
+            <section className="border-t border-[#F0EBE5] pt-8">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7EEE8] text-[#B8532F]"><FileLock2 className="h-5 w-5" /></span>
+                <div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9A7160]">03 · Documents</p><h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Supporting documents</h3></div>
+              </div>
+              <p className="mb-5 max-w-2xl text-sm leading-6 text-[#777067]">Documents are private and only shared with administrators for application review. Accepted formats: PDF, JPG, PNG; 8 MB maximum each.</p>
+              <div className="grid gap-3 sm:grid-cols-2">{documentFields.map(field => <label key={field.kind} className="group cursor-pointer rounded-2xl border border-dashed border-[#D8CFC3] bg-[#FCFBF9] p-4 transition hover:border-[#1D432D] hover:bg-[#F7FAF7]">
+                <span className="flex items-start justify-between gap-2 text-xs font-bold text-[#3D3A36]">{field.label}{field.required ? ' *' : ''}<UploadCloud className="h-4 w-4 shrink-0 text-[#1D432D]" /></span>
+                <span className="mt-1 block text-xs font-normal text-[#91897F]">{field.hint}</span>
+                <span className="mt-4 block truncate rounded-lg border border-[#EEE9E2] bg-white px-3 py-2.5 text-xs font-semibold text-[#1D432D]">{documents[field.kind]?.name || 'Choose a file to upload'}</span>
+                <input required={Boolean(field.required)} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e => setDocuments(current => ({ ...current, [field.kind]: e.target.files?.[0] || null }))} className="sr-only" />
+              </label>)}</div>
+            </section>
+
+            <section className="border-t border-[#F0EBE5] pt-8">
+              <label className="flex items-start gap-3 rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 text-xs leading-6 text-[#635E59] sm:p-5"><input type="checkbox" required className="mt-1 h-4 w-4 shrink-0 accent-[#1D432D]" /><span>I confirm the information is accurate and consent to MommyCare reviewing these details and documents. If approved, I agree that my name, role, area, arrangement, experience, skills, introduction, and expected salary may appear in the public directory. My contact details and uploaded documents will remain private.</span></label>
+              {status === 'error' && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-center gap-2 text-xs text-[#777067]"><LockKeyhole className="h-4 w-4 text-[#1D432D]" /> Your documents are submitted securely</p>
+                <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-6 py-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,67,45,0.2)] transition hover:-translate-y-0.5 hover:bg-[#143020] hover:shadow-[0_14px_28px_rgba(29,67,45,0.25)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Submitting securely…</> : <>Submit provider application <ArrowRight className="h-4 w-4" /></>}</button>
+              </div>
+            </section>
+          </div>
         </form>}
     </div>
   </main>;
