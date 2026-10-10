@@ -20,6 +20,7 @@ import { DEFAULT_BOOKINGS, DEFAULT_EMERGENCY_REQUESTS, DEFAULT_SITE_CONFIG } fro
 import { DEFAULT_REVIEWS } from '../data/defaultReviews';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
+import { getAdminAccessToken, getAdminAuthHeaders } from '../lib/adminAuth';
 
 interface ContentContextType {
   // Staff / Nannies
@@ -255,7 +256,7 @@ function adminMutation(resource: string, operation: 'upsert' | 'update' | 'delet
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-admin-pin': localStorage.getItem('mommycare_admin_pin') || sessionStorage.getItem('mommycare_admin_pin') || ''
+      ...getAdminAuthHeaders()
     },
     body: JSON.stringify({ resource, operation, data, id })
   }).then(async response => {
@@ -274,7 +275,7 @@ async function uploadImageToCloudinary(image: Blob): Promise<string> {
     method: 'POST',
     headers: {
       'Content-Type': 'image/jpeg',
-      'x-admin-pin': localStorage.getItem('mommycare_admin_pin') || sessionStorage.getItem('mommycare_admin_pin') || ''
+      ...getAdminAuthHeaders()
     },
     body: image
   });
@@ -453,31 +454,28 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       if (reviewsResult.data) setReviews(reviewsResult.data.map(row => mapReviewRow(row)));
 
-      const { data: sessionData } = await client.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      const accessToken = getAdminAccessToken();
       if (!isActive) return;
       if (accessToken) {
         await loadAdminSubmissions(accessToken);
-      } else {
-        const reviewResponse = await fetch(`${apiUrl}/api/admin/reviews`, {
-          headers: {
-            'x-admin-pin': localStorage.getItem('mommycare_admin_pin') || sessionStorage.getItem('mommycare_admin_pin') || ''
-          }
-        });
-        if (reviewResponse.ok) {
-          const reviewPayload = await reviewResponse.json() as { reviews?: Record<string, unknown>[] };
-          if (isActive) setReviews((reviewPayload.reviews || []).map(mapReviewRow));
-        }
       }
     };
 
     void loadLiveContent();
     const { data: authListener } = client.auth.onAuthStateChange((_event, session) => {
-      if (session?.access_token) void loadAdminSubmissions(session.access_token);
+      if (session?.access_token && sessionStorage.getItem('mommycare_admin_authenticated') === 'true') {
+        void loadAdminSubmissions(session.access_token);
+      }
     });
+    const handleAdminAuthenticated = () => {
+      const accessToken = getAdminAccessToken();
+      if (accessToken) void loadAdminSubmissions(accessToken);
+    };
+    window.addEventListener('mommycare-admin-authenticated', handleAdminAuthenticated);
     return () => {
       isActive = false;
       authListener.subscription.unsubscribe();
+      window.removeEventListener('mommycare-admin-authenticated', handleAdminAuthenticated);
     };
   }, []);
 

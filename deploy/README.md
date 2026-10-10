@@ -1,5 +1,7 @@
 # GitHub -> Hostinger VPS deployment
 
+For a domain-specific Ubuntu VPS walkthrough for `tmommycares.com`, see [TMOMMYCARES_VPS_SETUP.md](./TMOMMYCARES_VPS_SETUP.md).
+
 ## 1. Push the project to GitHub
 
 Run these commands on your Windows machine after installing Git and creating an empty GitHub repository:
@@ -13,7 +15,7 @@ git remote add origin https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.gi
 git push -u origin main
 ```
 
-Never commit `.env`, `.env.local`, Supabase service-role keys, Cloudinary secrets, or the admin PIN.
+Never commit `.env`, `.env.local`, Supabase service-role keys, or Cloudinary secrets.
 
 ## 2. Point Namecheap DNS to Hostinger
 
@@ -68,7 +70,6 @@ CLOUDINARY_API_KEY=YOUR_CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET=YOUR_CLOUDINARY_API_SECRET
 APP_URL=https://example.com
 PORT=5000
-ADMIN_PIN=USE_A_LONG_RANDOM_PIN
 ```
 
 Build the frontend and start the API:

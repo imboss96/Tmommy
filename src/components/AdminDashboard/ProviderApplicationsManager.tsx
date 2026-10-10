@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { BadgeCheck, ExternalLink, FileText, LoaderCircle, RefreshCw, UserRoundX } from 'lucide-react';
 import { getApiBaseUrl } from '../../lib/api';
+import { getAdminAuthHeaders } from '../../lib/adminAuth';
 
 type ProviderDocument = { path: string; name: string; kind: string; signedUrl: string };
 type ProviderApplication = {
   id: string; profile: { name: string; email: string; phone: string; role: string; nannyType: string; primaryEstate: string; age: number; experienceYears: number; monthlySalaryKsh: number; monthlySalaryRange?: string; languages: string[]; skills: string[]; bio: string; dciGoodConductNumber: string };
   documents: ProviderDocument[]; status: 'pending' | 'approved' | 'rejected' | 'disabled'; admin_notes: string; submitted_at: string; staff_profile_id: string | null;
 };
-const pin = () => localStorage.getItem('mommycare_admin_pin') || sessionStorage.getItem('mommycare_admin_pin') || '';
 const roleName: Record<string, string> = { nanny: 'Nanny', 'house-manager': 'House manager', 'house-girl': 'Housekeeper', 'house-boy': 'Domestic steward', 'shamba-boy': 'Gardener', caretaker: 'Caretaker', 'cook-chef': 'Cook / chef', 'home-driver': 'Family driver' };
 
 export const ProviderApplicationsManager: React.FC = () => {
@@ -20,7 +20,7 @@ export const ProviderApplicationsManager: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const response = await fetch(`${api}/api/admin/provider-applications`, { headers: { 'x-admin-pin': pin() } });
+      const response = await fetch(`${api}/api/admin/provider-applications`, { headers: getAdminAuthHeaders() });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not load provider applications.');
       setApplications(result.applications || []);
@@ -34,7 +34,7 @@ export const ProviderApplicationsManager: React.FC = () => {
     setBusyId(application.id); setError('');
     try {
       const response = await fetch(`${api}/api/admin/provider-applications/${application.id}/${action}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-pin': pin() }, body: JSON.stringify(extra)
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...getAdminAuthHeaders() }, body: JSON.stringify(extra)
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not update this application.');

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ContentProvider } from './context/ContentContext';
 import { AdminDashboard } from './components/AdminDashboard/AdminDashboard';
-import { AdminPinGate } from './components/AdminDashboard/AdminOtpGate';
+import { AdminOtpGate } from './components/AdminDashboard/AdminOtpGate';
+import { supabase } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MissionVision } from './components/MissionVision';
@@ -37,7 +38,7 @@ function MainWebsite() {
   const [globalEstate, setGlobalEstate] = useState<NairobiEstate | 'All Nairobi'>('All Nairobi');
   const [globalRole, setGlobalRole] = useState<string>('all');
 
-  // Secret Admin Route & PIN Authentication
+  // Admin route; each session is verified with an email one-time code.
   const checkIsAdminPath = () => {
     return window.location.pathname.toLowerCase().startsWith('/admin') || window.location.hash.toLowerCase() === '#admin';
   };
@@ -172,6 +173,10 @@ function MainWebsite() {
   }, []);
 
   const handleReturnToWebsite = () => {
+    sessionStorage.removeItem('mommycare_admin_authenticated');
+    sessionStorage.removeItem('mommycare_admin_access_token');
+    void supabase?.auth.signOut();
+    setIsAuthenticated(false);
     setIsAdminRoute(false);
     if (checkIsAdminPath()) {
       window.history.pushState(null, '', '/');
@@ -179,12 +184,20 @@ function MainWebsite() {
   };
 
   const handleLockDashboard = () => {
-    sessionStorage.removeItem('mommycare_admin_authenticated');
-    sessionStorage.removeItem('mommycare_admin_pin');
-    localStorage.removeItem('mommycare_admin_pin');
-    setIsAuthenticated(false);
     handleReturnToWebsite();
   };
+
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (sessionStorage.getItem('mommycare_admin_authenticated') === 'true' && session) {
+        sessionStorage.setItem('mommycare_admin_access_token', session.access_token);
+      } else if (!session) {
+        sessionStorage.removeItem('mommycare_admin_access_token');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleHeroSearch = (estate: NairobiEstate | 'All Nairobi', role: string) => {
     setGlobalEstate(estate);
@@ -210,7 +223,7 @@ function MainWebsite() {
   if (isAdminRoute) {
     if (!isAuthenticated) {
       return (
-        <AdminPinGate
+        <AdminOtpGate
           onSuccess={() => setIsAuthenticated(true)}
           onCancel={handleReturnToWebsite}
         />

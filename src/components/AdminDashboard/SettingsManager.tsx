@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Settings, 
   Phone, 
@@ -10,14 +10,22 @@ import {
   RotateCcw, 
   Check, 
   AlertTriangle,
-  KeyRound,
-  Eye,
-  EyeOff,
-  CheckCircle2
+  LoaderCircle,
+  RefreshCw,
+  UserPlus
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
+import { getAdminAccessToken } from '../../lib/adminAuth';
+
+type Administrator = {
+  email: string;
+  display_name: string | null;
+  invited_by: string | null;
+  status: 'invited' | 'active' | 'disabled';
+  created_at: string;
+};
 
 export const SettingsManager: React.FC = () => {
   const { siteConfig, updateSiteConfig, resetAllData, nannies, insights, bookings, emergencyRequests, mediaItems } = useContent();
@@ -25,46 +33,38 @@ export const SettingsManager: React.FC = () => {
   const [formConfig, setFormConfig] = useState(siteConfig);
   const [isSaved, setIsSaved] = useState(false);
 
-  // PIN security management
-  const [currentPin, setCurrentPin] = useState(() => localStorage.getItem('mommycare_admin_pin') || '2540');
-  const [newPin, setNewPin] = useState('');
-  const [showPinInput, setShowPinInput] = useState(false);
-  const [pinSuccessMsg, setPinSuccessMsg] = useState(false);
-  const [pinErrorMsg, setPinErrorMsg] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+  const [administrators, setAdministrators] = useState<Administrator[]>([]);
+  const [isLoadingAdmins, setIsLoadingAdmins] = useState(true);
+  const [adminListError, setAdminListError] = useState('');
 
-  const handleUpdatePin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const apiUrl = getApiBaseUrl();
-    if (!/^\d{4,6}$/.test(newPin)) {
-      setPinErrorMsg('PIN must be 4 to 6 numeric digits');
+  const loadAdministrators = async () => {
+    const token = getAdminAccessToken();
+    if (!token) {
+      setAdminListError('Your administrator session has expired. Sign in again.');
+      setIsLoadingAdmins(false);
       return;
     }
-    const response = await fetch(`${apiUrl}/api/admin/pin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-pin': currentPin
-      },
-      body: JSON.stringify({ newPin })
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const result = await response.json().catch(() => ({}));
-      setPinErrorMsg(result.error || 'Unable to update the server PIN.');
-      return;
+      if (!response.ok) throw new Error(result.error || 'Unable to load administrator accounts.');
+      setAdministrators(result.administrators || []);
+      setAdminListError('');
+    } catch (error) {
+      setAdminListError(error instanceof Error ? error.message : 'Unable to load administrator accounts.');
+    } finally {
+      setIsLoadingAdmins(false);
     }
-    localStorage.setItem('mommycare_admin_pin', newPin);
-    sessionStorage.setItem('mommycare_admin_pin', newPin);
-    setCurrentPin(newPin);
-    setNewPin('');
-    setPinErrorMsg('');
-    setPinSuccessMsg(true);
-    setTimeout(() => setPinSuccessMsg(false), 3000);
   };
+
+  useEffect(() => { void loadAdministrators(); }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,19 +75,25 @@ export const SettingsManager: React.FC = () => {
 
   const handleInviteAdmin = async (event: React.FormEvent) => {
     event.preventDefault();
-    const apiUrl = getApiBaseUrl();
-    const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
-    if (!data.session) { setInviteError('Your administrator session has expired. Sign in again.'); return; }
+    const token = getAdminAccessToken();
+    if (!token || !supabase) { setInviteError('Your administrator session has expired. Sign in again.'); return; }
     setIsInviting(true); setInviteError(''); setInviteMessage('');
-    const response = await fetch(`${apiUrl}/api/admin/invite`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
-      body: JSON.stringify({ email: inviteEmail, displayName: inviteName })
-    });
-    const result = await response.json().catch(() => ({}));
-    setIsInviting(false);
-    if (!response.ok) { setInviteError(result.error || 'Unable to invite administrator.'); return; }
-    setInviteEmail(''); setInviteName(''); setInviteMessage(`Invitation sent to ${result.email}.`);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: inviteEmail, displayName: inviteName })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Unable to invite administrator.');
+      setInviteEmail(''); setInviteName('');
+      setInviteMessage(result.message || `Invitation sent to ${result.email}.`);
+      await loadAdministrators();
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : 'Unable to invite administrator.');
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   const handleExportBackup = () => {
@@ -275,73 +281,77 @@ export const SettingsManager: React.FC = () => {
 
           </form>
         </div>
-
-        {/* Backups, Security PIN & Factory Reset */}
+        {/* Administrator access, backups & factory reset */}
         <div className="space-y-4">
-
-          {/* Admin Security PIN Card */}
-          <div className="bg-white rounded-2xl border border-[#E8DFD3] p-5 shadow-sm space-y-3">
-            <h3 className="font-bold text-sm text-[#1A201C] flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-[#D96B43]" />
-                <span>Dashboard Access PIN</span>
-              </span>
-              <span className="font-mono text-xs font-bold text-[#1D432D] bg-[#E8F0EA] px-2 py-0.5 rounded-lg border border-[#C5D9CB]">
-                Current: {showPinInput ? currentPin : '••••'}
-              </span>
-            </h3>
-
-            <p className="text-xs text-[#635E59] leading-relaxed">
-              This PIN protects <code className="bg-[#FAF7F2] px-1 py-0.5 rounded font-bold text-[#1D432D]">mydomain/admin</code> from unauthorized public access.
-            </p>
-
-            <form onSubmit={handleUpdatePin} className="space-y-2 pt-1">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type={showPinInput ? 'text' : 'password'}
-                    value={newPin}
-                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="New 4-6 digit PIN"
-                    maxLength={6}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#D5C9BA] focus:outline-none focus:ring-2 focus:ring-[#1D432D] font-mono tracking-wider"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPinInput(!showPinInput)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#635E59] hover:text-[#1A201C]"
-                  >
-                    {showPinInput ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-                <button
-                  type="submit"
-                  disabled={newPin.length < 4}
-                  className="px-4 py-2 bg-[#1D432D] hover:bg-[#153322] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-colors whitespace-nowrap"
-                >
-                  Update PIN
-                </button>
-              </div>
-
-              {pinErrorMsg && (
-                <p className="text-[11px] text-red-600 font-medium">{pinErrorMsg}</p>
-              )}
-
-              {pinSuccessMsg && (
-                <p className="text-[11px] text-emerald-700 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> PIN updated successfully!
-                </p>
-              )}
-            </form>
+          <div className="bg-white rounded-2xl border border-[#E8DFD3] p-5 shadow-sm space-y-2">
+            <h3 className="font-bold text-sm text-[#1A201C]">Administrator sign-in security</h3>
+            <p className="text-xs text-[#635E59] leading-relaxed">A fresh one-time email code is required each time you open the administrator console in a new browser session. Invite only trusted administrator email addresses below.</p>
           </div>
+
 
           <div className="bg-white rounded-2xl border border-[#E8DFD3] p-5 shadow-sm space-y-3">
             <h3 className="font-bold text-sm text-[#1A201C] flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#1D432D]" /> Invite an administrator
             </h3>
-            <p className="text-xs text-[#635E59] leading-relaxed">Administrator invitations will be enabled after SMTP and email OTP are configured.</p>
-            <div className="px-3 py-2 rounded-xl bg-[#FAF7F2] border border-[#E8DFD3] text-[11px] text-[#7D766D]">
-              For now, add administrators manually in Supabase Authentication → Users and the <code className="font-bold">admin_users</code> table.
+            <p className="text-xs text-[#635E59] leading-relaxed">Send an invitation to a trusted email address. They can accept the invitation, then sign in with a one-time email code.</p>
+            <form onSubmit={handleInviteAdmin} className="space-y-2">
+              <input
+                type="text"
+                maxLength={120}
+                value={inviteName}
+                onChange={(event) => setInviteName(event.target.value)}
+                placeholder="Administrator name (optional)"
+                aria-label="Administrator name"
+                className="w-full px-3 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-xs"
+              />
+              <input
+                type="email"
+                required
+                value={inviteEmail}
+                onChange={(event) => setInviteEmail(event.target.value)}
+                placeholder="name@example.com"
+                aria-label="Administrator email"
+                className="w-full px-3 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-xs"
+              />
+              <button
+                type="submit"
+                disabled={isInviting || !inviteEmail.trim()}
+                className="w-full py-2.5 px-3 bg-[#1D432D] hover:bg-[#143020] disabled:opacity-60 disabled:cursor-not-allowed rounded-xl font-bold text-xs text-white flex items-center justify-center gap-2 transition-colors"
+              >
+                {isInviting ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                {isInviting ? 'Sending invitation…' : 'Send invitation'}
+              </button>
+            </form>
+            {inviteMessage && <p role="status" className="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800">{inviteMessage}</p>}
+            {inviteError && <p role="alert" className="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[11px] text-red-700">{inviteError}</p>}
+
+            <div className="border-t border-[#F2ECE1] pt-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-bold text-xs text-[#1A201C]">Administrators</h4>
+                <button type="button" onClick={() => void loadAdministrators()} disabled={isLoadingAdmins} aria-label="Refresh administrators" className="p-1.5 rounded-lg text-[#1D432D] hover:bg-[#F2ECE1] disabled:opacity-50">
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingAdmins ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              {adminListError && <p role="alert" className="text-[11px] text-red-700">{adminListError}</p>}
+              {isLoadingAdmins ? (
+                <p className="text-[11px] text-[#7D766D] flex items-center gap-2"><LoaderCircle className="w-3.5 h-3.5 animate-spin" /> Loading administrators…</p>
+              ) : administrators.length === 0 ? (
+                <p className="text-[11px] text-[#7D766D]">No administrator accounts found.</p>
+              ) : (
+                <ul className="max-h-52 overflow-y-auto divide-y divide-[#F2ECE1]">
+                  {administrators.map((administrator) => (
+                    <li key={administrator.email} className="py-2 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[#1A201C] truncate">{administrator.display_name || administrator.email}</p>
+                        {administrator.display_name && <p className="text-[11px] text-[#7D766D] truncate">{administrator.email}</p>}
+                      </div>
+                      <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${administrator.status === 'active' ? 'bg-emerald-50 text-emerald-800' : administrator.status === 'invited' ? 'bg-amber-50 text-amber-800' : 'bg-gray-100 text-gray-600'}`}>
+                        {administrator.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           

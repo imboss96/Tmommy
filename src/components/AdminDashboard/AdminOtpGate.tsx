@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, Lock, Mail, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, CheckCircle2, Lock, Mail, ShieldAlert } from 'lucide-react';
 import { MommyCareLogo } from '../MommyCareLogo';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
@@ -30,6 +30,7 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
     });
     setIsLoading(false);
     if (otpError) {
+      console.error('[Admin OTP] Supabase failed to send the one-time code:', otpError);
       setError('This email is not an invited administrator, or the OTP could not be sent.');
       return;
     }
@@ -61,6 +62,9 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
       setError('This account is not an active MommyCare administrator.');
       return;
     }
+    sessionStorage.setItem('mommycare_admin_access_token', data.session.access_token);
+    sessionStorage.setItem('mommycare_admin_authenticated', 'true');
+    window.dispatchEvent(new Event('mommycare-admin-authenticated'));
     onSuccess();
   };
 
@@ -90,59 +94,6 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
         )}
         {message && <p className="mt-4 text-xs text-emerald-300 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />{message}</p>}
         {error && <p className="mt-4 text-xs text-red-300 flex items-center gap-2"><ShieldAlert className="w-4 h-4" />{error}</p>}
-      </div>
-    </div>
-  );
-};
-
-interface AdminPinGateProps {
-  onSuccess: () => void;
-  onCancel: () => void;
-}
-
-export const AdminPinGate: React.FC<AdminPinGateProps> = ({ onSuccess, onCancel }) => {
-  const [pin, setPin] = useState('');
-  const [showPin, setShowPin] = useState(false);
-  const [error, setError] = useState(false);
-  const getPin = () => localStorage.getItem('mommycare_admin_pin') || '2540';
-  const verify = (candidate: string) => {
-    if (candidate === getPin()) {
-      localStorage.setItem('mommycare_admin_pin', candidate);
-      sessionStorage.setItem('mommycare_admin_pin', candidate);
-      sessionStorage.setItem('mommycare_admin_authenticated', 'true');
-      onSuccess();
-    } else {
-      setError(true);
-      setPin('');
-    }
-  };
-  const press = (digit: string) => {
-    const next = `${pin}${digit}`;
-    setPin(next);
-    setError(false);
-    if (next.length === getPin().length) verify(next);
-  };
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (/^\d$/.test(event.key)) press(event.key);
-      else if (event.key === 'Backspace') setPin(value => value.slice(0, -1));
-      else if (event.key === 'Escape') onCancel();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  });
-  return (
-    <div className="min-h-screen bg-[#14261B] flex items-center justify-center p-4 text-white">
-      <button onClick={onCancel} className="absolute top-6 left-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 text-white/90 text-xs font-semibold"><ArrowLeft className="w-4 h-4" /> Return to Public Website</button>
-      <div className="w-full max-w-sm bg-[#1A3324] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl text-center">
-        <div className="flex justify-center mb-5"><MommyCareLogo colorScheme="white" size="lg" showTagline showLocationBadge={false} /></div>
-        <div className="inline-flex items-center gap-2 text-emerald-300 text-xs font-bold mb-3"><Lock className="w-4 h-4 text-[#F4A261]" /> Restricted Coordinator Console</div>
-        <p className="text-sm text-[#A8C2B0] mb-5">Enter the dashboard security PIN.</p>
-        <div className="flex justify-center gap-3 mb-4">{[0,1,2,3,4,5].map(index => <div key={index} className={`w-10 h-11 rounded-xl flex items-center justify-center text-lg font-bold ${pin.length > index ? 'bg-[#D96B43]' : 'bg-white/5 border border-white/10'}`}>{pin.length > index ? (showPin ? pin[index] : '•') : ''}</div>)}</div>
-        <div className="h-6 mb-3 text-xs">{error ? <span className="text-red-300 inline-flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Invalid PIN</span> : <button onClick={() => setShowPin(value => !value)} className="text-[#A8C2B0] inline-flex items-center gap-1">{showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />} {showPin ? 'Hide' : 'Show'} characters</button>}</div>
-        <div className="grid grid-cols-3 gap-2.5 mb-5">{['1','2','3','4','5','6','7','8','9'].map(digit => <button key={digit} onClick={() => press(digit)} className="h-12 rounded-2xl bg-white/10 text-white font-bold text-lg">{digit}</button>)}<button onClick={() => setPin('')} className="h-12 rounded-2xl bg-white/5 text-white/70 text-xs font-semibold">Clear</button><button onClick={() => press('0')} className="h-12 rounded-2xl bg-white/10 text-white font-bold text-lg">0</button><button onClick={() => setPin(value => value.slice(0,-1))} className="h-12 rounded-2xl bg-white/5 text-white/70 text-xs font-semibold">Delete</button></div>
-        <button onClick={() => verify(pin)} disabled={pin.length < 4} className="w-full py-3 rounded-xl bg-[#D96B43] disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2"><KeyRound className="w-4 h-4" /> Unlock Dashboard</button>
-        <p className="mt-4 text-[11px] text-[#A8C2B0]">Default PIN: <strong className="text-white">2540</strong>. Change it in Dashboard Settings.</p>
       </div>
     </div>
   );

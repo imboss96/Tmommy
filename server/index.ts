@@ -13,6 +13,17 @@ dotenv.config({ path: path.join(projectRoot, '.env') });
 const app = express();
 const port = Number(process.env.PORT || 5000);
 const appUrl = process.env.APP_URL || 'http://localhost:3000';
+const publicAppUrl = (() => {
+  try {
+    const configuredUrl = new URL(appUrl);
+    if (['localhost', '127.0.0.1', '0.0.0.0'].includes(configuredUrl.hostname)) {
+      return 'https://tmommycares.com';
+    }
+    return configuredUrl.origin;
+  } catch {
+    return 'https://tmommycares.com';
+  }
+})();
 const configuredAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map(origin => origin.trim())
@@ -22,10 +33,98 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME;
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
 const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
-let activeAdminPin = process.env.ADMIN_PIN || '2540';
+const brevoApiKey = process.env.BREVO_API_KEY;
+const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tmommycares.com';
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tmommycares.com';
+const brevoSenderName = process.env.BREVO_SENDER_NAME || 'MommyCare';
 
 const hasRealValue = (...values: Array<string | undefined>) =>
   values.every(value => Boolean(value && !value.includes('YOUR_')));
+
+const htmlEscapes: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, character => htmlEscapes[character]);
+
+async function sendSubmissionNotification(
+  submissionType: string,
+  details: Record<string, string | number | boolean | null | undefined>
+) {
+  if (!brevoApiKey || brevoApiKey.includes('YOUR_') ||
+      !notificationEmail || notificationEmail.includes('YOUR_') ||
+      !brevoSenderEmail || brevoSenderEmail.includes('YOUR_')) {
+    console.error(`[API] Email notification for ${submissionType} was not sent: configure BREVO_API_KEY and BREVO_SENDER_EMAIL.`);
+    return;
+  }
+
+  const fields = Object.entries(details)
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(([label, value]) => [label, String(value).slice(0, 2000)] as const);
+  const htmlRows = fields
+    .map(([label, value]) => `<tr><td style="width:38%;padding:12px 14px;border-bottom:1px solid #eee7df;color:#635e59;font-size:13px;font-weight:700;vertical-align:top">${escapeHtml(label)}</td><td style="padding:12px 14px;border-bottom:1px solid #eee7df;color:#1a201c;font-size:14px;line-height:1.5;vertical-align:top;white-space:pre-wrap;word-break:break-word">${escapeHtml(value)}</td></tr>`)
+    .join('');
+  const textDetails = fields.map(([label, value]) => `${label}: ${value}`).join('\n');
+  const logoUrl = `${publicAppUrl}/mommycare-logo-transparent.png`;
+  const htmlContent = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#f7f3ef;font-family:Arial,Helvetica,sans-serif;color:#1a201c">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f7f3ef;padding:32px 12px">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background-color:#ffffff;border:1px solid #e8dfd3;border-radius:16px;overflow:hidden">
+        <tr><td style="height:8px;background-color:#1d432d;font-size:0;line-height:0">&nbsp;</td></tr>
+        <tr><td align="center" style="padding:26px 28px 20px;background-color:#fff">
+          <img src="${escapeHtml(logoUrl)}" width="190" alt="MommyCare - Quality Care. Safer Homes." style="display:block;width:190px;max-width:80%;height:auto;border:0;outline:none;text-decoration:none">
+        </td></tr>
+        <tr><td style="padding:26px 30px;background-color:#faf7f2;border-top:1px solid #eee7df;border-bottom:1px solid #eee7df">
+          <p style="margin:0 0 8px;color:#d96b43;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">New submission</p>
+          <h1 style="margin:0;color:#1d432d;font-size:24px;line-height:1.3">${escapeHtml(submissionType)}</h1>
+          <p style="margin:9px 0 0;color:#635e59;font-size:14px;line-height:1.6">A new submission has been received and is ready for your team to review.</p>
+        </td></tr>
+        <tr><td style="padding:20px 22px 26px">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee7df;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden">${htmlRows}</table>
+        </td></tr>
+        <tr><td align="center" style="padding:18px 24px;background-color:#1d432d;color:#e8f0ea;font-size:12px;line-height:1.6">
+          MommyCare <span style="color:#f4a261">&bull;</span> Quality Care. Safer Homes.<br>
+          <a href="${escapeHtml(publicAppUrl)}" style="color:#ffffff;text-decoration:underline">Visit MommyCare</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': brevoApiKey,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { name: brevoSenderName, email: brevoSenderEmail },
+        to: [{ email: notificationEmail }],
+        subject: `New MommyCare ${submissionType}`,
+        htmlContent,
+        textContent: `New ${submissionType}\n\n${textDetails}`
+      }),
+      signal: AbortSignal.timeout(10000)
+    });
+
+    if (!response.ok) {
+      const errorDetails = (await response.text()).slice(0, 500);
+      throw new Error(`Brevo returned ${response.status}: ${errorDetails}`);
+    }
+
+    console.info(`[API] Email notification sent for ${submissionType}.`);
+  } catch (error) {
+    console.error(`[API] Email notification for ${submissionType} failed:`, error);
+  }
+}
 
 async function uploadImageBufferToCloudinary(imageBuffer: Buffer) {
   if (!imageBuffer.length) throw new Error('The uploaded image is empty.');
@@ -159,8 +258,8 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Pin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
@@ -220,27 +319,6 @@ app.get('/api/admin/session', requireAdmin, async (req, res) => {
   res.json({ email: data.user?.email, authenticated: true });
 });
 
-const requireAdminPin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.headers['x-admin-pin'] !== activeAdminPin) {
-    console.warn(`[API] Admin mutation rejected: invalid or missing PIN (${req.method} ${req.originalUrl})`);
-    return res.status(401).json({ error: 'Administrator PIN required.' });
-  }
-  if (!supabase) {
-    return res.status(503).json({ error: 'Supabase server configuration is missing.' });
-  }
-  next();
-};
-
-app.post('/api/admin/pin', requireAdminPin, (req, res) => {
-  const newPin = typeof req.body?.newPin === 'string' ? req.body.newPin : '';
-  if (!/^\d{4,6}$/.test(newPin)) {
-    return res.status(400).json({ error: 'PIN must contain 4 to 6 digits.' });
-  }
-  activeAdminPin = newPin;
-  console.log('[API] Administrator PIN updated for the current server session.');
-  res.json({ updated: true });
-});
-
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
@@ -256,12 +334,12 @@ app.get('/api/core-service-categories', async (_req, res) => {
   res.json({ categories });
 });
 
-app.get('/api/admin/core-service-categories', requireAdminPin, async (_req, res) => {
+app.get('/api/admin/core-service-categories', requireAdmin, async (_req, res) => {
   const categories = await readCoreServiceCategories();
   res.json({ categories });
 });
 
-app.post('/api/admin/core-service-categories', requireAdminPin, async (req, res) => {
+app.post('/api/admin/core-service-categories', requireAdmin, async (req, res) => {
   try {
     const nextCategory = normalizeCoreServiceCategory(req.body || {});
 
@@ -303,7 +381,7 @@ app.post('/api/admin/core-service-categories', requireAdminPin, async (req, res)
   }
 });
 
-app.put('/api/admin/core-service-categories/:id', requireAdminPin, async (req, res) => {
+app.put('/api/admin/core-service-categories/:id', requireAdmin, async (req, res) => {
   try {
     const categoryId = String(req.params.id || '');
 
@@ -360,7 +438,7 @@ app.put('/api/admin/core-service-categories/:id', requireAdminPin, async (req, r
   }
 });
 
-app.delete('/api/admin/core-service-categories/:id', requireAdminPin, async (req, res) => {
+app.delete('/api/admin/core-service-categories/:id', requireAdmin, async (req, res) => {
   const categoryId = String(req.params.id || '');
 
   if (supabase) {
@@ -457,10 +535,25 @@ app.post('/api/provider-applications', requireSupabase, async (req, res) => {
     console.error(`[API] Provider application save failed: ${error.message}`);
     return res.status(500).json({ error: 'We could not save your application. Please try again.' });
   }
+  await sendSubmissionNotification('provider application', {
+    'Application reference': id,
+    Name: submittedProfile.name,
+    Email: submittedProfile.email,
+    Phone: submittedProfile.phone,
+    Role: submittedProfile.role,
+    Availability: submittedProfile.nannyType,
+    'Preferred area': submittedProfile.primaryEstate,
+    Age: submittedProfile.age,
+    'Years of experience': submittedProfile.experienceYears,
+    'Expected salary range': submittedProfile.monthlySalaryRange,
+    Languages: submittedProfile.languages.join(', '),
+    Skills: submittedProfile.skills.join(', '),
+    Bio: submittedProfile.bio
+  });
   res.status(201).json({ id, status: 'pending' });
 });
 
-app.get('/api/admin/provider-applications', requireAdminPin, async (_req, res) => {
+app.get('/api/admin/provider-applications', requireAdmin, async (_req, res) => {
   const { data, error } = await supabase!.from('provider_applications').select('*').order('submitted_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   const applications = await Promise.all((data || []).map(async application => {
@@ -474,7 +567,7 @@ app.get('/api/admin/provider-applications', requireAdminPin, async (_req, res) =
   res.json({ applications });
 });
 
-app.post('/api/admin/provider-applications/:id/:action', requireAdminPin, async (req, res) => {
+app.post('/api/admin/provider-applications/:id/:action', requireAdmin, async (req, res) => {
   const { id, action } = req.params;
   const allowedActions = new Set(['approve', 'reject', 'disable', 'enable', 'note']);
   if (!allowedActions.has(action)) return res.status(400).json({ error: 'Unknown application action.' });
@@ -566,7 +659,7 @@ app.get('/api/admin/submissions', requireAdmin, async (_req, res) => {
   res.json({ bookings: bookingsResult.data || [], emergencyRequests: emergencyResult.data || [], reviews: reviewsResult.data || [] });
 });
 
-app.get('/api/admin/reviews', requireAdminPin, async (_req, res) => {
+app.get('/api/admin/reviews', requireAdmin, async (_req, res) => {
   const { data, error } = await supabase!.from('reviews').select('*').order('submitted_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ reviews: data || [] });
@@ -604,6 +697,25 @@ app.post('/api/bookings', requireSupabase, async (req, res) => {
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
+  await sendSubmissionNotification('client service request', {
+    'Request reference': data.id,
+    'Parent or guardian': booking.parentName,
+    Phone: booking.phone,
+    Email: booking.email,
+    Estate: booking.estate,
+    'Residence details': booking.residenceDetails,
+    'Residence type': booking.residenceType,
+    'Requested role': booking.role || booking.nannyType,
+    'Preferred provider': booking.nannyName,
+    'Start date': booking.startDate,
+    'Number of children': booking.numberOfChildren,
+    'Children ages': booking.childrenAges,
+    'Preferred trial days': booking.preferredTrialDays,
+    'Additional notes': booking.additionalNotes,
+    'Needs cooking': booking.needsCooking,
+    'Pet-friendly required': booking.needsPetFriendly,
+    'Has garden or lawn': booking.hasGardenOrLawn
+  });
   res.status(201).json(data);
 });
 
@@ -629,6 +741,17 @@ app.post('/api/emergency-requests', requireSupabase, async (req, res) => {
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
+  await sendSubmissionNotification('emergency service request', {
+    'Request reference': data.id,
+    'Parent or guardian': request.parentName,
+    Phone: request.phone,
+    Estate: request.estate,
+    'Requested role': request.requestedRole,
+    'Required time': request.requiredTime,
+    'Duration in days': request.durationDays,
+    'Number of children': request.childrenCount,
+    'Urgent notes': request.urgentNotes
+  });
   res.status(201).json(data);
 });
 
@@ -652,6 +775,13 @@ app.post('/api/contact-inquiries', requireSupabase, async (req, res) => {
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
+  await sendSubmissionNotification('contact inquiry', {
+    'Inquiry reference': data.id,
+    Name: req.body.name,
+    Email: email,
+    Phone: req.body.phone,
+    Message: req.body.message
+  });
   res.status(201).json(data);
 });
 
@@ -710,31 +840,68 @@ app.post('/api/cloudinary/signature', requireAdmin, (req, res) => {
   });
 });
 
+app.get('/api/admin/users', requireAdmin, async (_req, res) => {
+  const { data, error } = await supabase!
+    .from('admin_users')
+    .select('email, display_name, invited_by, status, created_at')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error(`[API] Admin user list failed: ${error.message}`);
+    return res.status(500).json({ error: 'Unable to load administrator accounts.' });
+  }
+  res.json({ administrators: data || [] });
+});
+
 app.post('/api/admin/invite', requireAdmin, async (req, res) => {
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  const displayName = typeof req.body?.displayName === 'string' ? req.body.displayName.trim() : null;
-  if (!email || !email.includes('@')) return res.status(400).json({ error: 'A valid email address is required.' });
+  const displayName = typeof req.body?.displayName === 'string' ? req.body.displayName.trim().slice(0, 120) : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
+
+  const { data: existingAdmin, error: lookupError } = await supabase!
+    .from('admin_users')
+    .select('status')
+    .eq('email', email)
+    .maybeSingle();
+  if (lookupError) {
+    console.error(`[API] Admin invite lookup failed: ${lookupError.message}`);
+    return res.status(500).json({ error: 'Unable to check existing administrator accounts.' });
+  }
+  if (existingAdmin?.status === 'active') {
+    return res.status(409).json({ error: 'This email already has administrator access.' });
+  }
 
   const authorization = req.headers.authorization!;
   const token = authorization.slice('Bearer '.length);
   const { data: inviter } = await supabase!.auth.getUser(token);
   const { error: inviteError } = await supabase!.auth.admin.inviteUserByEmail(email, {
-    data: { role: 'admin', display_name: displayName }
+    data: { display_name: displayName },
+    redirectTo: `${publicAppUrl}/admin`
   });
-  if (inviteError && !inviteError.message.toLowerCase().includes('already')) {
+  const existingAccount = inviteError?.code === 'email_exists' || Boolean(inviteError?.message.toLowerCase().includes('already'));
+  if (inviteError && !existingAccount) {
     console.error(`[API] Admin invite failed: ${inviteError.message}`);
-    return res.status(500).json({ error: inviteError.message });
+    return res.status(502).json({ error: 'Supabase could not send the invitation email. Check Auth SMTP settings and try again.' });
   }
 
   const { error: rowError } = await supabase!.from('admin_users').upsert({
     email,
-    display_name: displayName,
+    display_name: displayName || null,
     invited_by: inviter.user?.email || null,
     status: 'active'
   }, { onConflict: 'email' });
-  if (rowError) return res.status(500).json({ error: rowError.message });
-  console.log(`[API] Admin invited: ${email}`);
-  res.status(201).json({ email, invited: !inviteError });
+  if (rowError) {
+    console.error(`[API] Admin access record save failed for ${email}: ${rowError.message}`);
+    return res.status(500).json({ error: 'The invitation was processed, but administrator access could not be saved.' });
+  }
+  console.log(`[API] Administrator access granted: ${email}`);
+  res.status(existingAccount ? 200 : 201).json({
+    email,
+    invited: !existingAccount,
+    existingAccount,
+    message: existingAccount
+      ? 'This email already has a Supabase account. Administrator access is enabled; they can sign in with an email code.'
+      : 'Invitation sent. After accepting it, the administrator can sign in using an email code.'
+  });
 });
 
 const adminTables = {
@@ -747,7 +914,7 @@ const adminTables = {
   reviews: 'reviews'
 } as const;
 
-app.post('/api/admin/cloudinary/upload', requireAdminPin, express.raw({ type: 'image/jpeg', limit: '10mb' }), async (req, res) => {
+app.post('/api/admin/cloudinary/upload', requireAdmin, express.raw({ type: 'image/jpeg', limit: '10mb' }), async (req, res) => {
   if (!Buffer.isBuffer(req.body)) {
     return res.status(400).json({ error: 'Image data is required.' });
   }
@@ -762,7 +929,7 @@ app.post('/api/admin/cloudinary/upload', requireAdminPin, express.raw({ type: 'i
   }
 });
 
-app.post('/api/admin/content', requireAdminPin, async (req, res) => {
+app.post('/api/admin/content', requireAdmin, async (req, res) => {
   const { resource, operation, id, data } = req.body || {};
   const table = adminTables[resource as keyof typeof adminTables];
   console.log(`[API] Admin content mutation: ${operation} ${resource} ${id || data?.id || ''}`);
