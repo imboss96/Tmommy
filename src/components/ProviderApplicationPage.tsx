@@ -1,12 +1,13 @@
-import React, { FormEvent, useState } from 'react';
-import { ArrowRight, BadgeCheck, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
+import React, { FormEvent, PointerEvent, useRef, useState } from 'react';
+import { ArrowRight, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
 import { HomecareRole, NairobiEstate, NannyType } from '../types';
 
-type DocumentKind = 'identity' | 'good-conduct' | 'training' | 'cv' | 'other';
+type DocumentKind = 'profile-photo' | 'identity' | 'good-conduct' | 'training' | 'cv' | 'other';
 type ApplicationDocument = { path: string; name: string; kind: DocumentKind };
 const documentFields: { kind: DocumentKind; label: string; required?: boolean; hint: string }[] = [
+  { kind: 'profile-photo', label: 'Profile photo', required: true, hint: 'JPG or PNG image; max 5 MB. This photo will appear in your public profile if approved.' },
   { kind: 'identity', label: 'National ID or passport', required: true, hint: 'PDF, JPG, or PNG; max 8 MB.' },
   { kind: 'good-conduct', label: 'Certificate of Good Conduct', required: true, hint: 'PDF, JPG, or PNG; max 8 MB.' },
   { kind: 'training', label: 'Training or first-aid certificate', hint: 'Optional supporting document.' },
@@ -31,17 +32,78 @@ const salaryRanges = [
 const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
-  const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ identity: null, 'good-conduct': null, training: null, cv: null, other: null });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
+  const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ 'profile-photo': null, identity: null, 'good-conduct': null, training: null, cv: null, other: null });
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [signatureDataUrl, setSignatureDataUrl] = useState('');
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingSignatureRef = useRef(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle');
   const [error, setError] = useState('');
 
   const setField = <Key extends keyof typeof form>(key: Key, value: (typeof form)[Key]) => setForm(current => ({ ...current, [key]: value }));
+  const clearSignature = () => {
+    const canvas = signatureCanvasRef.current;
+    canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+    setSignatureDataUrl('');
+    drawingSignatureRef.current = false;
+  };
+  const getSignaturePoint = (event: PointerEvent<HTMLCanvasElement>) => {
+    const canvas = event.currentTarget;
+    const bounds = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - bounds.left) * canvas.width / bounds.width,
+      y: (event.clientY - bounds.top) * canvas.height / bounds.height
+    };
+  };
+  const startSignature = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (!termsAccepted) return;
+    event.preventDefault();
+    const canvas = event.currentTarget;
+    const point = getSignaturePoint(event);
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    canvas.setPointerCapture(event.pointerId);
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+    context.lineWidth = 1.25;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.strokeStyle = '#1D432D';
+    context.lineTo(point.x + 0.1, point.y + 0.1);
+    context.stroke();
+    drawingSignatureRef.current = true;
+  };
+  const drawSignature = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (!drawingSignatureRef.current) return;
+    event.preventDefault();
+    const point = getSignaturePoint(event);
+    const context = event.currentTarget.getContext('2d');
+    if (!context) return;
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  };
+  const finishSignature = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (!drawingSignatureRef.current) return;
+    drawingSignatureRef.current = false;
+    setSignatureDataUrl(event.currentTarget.toDataURL('image/png'));
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     if (!supabase) { setStatus('error'); setError('Applications are temporarily unavailable. Please contact us directly.'); return; }
-    if (!documents.identity || !documents['good-conduct']) { setStatus('error'); setError('Please attach your identity document and Certificate of Good Conduct.'); return; }
+    if (!documents['profile-photo'] || !documents.identity || !documents['good-conduct']) { setStatus('error'); setError('Please attach your profile photo, identity document, and Certificate of Good Conduct.'); return; }
+    if (![form.contactAddress, form.referenceName, form.referencePhone, form.emergencyContactName, form.emergencyContactPhone].every(value => value.trim())) {
+      setStatus('error');
+      setError('Enter your contact address, at least one reference with a phone number, and an emergency contact with a phone number.');
+      return;
+    }
+    if (!termsAccepted || !signatureDataUrl) {
+      setStatus('error');
+      setError('Agree to the provider terms and sign in the signature box before submitting.');
+      return;
+    }
     setStatus('sending');
     const id = crypto.randomUUID();
     try {
@@ -49,25 +111,30 @@ export const ProviderApplicationPage: React.FC = () => {
       for (const field of documentFields) {
         const file = documents[field.kind];
         if (!file) continue;
-        if (file.size > 8 * 1024 * 1024) throw new Error(`${field.label} must be smaller than 8 MB.`);
-        if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) throw new Error(`${field.label} must be a PDF, JPG, or PNG.`);
+        const isProfilePhoto = field.kind === 'profile-photo';
+        if (file.size > (isProfilePhoto ? 5 : 8) * 1024 * 1024) throw new Error(`${field.label} exceeds the maximum file size.`);
+        const allowedTypes = isProfilePhoto ? ['image/jpeg', 'image/png'] : ['application/pdf', 'image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) throw new Error(`${field.label} must be ${isProfilePhoto ? 'a JPG or PNG image' : 'a PDF, JPG, or PNG'}.`);
         const extension = file.name.split('.').pop()?.toLowerCase() || 'file';
         const path = `${id}/${field.kind}-${crypto.randomUUID()}.${extension}`;
         const { error: uploadError } = await supabase.storage.from('provider-documents').upload(path, file, { contentType: file.type, upsert: false });
         if (uploadError) throw new Error(`Could not upload ${field.label}: ${uploadError.message}`);
         uploaded.push({ path, name: file.name.slice(0, 160), kind: field.kind });
       }
-      const response = await fetch(`${getApiBaseUrl()}/api/provider-applications`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/provider-applications/draft`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, profile: {
           ...form, age: Number(form.age), experienceYears: Number(form.experienceYears),
           languages: form.languages.split(',').map(value => value.trim()).filter(Boolean),
-          skills: form.skills.split(',').map(value => value.trim()).filter(Boolean)
+          skills: form.skills.split(',').map(value => value.trim()).filter(Boolean),
+          termsAccepted,
+          signatureDataUrl
         }, documents: uploaded })
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'We could not submit your application. Please try again.');
-      setStatus('sent');
+      sessionStorage.setItem(`mommycare-provider-payment-phone-${id}`, form.phone);
+      window.location.assign(`/provider-payment?id=${encodeURIComponent(id)}`);
     } catch (submissionError) {
       setStatus('error');
       setError(submissionError instanceof Error ? submissionError.message : 'We could not submit your application.');
@@ -80,7 +147,7 @@ export const ProviderApplicationPage: React.FC = () => {
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm"><Sparkles className="h-4 w-4" /> PROVIDER APPLICATIONS</div>
           <h1 className="max-w-3xl font-['Outfit'] text-4xl font-extrabold leading-[1.05] tracking-tight text-[#1A201C] sm:text-5xl lg:text-6xl">Your next chapter in <span className="text-[#D96B43]">homecare</span> starts here.</h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Our team reviews every application before a profile is considered for the MommyCare directory.</p>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. After completing the form, you’ll continue to the secure registration-fee payment step. Your application is created for review only after M-Pesa confirms payment.</p>
         </div>
         <aside className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white/80 p-5 shadow-[0_12px_32px_rgba(42,35,25,0.05)]">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><LockKeyhole className="h-5 w-5" /></span>
@@ -88,12 +155,7 @@ export const ProviderApplicationPage: React.FC = () => {
         </aside>
       </header>
 
-      {status === 'sent' ? <section className="rounded-[2rem] border border-[#DCE7DE] bg-white px-6 py-14 text-center shadow-[0_24px_70px_rgba(42,35,25,0.08)] sm:px-12">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#E8F0EA] text-[#1D432D]"><BadgeCheck className="h-8 w-8" /></span>
-        <h2 className="mt-6 font-['Outfit'] text-3xl font-bold text-[#1A201C]">Application received</h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#635E59]">Your documents are stored privately for review. Your profile will only appear in the public directory if the admin team verifies and approves it.</p>
-      </section> :
-        <form onSubmit={handleSubmit} className="overflow-hidden rounded-[2rem] border border-[#E8DFD3] bg-white shadow-[0_24px_70px_rgba(42,35,25,0.08)]">
+      <form onSubmit={handleSubmit} className="overflow-hidden rounded-[2rem] border border-[#E8DFD3] bg-white shadow-[0_24px_70px_rgba(42,35,25,0.08)]">
           <div className="flex flex-col gap-5 border-b border-[#F0EBE5] bg-[#FEFDFC] px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-9">
             <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D96B43]">A little about you</p><h2 className="mt-1 font-['Outfit'] text-2xl font-bold text-[#1A201C]">Let’s get your application started</h2></div>
             <p className="flex items-center gap-2 text-xs font-medium text-[#777067]"><span className="h-2 w-2 rounded-full bg-[#D96B43]" /> Required fields are marked with *</p>
@@ -110,6 +172,20 @@ export const ProviderApplicationPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#514B44]">Phone / WhatsApp *<input required type="tel" autoComplete="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Email address *<input required type="email" autoComplete="email" value={form.email} onChange={e => setField('email', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Age *<input required type="number" min="18" max="75" value={form.age} onChange={e => setField('age', e.target.value)} className={inputClass} /></label>
+              </div>
+              <div className="mt-6 rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 sm:p-5">
+                <div className="mb-4">
+                  <h4 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Address, reference & emergency contact</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-[#777067]">These required details are stored privately for application review and are not included in your public profile.</p>
+                </div>
+                <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                  <label className="text-xs font-bold text-[#514B44] sm:col-span-2">Current residential / contact address *<textarea required minLength={5} autoComplete="street-address" rows={2} value={form.contactAddress} onChange={e => setField('contactAddress', e.target.value)} placeholder="Estate, area, town and any directions needed to contact you" className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">At least one reference — full name *<input required minLength={2} autoComplete="off" value={form.referenceName} onChange={e => setField('referenceName', e.target.value)} className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Reference relationship / workplace<input value={form.referenceRelationship} onChange={e => setField('referenceRelationship', e.target.value)} placeholder="e.g. Previous employer" className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Reference contact number *<input required minLength={7} type="tel" autoComplete="off" value={form.referencePhone} onChange={e => setField('referencePhone', e.target.value)} className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Emergency contact full name *<input required minLength={2} autoComplete="off" value={form.emergencyContactName} onChange={e => setField('emergencyContactName', e.target.value)} className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Emergency contact number *<input required minLength={7} type="tel" autoComplete="off" value={form.emergencyContactPhone} onChange={e => setField('emergencyContactPhone', e.target.value)} className={inputClass} /></label>
+                </div>
               </div>
             </section>
 
@@ -138,25 +214,59 @@ export const ProviderApplicationPage: React.FC = () => {
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7EEE8] text-[#B8532F]"><FileLock2 className="h-5 w-5" /></span>
                 <div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9A7160]">03 · Documents</p><h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Supporting documents</h3></div>
               </div>
-              <p className="mb-5 max-w-2xl text-sm leading-6 text-[#777067]">Documents are private and only shared with administrators for application review. Accepted formats: PDF, JPG, PNG; 8 MB maximum each.</p>
+              <p className="mb-5 max-w-2xl text-sm leading-6 text-[#777067]">Your profile photo will appear in your public profile if approved. Other documents remain private and are only shared with administrators for application review. Photos: JPG or PNG, 5 MB maximum. Other documents: PDF, JPG, or PNG, 8 MB maximum each.</p>
               <div className="grid gap-3 sm:grid-cols-2">{documentFields.map(field => <label key={field.kind} className="group cursor-pointer rounded-2xl border border-dashed border-[#D8CFC3] bg-[#FCFBF9] p-4 transition hover:border-[#1D432D] hover:bg-[#F7FAF7]">
                 <span className="flex items-start justify-between gap-2 text-xs font-bold text-[#3D3A36]">{field.label}{field.required ? ' *' : ''}<UploadCloud className="h-4 w-4 shrink-0 text-[#1D432D]" /></span>
                 <span className="mt-1 block text-xs font-normal text-[#91897F]">{field.hint}</span>
                 <span className="mt-4 block truncate rounded-lg border border-[#EEE9E2] bg-white px-3 py-2.5 text-xs font-semibold text-[#1D432D]">{documents[field.kind]?.name || 'Choose a file to upload'}</span>
-                <input required={Boolean(field.required)} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e => setDocuments(current => ({ ...current, [field.kind]: e.target.files?.[0] || null }))} className="sr-only" />
+                <input required={Boolean(field.required)} type="file" accept={field.kind === 'profile-photo' ? ".jpg,.jpeg,.png,image/jpeg,image/png" : ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"} onChange={e => setDocuments(current => ({ ...current, [field.kind]: e.target.files?.[0] || null }))} className="sr-only" />
               </label>)}</div>
             </section>
 
             <section className="border-t border-[#F0EBE5] pt-8">
-              <label className="flex items-start gap-3 rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 text-xs leading-6 text-[#635E59] sm:p-5"><input type="checkbox" required className="mt-1 h-4 w-4 shrink-0 accent-[#1D432D]" /><span>I confirm the information is accurate and consent to MommyCare reviewing these details and documents. If approved, I agree that my name, role, area, arrangement, experience, skills, introduction, and expected salary may appear in the public directory. My contact details and uploaded documents will remain private.</span></label>
+              <div className="rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 sm:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9A7160]">04 · Agreement & signature</p>
+                <label className="mt-3 flex items-start gap-3 text-xs leading-6 text-[#635E59]">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={termsAccepted}
+                    onChange={event => {
+                      setTermsAccepted(event.target.checked);
+                      if (!event.target.checked) clearSignature();
+                    }}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#1D432D]"
+                  />
+                  <span>I confirm that the information I have provided is accurate, consent to MommyCare reviewing my application and supporting documents, and agree to the provider application terms. If approved, I consent to my name, role, area, arrangement, experience, skills, introduction, and expected salary appearing in the public directory. My contact details and documents remain private.</span>
+                </label>
+                <div className="mt-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label htmlFor="provider-signature" className="text-xs font-bold text-[#514B44]">Draw your signature * {termsAccepted ? '' : '· agree to the terms first'}</label>
+                    <button type="button" disabled={!termsAccepted} onClick={clearSignature} className="text-xs font-bold text-[#1D432D] underline disabled:cursor-not-allowed disabled:opacity-50">Clear signature</button>
+                  </div>
+                  <canvas
+                    id="provider-signature"
+                    ref={signatureCanvasRef}
+                    width={700}
+                    height={180}
+                    aria-label="Draw your signature after agreeing to the provider terms"
+                    onPointerDown={startSignature}
+                    onPointerMove={drawSignature}
+                    onPointerUp={finishSignature}
+                    onPointerCancel={finishSignature}
+                    className={`mt-2 h-36 w-full touch-none rounded-xl border border-dashed border-[#CFC5B8] bg-white ${termsAccepted ? 'cursor-crosshair' : 'cursor-not-allowed opacity-60'}`}
+                  />
+                  <p className="mt-2 text-xs text-[#777067]">Use your mouse, touch screen, or stylus. Your signature and agreement time will be kept with your private application for review.</p>
+                </div>
+              </div>
               {status === 'error' && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-center gap-2 text-xs text-[#777067]"><LockKeyhole className="h-4 w-4 text-[#1D432D]" /> Your documents are submitted securely</p>
-                <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-6 py-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,67,45,0.2)] transition hover:-translate-y-0.5 hover:bg-[#143020] hover:shadow-[0_14px_28px_rgba(29,67,45,0.25)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Submitting securely…</> : <>Submit provider application <ArrowRight className="h-4 w-4" /></>}</button>
+                <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-6 py-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,67,45,0.2)] transition hover:-translate-y-0.5 hover:bg-[#143020] hover:shadow-[0_14px_28px_rgba(29,67,45,0.25)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Preparing your payment…</> : <>Continue to registration payment <ArrowRight className="h-4 w-4" /></>}</button>
               </div>
             </section>
           </div>
-        </form>}
+      </form>
     </div>
   </main>;
 };

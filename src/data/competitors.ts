@@ -2,10 +2,10 @@ import { CompetitorComparisonItem } from '../types';
 
 export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   {
-    feature: 'DCI Criminal Background Check (Directorate of Criminal Investigations)',
-    mommyCare: 'Verified biometric fingerprint check renewed every 12 months with online proof for all staff',
+    feature: 'Background & Identity Check',
+    mommyCare: 'Documented identity review and reference follow-up before staff join the roster',
     informalBrokers: 'May rely on informal references or document copies',
-    generalAgencies: 'Verification practices and renewal schedules vary',
+    generalAgencies: 'Verification practices vary by provider',
     whatsappGroups: 'Profile information may vary and should be confirmed',
     highlight: true
   },
@@ -69,12 +69,12 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
 
 export const VETTING_PILLARS = [
   {
-    id: 'dci',
-    title: '1. Forensic DCI Criminal Clearance',
-    shortDesc: 'Biometric fingerprint vetting through the Directorate of Criminal Investigations Kenya.',
-    fullDesc: 'We verify the authenticity of every domestic professional’s Certificate of Good Conduct directly with the DCI database in Nairobi, screening for criminal history, property theft, domestic violence, child welfare violations, and identity impersonation.',
-    verificationMethod: 'Biometric fingerprint matching & eCitizen government certificate validation',
-    issuingAuthority: 'DCI Headquarters, Mazingira Complex, Kiambu Road',
+    id: 'background-checks',
+    title: '1. Background & Identity Screening',
+    shortDesc: 'Documented identity verification and reference checks for every candidate.',
+    fullDesc: 'We review identity documents, reference history, and role fit before a domestic professional is introduced into a home or household team.',
+    verificationMethod: 'Document review and reference follow-up',
+    issuingAuthority: 'MommyCare quality review team',
     iconName: 'ShieldCheck',
     status: 'mandatory' as const
   },

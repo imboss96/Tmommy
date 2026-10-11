@@ -4,11 +4,11 @@ export const SEO_STRATEGY_PILLARS: SEOStrategyItem[] = [
   {
     pillar: 'High-Intent Nairobi Commercial Keywords',
     focusKeywords: [
-      'vetted nanny agency nairobi',
+      'nanny agency nairobi',
       'hire trained babysitter nairobi',
       'live in nanny karen westlands',
       'infant care night nurse kenya',
-      'dci cleared nanny nairobi',
+      'childcare agency nairobi',
       'montessori childcare agency nairobi'
     ],
     implementation: 'Integrated into semantic H1/H2 hierarchy, metadata tags, image alt texts, and localized content.',
@@ -57,12 +57,12 @@ export const SEO_STRATEGY_PILLARS: SEOStrategyItem[] = [
 export const SEM_CAMPAIGNS: SEMCampaign[] = [
   {
     id: 'sem-01',
-    campaignName: 'Campaign 1: Live-In & Verified Estate Nannies (Karen, Runda, Lavington)',
+    campaignName: 'Campaign 1: Live-In & Estate Nannies (Karen, Runda, Lavington)',
     targetAudience: 'Parents aged 28-48 living in affluent Nairobi gated estates seeking long-term professional childcare.',
     targetEstates: ['Karen', 'Runda', 'Lavington', 'Westlands', 'Muthaiga', 'Gigiri'],
     headlines: [
-      'Vetted Nanny Agency Nairobi | MommyCare',
-      'DCI Background Checked Nannies',
+      'Nanny Agency Nairobi | MommyCare',
+      'Experienced Nannies in Nairobi',
       '90-Day Free Replacement Warranty',
       'Red Cross CPR Certified Nannies',
       'Live-In Nannies Karen & Runda',
@@ -70,25 +70,25 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
       'Ethical Domestic Childcare Kenya'
     ],
     descriptions: [
-      'Connect with thoroughly vetted, hospital-screened, and CPR-certified nannies in Nairobi. 90-day replacement guarantee included.',
-      'Peace of mind for your home. DCI good conduct checked, 3 verified references & Red Cross infant first aid trained. Book a trial today.',
+      'Connect with experienced, hospital-screened, and CPR-certified nannies in Nairobi. 90-day replacement guarantee included.',
+      'Peace of mind for your home with thoughtful matching, trusted references, and infant first aid training. Book a trial today.',
       'Serving Karen, Runda, Westlands & Lavington. Transparent contracts and fair wages. Schedule your nanny interview in 24 hours.'
     ],
     sitelinks: [
-      { title: 'Browse Vetted Nannies', desc: 'View verified profiles, DCI checks & badges' },
-      { title: '7-Pillar Vetting Standards', desc: 'See how we forensically verify every caregiver' },
+      { title: 'Browse Nannies', desc: 'Explore household care profiles and fit options' },
+      { title: 'Care Standards', desc: 'See how we assess and support every caregiver' },
       { title: 'Nairobi Salary Calculator', desc: 'Check fair monthly salary for your estate' },
       { title: 'Book 3-Day Home Trial', desc: 'Interview and test compatibility risk-free' }
     ],
     callouts: [
-      'DCI Good Conduct Verified',
+      'Thoughtful Matching',
       'Red Cross First Aid Certified',
       '90-Day Free Replacement',
       'Emergency Standby Backup',
       'Transparent M-Pesa Contracts'
     ],
     targetKeywords: [
-      { keyword: 'vetted nanny agency nairobi', matchType: 'Phrase', monthlySearches: 2400, avgCpcKsh: 42 },
+      { keyword: 'nanny agency nairobi', matchType: 'Phrase', monthlySearches: 2400, avgCpcKsh: 42 },
       { keyword: 'hire live in nanny karen', matchType: 'Exact', monthlySearches: 1300, avgCpcKsh: 58 },
       { keyword: 'house help agency westlands', matchType: 'Phrase', monthlySearches: 3100, avgCpcKsh: 35 },
       { keyword: 'best childcare agency in kenya', matchType: 'Phrase', monthlySearches: 1800, avgCpcKsh: 45 }
@@ -147,20 +147,20 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
     headlines: [
       'Emergency Nanny in Nairobi | 2-4 Hr Dispatch',
       'Nanny Cancelled Today? We Have You Covered',
-      'On-Demand Vetted Babysitters',
+      'On-Demand Babysitters',
       'Instant Childcare Backup Nairobi',
       'Pre-Screened & Ready Now',
       'Call +254 700 MOMMY Care'
     ],
     descriptions: [
-      'Don’t miss your executive meeting. MommyCare dispatches a pre-vetted, first-aid trained emergency nanny to your door within 2-4 hours.',
-      'Reliable emergency childcare across Nairobi. Fully vetted, DCI-checked, and ready on standby. Tap to dispatch immediately.'
+      'Don’t miss your executive meeting. MommyCare dispatches a first-aid trained emergency nanny to your door within 2-4 hours.',
+      'Reliable emergency childcare across Nairobi. Ready on standby for urgent backup support. Tap to dispatch immediately.'
     ],
     sitelinks: [
       { title: 'Request Immediate Dispatch', desc: 'Nanny sent to your estate within 2-4 hours' },
       { title: 'Instant WhatsApp Concierge', desc: 'Chat directly with our dispatch team' }
     ],
-    callouts: ['2-4 Hour Arrival', 'Zero Advance Commitment', 'DCI Verified Standby'],
+    callouts: ['2-4 Hour Arrival', 'Zero Advance Commitment', 'Standby Support'],
     targetKeywords: [
       { keyword: 'emergency nanny nairobi', matchType: 'Exact', monthlySearches: 1100, avgCpcKsh: 75 },
       { keyword: 'urgent babysitter nairobi today', matchType: 'Phrase', monthlySearches: 1450, avgCpcKsh: 68 },

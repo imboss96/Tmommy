@@ -22,6 +22,7 @@ import { ContactPage } from './components/ContactPage';
 import { CoreServiceCategories } from './components/CoreServiceCategories';
 import { HiringGuide } from './components/HiringGuide';
 import { ProviderApplicationPage } from './components/ProviderApplicationPage';
+import { ProviderPaymentPage } from './components/ProviderPaymentPage';
 import { InfoPage } from './components/InfoPage';
 import { NairobiEstate, NannyProfile, NannyType } from './types';
 
@@ -71,16 +72,16 @@ function MainWebsite() {
   useEffect(() => {
     const routeSeo: Record<string, { title: string; description: string }> = {
       '/': {
-        title: 'MommyCare Nairobi | Vetted Nannies & Homecare Professionals',
-        description: 'Find DCI-verified nannies, house managers, caregivers, and domestic professionals in Nairobi with a guided trial and replacement guarantee.'
+        title: 'MommyCare Nairobi | Nannies & Homecare Professionals',
+        description: 'Find nannies, house managers, caregivers, and domestic professionals in Nairobi with guided placement support and replacement options.'
       },
       '/nannies': {
-        title: 'Vetted Nannies & Domestic Staff in Nairobi | MommyCare',
-        description: 'Browse vetted nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi estates.'
+        title: 'Nannies & Domestic Staff in Nairobi | MommyCare',
+        description: 'Browse nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi estates.'
       },
       '/vetting': {
-        title: '7-Pillar Nanny Vetting in Nairobi | MommyCare',
-        description: 'See how MommyCare verifies Nairobi domestic staff through DCI clearance, identity checks, medical screening, references, training, and integrity assessment.'
+        title: 'Nanny Care Standards in Nairobi | MommyCare',
+        description: 'See how MommyCare supports quality care through thoughtful screening, reference checks, training, and household support.'
       },
       '/salary-guide': {
         title: 'Nairobi Nanny Salary Guide & Take-Home Calculator | MommyCare',
@@ -100,7 +101,7 @@ function MainWebsite() {
       },
       '/compare-care': {
         title: 'MommyCare vs Other Nanny Options in Nairobi',
-        description: 'Compare managed nanny placement, DCI verification, first aid training, trial periods, replacement support, and informal childcare options.'
+        description: 'Compare managed nanny placement, household support, first aid training, trial periods, replacement support, and informal childcare options.'
       },
       '/academy': {
         title: 'MommyCare Domestic & Homecare Academy | Nairobi',
@@ -108,7 +109,7 @@ function MainWebsite() {
       },
       '/contact': {
         title: 'Contact MommyCare Nairobi | Nanny & Homecare Placement',
-        description: 'Contact MommyCare for vetted nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
+        description: 'Contact MommyCare for nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
       },
       '/pricing': {
         title: 'Private Placement Pricing | MommyCare Nairobi',
@@ -247,6 +248,10 @@ function MainWebsite() {
       return <ProviderApplicationPage />;
     }
 
+    if (pathname === '/provider-payment') {
+      return <ProviderPaymentPage />;
+    }
+
     if (pathname === '/pricing') {
       return (
         <InfoPage
@@ -318,7 +323,7 @@ function MainWebsite() {
           title="Child & household safety policy"
           intro="Safety is at the centre of every placement we arrange. We screen and verify staff before they are introduced into your home."
           items={[
-            'Every candidate is checked for DCI, identity, and reference integrity before admission to the registry.',
+            'Every candidate is reviewed for identity and reference integrity before admission to the registry.',
             'We do not place staff whose records are inconsistent, expired, or incomplete.',
             'Families are encouraged to communicate clearly about duties, routines, boundaries, and household expectations.',
             'We maintain a high standard for professionalism, discretion, and respectful family support.'

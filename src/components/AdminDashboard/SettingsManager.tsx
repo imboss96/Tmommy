@@ -18,6 +18,7 @@ import { useContent } from '../../context/ContentContext';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
 import { getAdminAccessToken } from '../../lib/adminAuth';
+import { MpesaSettingsPanel } from './MpesaSettingsPanel';
 
 type Administrator = {
   email: string;
@@ -129,6 +130,8 @@ export const SettingsManager: React.FC = () => {
           Configure global site parameters, emergency contact hotlines, top notification messages, and data backups.
         </p>
       </div>
+
+      <MpesaSettingsPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         

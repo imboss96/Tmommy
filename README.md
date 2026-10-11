@@ -1,14 +1,14 @@
 # MommyCare Nairobi
 
-MommyCare Nairobi is a homecare and domestic staffing platform for families looking for vetted nannies and household professionals across Nairobi.
+MommyCare Nairobi is a homecare and domestic staffing platform for families looking for skilled nannies and household professionals across Nairobi.
 
 The platform supports nanny placement, domestic staff browsing, bookings, emergency backup requests, public reviews, SEO-focused service pages, media management, and an admin operations dashboard.
 
 ## Features
 
-- Vetted nanny and domestic staff directory
+- Nanny and domestic staff directory
 - Nannies, house managers, housekeepers, house boys, caretakers, gardeners, cooks, chefs, and family drivers
-- DCI verification and seven-pillar vetting presentation
+- Care standards and screening presentation
 - Homepage hero slider image management
 - Core service category cards
 - Salary and private-agreement take-home calculator
@@ -16,6 +16,7 @@ The platform supports nanny placement, domestic staff browsing, bookings, emerge
 - Moderated public reviews
 - Parenting and childcare insights
 - Admin dashboard for staff, posts, media, reviews, settings, and submissions
+- Print-ready provider service agreements and profile-based CVs
 - Supabase-backed production content and submissions
 - SEO routes, metadata, sitemap, and robots.txt
 
@@ -77,8 +78,8 @@ npm run build
 ## Public Routes
 
 - `/` Homepage
-- `/nannies` Vetted staff directory
-- `/vetting` Seven-pillar vetting standards
+- `/nannies` Staff directory
+- `/vetting` Care standards
 - `/salary-guide` Nairobi salary guide
 - `/mission-vision` Mission and vision
 - `/insights` Parenting and childcare insights
@@ -99,8 +100,12 @@ Supabase migrations are stored in `supabase/migrations/`. Apply them in order, i
 - `004_contact_inquiries.sql`
 - `005_reviews.sql`
 - `006_provider_applications.sql` (creates the provider review queue and private document bucket)
+- `007_contract_numbering.sql` (creates the atomic yearly counter for unique contract numbers)
+- `008_provider_registration_mpesa.sql` (adds private provider-payment drafts and M-Pesa settings)
 
 Never commit `.env`, `.env.local`, Supabase service-role keys, or Cloudinary secrets.
+
+Configure `MPESA_CONFIG_ENCRYPTION_KEY` as a stable, backend-only 64-character hex key before saving M-Pesa credentials in the admin dashboard. Set `MPESA_CALLBACK_URL` to the public HTTPS API callback URL so Safaricom can reach the payment confirmation endpoint. M-Pesa credentials are encrypted in Supabase; only the one-time encryption key belongs in the server environment.
 
 ## GitHub
 

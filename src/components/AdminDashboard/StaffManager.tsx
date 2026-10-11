@@ -19,6 +19,7 @@ import {
 import { useContent } from '../../context/ContentContext';
 import { compressImageToJpeg } from '../../lib/imageUpload';
 import { NannyProfile, HomecareRole, NairobiEstate, NannyType } from '../../types';
+import { ProviderCvButton } from './ProviderDocuments';
 
 export const StaffManager: React.FC = () => {
   const { nannies, addNanny, updateNanny, deleteNanny, uploadImage } = useContent();
@@ -275,6 +276,25 @@ export const StaffManager: React.FC = () => {
 
                   <td className="py-3.5 px-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      <ProviderCvButton
+                        profile={{
+                          name: staff.name,
+                          role: staff.role,
+                          roleTitle: staff.roleTitle,
+                          nannyType: staff.nannyType,
+                          primaryEstate: staff.primaryEstate,
+                          age: staff.age,
+                          experienceYears: staff.experienceYears,
+                          monthlySalaryKsh: staff.monthlySalaryKsh,
+                          languages: staff.languages,
+                          skills: staff.skills,
+                          bio: staff.bio,
+                          education: staff.education,
+                          certifications: staff.certifications,
+                          avatar: staff.avatar
+                        }}
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#D5C9BA] bg-white px-2 py-1.5 text-[10px] font-bold text-[#1D432D] hover:bg-[#FAF7F2]"
+                      />
                       <button
                         onClick={() => handleOpenEdit(staff)}
                         className="p-1.5 rounded-lg bg-[#FAF7F2] border border-[#E8DFD3] hover:bg-[#F2ECE1] text-[#1A201C]"
