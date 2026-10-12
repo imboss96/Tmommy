@@ -67,7 +67,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
               <li><a href="/nannies" className="hover:text-white transition-colors">House Girls (Fine Housekeepers)</a></li>
               <li><a href="/nannies" className="hover:text-white transition-colors">House Boys (Domestic Stewards)</a></li>
               <li><a href="/nannies" className="hover:text-white transition-colors">Shamba Boys (Gardeners & Grounds)</a></li>
-              <li><a href="/nannies" className="hover:text-white transition-colors">Compound Caretakers & Custodians</a></li>
+              <li><a href="/nannies" className="hover:text-white transition-colors">Caretakers & Custodians</a></li>
               <li><a href="/nannies" className="hover:text-white transition-colors">Private Domestic Cooks & Chefs</a></li>
               <li><a href="/salary-guide" className="hover:text-white transition-colors">Nairobi Domestic Salary Guide</a></li>
             </ul>
@@ -117,7 +117,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
               onClick={onOpenBooking}
               className="w-full py-2.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white text-xs font-bold text-center transition-all shadow-md shadow-[#D96B43]/20 block"
             >
-              Book 3-Day Trial
+              Book now
             </button>
           </div>
 

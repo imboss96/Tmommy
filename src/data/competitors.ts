@@ -34,14 +34,6 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
     highlight: true
   },
   {
-    feature: 'Trial Period Before Full Placement',
-    Tmommycare: '3-Day Risk-Free Guided Paid Trial in your home before commitment',
-    informalBrokers: 'Trial arrangements vary by individual agreement',
-    generalAgencies: 'Trial terms vary by provider',
-    whatsappGroups: 'Trial terms should be agreed in advance',
-    highlight: true
-  },
-  {
     feature: 'Free Replacement Guarantee Period',
     Tmommycare: '90-Day Hassle-Free Free Replacement Warranty across all professions',
     informalBrokers: 'Replacement terms vary by individual agreement',

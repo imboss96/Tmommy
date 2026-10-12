@@ -37,8 +37,10 @@ interface ContractDetails {
 
 const roleName: Record<string, string> = {
   nanny: 'Nanny / childcare provider',
+  babysitter: 'Babysitter',
   'house-manager': 'House manager',
   'house-girl': 'Housekeeper',
+  mamafua: 'Mamafua (One-Time Housekeeper)',
   'house-boy': 'Domestic steward',
   'shamba-boy': 'Gardener / groundskeeper',
   caretaker: 'Caretaker',

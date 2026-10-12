@@ -10,7 +10,7 @@ import {
   Send,
   Briefcase
 } from 'lucide-react';
-import { NairobiEstate, EmergencyRequestData, HomecareRole } from '../types';
+import { EmergencyRequestData, HomecareRole } from '../types';
 import { useContent } from '../context/ContentContext';
 
 interface EmergencyBackupModalProps {
@@ -26,7 +26,7 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
   const [formData, setFormData] = useState<EmergencyRequestData>({
     parentName: '',
     phone: '',
-    estate: 'Kilimani',
+    estate: '',
     requestedRole: 'nanny',
     requiredTime: 'Immediate (Within 2-3 Hours)',
     durationDays: 1,
@@ -127,12 +127,13 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                   className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-semibold text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
                 >
                   <option value="nanny">Emergency Backup Nanny & Childcare</option>
-                  <option value="nanny">Au Pairs / Elite Nannies</option>
+                  <option value="babysitter">Emergency Babysitter</option>
+                  <option value="mamafua">Mamafua (One-Time Housekeeper)</option>
                   <option value="temporary-backup">Holiday Relievers</option>
                   <option value="house-girl">Emergency Housekeeper / House Girl</option>
                   <option value="house-boy">Emergency House Boy / Domestic Steward</option>
                   <option value="cook-chef">Emergency Cook / Kitchen Caterer</option>
-                  <option value="caretaker">Emergency Compound Caretaker / Relief</option>
+                  <option value="caretaker">Emergency Caretaker / Relief</option>
                   <option value="shamba-boy">Emergency Grounds / Garden Relief</option>
                 </select>
               </div>
@@ -172,23 +173,16 @@ export const EmergencyBackupModal: React.FC<EmergencyBackupModalProps> = ({
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#7D766D]">
                     Neighbourhood *
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    minLength={2}
+                    maxLength={100}
                     value={formData.estate}
-                    onChange={(e) => setFormData({ ...formData, estate: e.target.value as NairobiEstate })}
+                    onChange={(e) => setFormData({ ...formData, estate: e.target.value })}
+                    placeholder="Enter your estate or neighbourhood"
                     className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-semibold text-[#1A201C] outline-none transition focus:border-[#D96B43] focus:ring-2 focus:ring-[#D96B43]/20"
-                  >
-                    <option value="Kilimani">Kilimani</option>
-                    <option value="Westlands">Westlands</option>
-                    <option value="Karen">Karen</option>
-                    <option value="Lavington">Lavington</option>
-                    <option value="Kileleshwa">Kileleshwa</option>
-                    <option value="Runda">Runda</option>
-                    <option value="South C">South C</option>
-                    <option value="Parklands">Parklands</option>
-                    <option value="Gigiri">Gigiri</option>
-                    <option value="Kiambu Road">Kiambu Road</option>
-                    <option value="Ruaka">Ruaka</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="rounded-[22px] border border-[#E8DFD3] bg-white/50 p-3 shadow-[0_10px_20px_rgba(19,23,21,0.03)] sm:p-4">

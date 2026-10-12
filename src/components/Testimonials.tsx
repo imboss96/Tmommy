@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Star, CheckCircle2, MapPin, Heart, Send } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
-import { NairobiEstate } from '../types';
 
 export const Testimonials: React.FC = () => {
   const { reviews, addReview } = useContent();
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
-    parentName: '', familyRole: '', estate: 'Kilimani' as NairobiEstate, nannyName: '',
+    parentName: '', familyRole: '', estate: '', nannyName: '',
     comment: '', rating: 5, childrenAge: '', serviceType: ''
   });
   const publishedReviews = reviews.filter(review => review.status === 'published');
@@ -17,7 +16,7 @@ export const Testimonials: React.FC = () => {
     event.preventDefault();
     addReview(form);
     setSubmitted(true);
-    setForm({ parentName: '', familyRole: '', estate: 'Kilimani', nannyName: '', comment: '', rating: 5, childrenAge: '', serviceType: '' });
+    setForm({ parentName: '', familyRole: '', estate: '', nannyName: '', comment: '', rating: 5, childrenAge: '', serviceType: '' });
   };
 
   return (
@@ -121,9 +120,7 @@ export const Testimonials: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input required value={form.parentName} onChange={e => setForm({ ...form, parentName: e.target.value })} placeholder="Your name" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />
                 <input required value={form.familyRole} onChange={e => setForm({ ...form, familyRole: e.target.value })} placeholder="Family role (e.g. Parent of two)" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />
-                <select value={form.estate} onChange={e => setForm({ ...form, estate: e.target.value as NairobiEstate })} className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm">
-                  {['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka'].map(estate => <option key={estate}>{estate}</option>)}
-                </select>
+                <input required minLength={2} maxLength={100} value={form.estate} onChange={e => setForm({ ...form, estate: e.target.value })} placeholder="Estate or neighbourhood" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />
                 <input value={form.serviceType} onChange={e => setForm({ ...form, serviceType: e.target.value })} placeholder="Service used (optional)" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />
                 <input value={form.nannyName} onChange={e => setForm({ ...form, nannyName: e.target.value })} placeholder="Professional's name (optional)" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />
                 <input value={form.childrenAge} onChange={e => setForm({ ...form, childrenAge: e.target.value })} placeholder="Children's age (optional)" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2.5 text-sm" />

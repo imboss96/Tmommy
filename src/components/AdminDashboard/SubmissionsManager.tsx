@@ -87,7 +87,7 @@ export const SubmissionsManager: React.FC = () => {
 
   const exportCSV = () => {
     if (activeTab === 'bookings') {
-      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Email', 'Estate', 'Role', 'Selected Staff', 'Trial Days', 'Children', 'Notes'];
+      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Email', 'Estate', 'Role', 'Selected Staff', 'Start Date', 'Children', 'Notes'];
       const rows = bookings.map(b => [
         b.id,
         b.submittedAt,
@@ -98,7 +98,7 @@ export const SubmissionsManager: React.FC = () => {
         b.estate,
         b.role || 'nanny',
         `"${(b.nannyName || '').replace(/"/g, '""')}"`,
-        b.preferredTrialDays,
+        b.startDate,
         b.numberOfChildren,
         `"${(b.additionalNotes || '').replace(/"/g, '""')}"`
       ]);
@@ -106,7 +106,7 @@ export const SubmissionsManager: React.FC = () => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `Tmommycare-trial-bookings-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `Tmommycare-bookings-${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -152,7 +152,6 @@ export const SubmissionsManager: React.FC = () => {
       case 'Contacted':
       case 'Staff Contacted':
         return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Trial Scheduled':
       case 'Dispatched':
         return 'bg-purple-100 text-purple-800 border-purple-200 font-bold';
       case 'Completed':
@@ -174,7 +173,7 @@ export const SubmissionsManager: React.FC = () => {
             <span>Form Submissions & Client Inquiries</span>
           </h2>
           <p className="text-xs text-[#635E59] mt-0.5">
-            Real-time submissions from Nairobi parents requesting 3-Day Trials and Emergency Backup Dispatches.
+            Direct booking requests and emergency backup dispatches from Nairobi households.
           </p>
         </div>
 
@@ -201,7 +200,7 @@ export const SubmissionsManager: React.FC = () => {
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>3-Day Trial Bookings</span>
+          <span>Bookings</span>
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
             newBookingsCount > 0 ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-700'
           }`}>
@@ -264,7 +263,6 @@ export const SubmissionsManager: React.FC = () => {
               <>
                 <option value="New">New</option>
                 <option value="Contacted">Contacted</option>
-                <option value="Trial Scheduled">Trial Scheduled</option>
                 <option value="Completed">Completed</option>
                 <option value="Archived">Archived</option>
               </>
@@ -317,7 +315,6 @@ export const SubmissionsManager: React.FC = () => {
                   >
                     <option value="New">New</option>
                     <option value="Contacted">Contacted</option>
-                    <option value="Trial Scheduled">Trial Scheduled</option>
                     <option value="Completed">Completed</option>
                     <option value="Archived">Archived</option>
                   </select>
@@ -352,13 +349,13 @@ export const SubmissionsManager: React.FC = () => {
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8DFD3]">
-                  <span className="text-[10px] uppercase font-bold text-[#7D766D] block">Requested Staff & Trial</span>
+                  <span className="text-[10px] uppercase font-bold text-[#7D766D] block">Requested Staff & Start Date</span>
                   <div className="mt-1 font-semibold text-[#1A201C]">
                     <p className="capitalize">Role: {b.role || 'nanny'}</p>
                     <p className="text-[#D96B43] font-bold">
                       {b.nannyName ? `Staff: ${b.nannyName}` : 'General Placement'}
                     </p>
-                    <span className="text-[11px] text-[#7D766D]">{b.preferredTrialDays} Days Trial • Starts: {b.startDate || 'Immediate'}</span>
+                    <span className="text-[11px] text-[#7D766D]">Starts: {b.startDate || 'To be confirmed'}</span>
                   </div>
                 </div>
 
@@ -447,7 +444,7 @@ export const SubmissionsManager: React.FC = () => {
             <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-[#D5C9BA]">
               <Inbox className="w-10 h-10 text-[#D5C9BA] mx-auto mb-2" />
               <p className="text-sm font-bold text-[#1A201C]">No booking submissions found</p>
-              <p className="text-xs text-[#7D766D] mt-1">Check back once parents submit 3-Day Trial forms on the website.</p>
+              <p className="text-xs text-[#7D766D] mt-1">New booking requests will appear here.</p>
             </div>
           )}
         </div>

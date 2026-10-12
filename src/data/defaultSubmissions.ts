@@ -18,12 +18,11 @@ export const DEFAULT_BOOKINGS: BookingSubmission[] = [
     numberOfChildren: 2,
     childrenAges: '7 months and 3 years',
     startDate: '2026-09-22',
-    preferredTrialDays: 3,
     additionalNotes: 'Need experienced nanny who knows baby weaning with Kenyan porridge and infant sleep schedules. Both parents are doctors.',
     needsCooking: true,
     needsPetFriendly: false,
     hasGardenOrLawn: false,
-    internalNotes: 'VIP doctor family in Kilimani. Assigned coordinator: Beatrice. Needs Grace Wambui for immediate 3-day trial.'
+    internalNotes: 'VIP doctor family in Kilimani. Assigned coordinator: Beatrice. Requested immediate placement.'
   },
   {
     id: 'book-102',
@@ -42,17 +41,16 @@ export const DEFAULT_BOOKINGS: BookingSubmission[] = [
     numberOfChildren: 3,
     childrenAges: '5, 8, and 12 years',
     startDate: '2026-09-25',
-    preferredTrialDays: 3,
     additionalNotes: 'Large 1.5-acre property with gardener and cook. Looking for a firm, diplomatic house manager to run inventory, grocery budgets, and staff supervision.',
     needsCooking: false,
     needsPetFriendly: true,
     hasGardenOrLawn: true,
-    internalNotes: 'Called by Coordinator Davis. Client confirmed trial starting Sept 25th. Waiting on gate security clearance form.'
+    internalNotes: 'Called by Coordinator Davis. Client confirmed a Sept 25th start date. Waiting on gate security clearance form.'
   },
   {
     id: 'book-103',
     submittedAt: '2026-09-16T17:45:00Z',
-    status: 'Trial Scheduled',
+    status: 'Contacted',
     nannyId: 'staff-3',
     nannyName: 'Faith Achieng',
     role: 'house-girl',
@@ -66,12 +64,11 @@ export const DEFAULT_BOOKINGS: BookingSubmission[] = [
     numberOfChildren: 1,
     childrenAges: '4 years',
     startDate: '2026-09-20',
-    preferredTrialDays: 3,
     additionalNotes: 'Needs deep cleaning expertise for wood and marble flooring, steam ironing, and gentle handling of silk fabrics.',
     needsCooking: true,
     needsPetFriendly: false,
     hasGardenOrLawn: false,
-    internalNotes: 'Trial confirmed for Faith Achieng. DCI and clinical panel sent to UN security desk.'
+    internalNotes: 'Placement details confirmed for Faith Achieng. DCI and clinical panel sent to UN security desk.'
   }
 ];
 

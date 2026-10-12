@@ -25,6 +25,7 @@ export const ProviderPaymentPage: React.FC = () => {
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not check payment status.');
       setStatus(result.status);
+      setFeeKes(Number(result.amountKes) || 0);
       setReceiptNumber(result.receiptNumber || '');
       if (result.status === 'failed' && result.message) setError(result.message);
     } finally {
@@ -44,7 +45,6 @@ export const ProviderPaymentPage: React.FC = () => {
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || 'Could not load payment information.');
         setAvailable(Boolean(result.available));
-        setFeeKes(Number(result.feeKes) || 0);
       }),
       checkStatus()
     ]).catch(loadError => setError(loadError instanceof Error ? loadError.message : 'Could not load payment information.'));

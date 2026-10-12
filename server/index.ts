@@ -416,8 +416,7 @@ app.get('/api/provider-payment-settings', requireSupabase, async (_req, res) => 
   const callbackConfigured = isMpesaCallbackConfigured();
   res.json({
     available: Boolean(data?.enabled && data.consumer_key_ciphertext && data.consumer_secret_ciphertext &&
-      data.passkey_ciphertext && encryptionConfigured && callbackConfigured),
-    feeKes: data?.fee_kes || 0
+      data.passkey_ciphertext && encryptionConfigured && callbackConfigured)
   });
 });
 
@@ -489,7 +488,6 @@ app.put('/api/admin/mpesa-settings', requireAdmin, async (req, res) => {
       !/^\d{5,7}$/.test(shortcode) || !/^[A-Za-z0-9]{1,12}$/.test(accountReference)) {
     return res.status(400).json({ error: 'Enter a valid fee, environment, merchant type, shortcode, and account reference (up to 12 letters or digits).' });
   }
-  if (input.enabled && feeKes < 1) return res.status(400).json({ error: 'Set a registration fee greater than zero before enabling M-Pesa payments.' });
   if ([input.consumerKey, input.consumerSecret, input.passkey].some(value => value !== undefined &&
       (typeof value !== 'string' || value.length > 512))) {
     return res.status(400).json({ error: 'M-Pesa credential fields must be text no longer than 512 characters.' });
@@ -689,42 +687,20 @@ app.get('/api/nannies', requireSupabase, async (_req, res) => {
   res.json(data);
 });
 
-const providerRoles = new Set(['nanny', 'house-manager', 'house-girl', 'house-boy', 'shamba-boy', 'caretaker', 'cook-chef', 'home-driver']);
+const providerRoles = new Set(['nanny', 'babysitter', 'house-manager', 'house-girl', 'mamafua', 'house-boy', 'shamba-boy', 'caretaker', 'cook-chef', 'home-driver']);
 const providerArrangements = new Set(['live-in', 'day-care', 'night-nurse', 'temporary-backup']);
-const providerEstates = new Set(['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka']);
-const providerSalaryRanges: Record<string, number> = {
-  'KES 10,000–12,000': 11000,
-  'KES 12,001–15,000': 13500,
-  'KES 15,001–20,000': 17500,
-  'KES 20,001–25,000': 22500,
-  'KES 25,001–30,000': 27500,
-  'Above KES 30,000': 30000,
-  Negotiable: 0
+const providerSalaryRanges: Record<string, { monthlySalaryKsh: number; registrationFeeIncrementKes: number }> = {
+  'KES 6,000–8,000': { monthlySalaryKsh: 7000, registrationFeeIncrementKes: 0 },
+  'KES 8,001–12,000': { monthlySalaryKsh: 10000, registrationFeeIncrementKes: 200 },
+  'KES 12,001–15,000': { monthlySalaryKsh: 13500, registrationFeeIncrementKes: 250 },
+  'KES 15,001–20,000': { monthlySalaryKsh: 17500, registrationFeeIncrementKes: 300 },
+  'Above KES 20,000': { monthlySalaryKsh: 25000, registrationFeeIncrementKes: 500 }
 };
 
 app.post('/api/provider-applications/draft', requireSupabase, async (req, res) => {
   const { id, profile, documents } = req.body || {};
   if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     return res.status(400).json({ error: 'A valid application reference is required.' });
-  }
-  const { data: paymentSettings, error: paymentSettingsError } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
-  if (paymentSettingsError) {
-    if (reportPaymentSchemaError('Provider application payment setup lookup', paymentSettingsError, res)) return;
-    return res.status(500).json({ error: 'Could not prepare provider registration payment.' });
-  }
-  if (!paymentSettings?.enabled || Number(paymentSettings.fee_kes) < 1 ||
-      !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
-      !paymentSettings.passkey_ciphertext || !isMpesaCallbackConfigured()) {
-    return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact Tmommycare.' });
-  }
-  try {
-    decryptMpesaSecret(paymentSettings.consumer_key_ciphertext);
-    decryptMpesaSecret(paymentSettings.consumer_secret_ciphertext);
-    decryptMpesaSecret(paymentSettings.passkey_ciphertext);
-  } catch (configurationError) {
-    const message = configurationError instanceof Error ? configurationError.message : 'M-Pesa credentials cannot be read.';
-    console.error(`[API] Provider application draft blocked by M-Pesa configuration: ${message}`);
-    return res.status(503).json({ error: 'M-Pesa settings need administrator attention. Please contact Tmommycare.' });
   }
   if (!profile || typeof profile !== 'object' || typeof profile.name !== 'string' || profile.name.trim().length < 2 ||
       typeof profile.phone !== 'string' || profile.phone.trim().length < 7 ||
@@ -734,7 +710,8 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
       typeof profile.emergencyContactPhone !== 'string' || profile.emergencyContactPhone.trim().length < 7 ||
       !['male', 'female'].includes(profile.gender) ||
       !providerRoles.has(profile.role) || !providerArrangements.has(profile.nannyType) ||
-      !providerEstates.has(profile.primaryEstate) || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
+      typeof profile.primaryEstate !== 'string' || profile.primaryEstate.trim().length < 2 ||
+      profile.primaryEstate.trim().length > 100 || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
     return res.status(400).json({ error: 'Complete the required contact address, emergency contact, gender, role, availability, and document fields.' });
   }
   const referenceName = typeof profile.referenceName === 'string' ? profile.referenceName.trim() : '';
@@ -764,10 +741,35 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
       signatureBytes.readUInt32BE(16) !== 700 || signatureBytes.readUInt32BE(20) !== 180) {
     return res.status(400).json({ error: 'The signature is invalid. Please clear it, sign again, and resubmit.' });
   }
-  const monthlySalaryRange = profile.monthlySalaryRange === undefined ? '' : profile.monthlySalaryRange;
-  if (typeof monthlySalaryRange !== 'string' ||
-      (monthlySalaryRange !== '' && !Object.prototype.hasOwnProperty.call(providerSalaryRanges, monthlySalaryRange))) {
+  const monthlySalaryRange = profile.monthlySalaryRange;
+  if (typeof monthlySalaryRange !== 'string' || !Object.prototype.hasOwnProperty.call(providerSalaryRanges, monthlySalaryRange)) {
     return res.status(400).json({ error: 'Select a valid expected salary range.' });
+  }
+  const salaryBand = providerSalaryRanges[monthlySalaryRange];
+  const isFreeRegistration = salaryBand.registrationFeeIncrementKes === 0;
+  let registrationFeeKes = 0;
+  if (!isFreeRegistration) {
+    const { data: paymentSettings, error: paymentSettingsError } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
+    if (paymentSettingsError) {
+      if (reportPaymentSchemaError('Provider application payment setup lookup', paymentSettingsError, res)) return;
+      return res.status(500).json({ error: 'Could not prepare provider registration payment.' });
+    }
+    const baseFeeKes = Number(paymentSettings?.fee_kes);
+    if (!paymentSettings?.enabled || !Number.isInteger(baseFeeKes) || baseFeeKes < 0 ||
+        !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
+        !paymentSettings.passkey_ciphertext || !isMpesaCallbackConfigured()) {
+      return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact Tmommycare.' });
+    }
+    registrationFeeKes = baseFeeKes + salaryBand.registrationFeeIncrementKes;
+    try {
+      decryptMpesaSecret(paymentSettings.consumer_key_ciphertext);
+      decryptMpesaSecret(paymentSettings.consumer_secret_ciphertext);
+      decryptMpesaSecret(paymentSettings.passkey_ciphertext);
+    } catch (configurationError) {
+      const message = configurationError instanceof Error ? configurationError.message : 'M-Pesa credentials cannot be read.';
+      console.error(`[API] Provider application draft blocked by M-Pesa configuration: ${message}`);
+      return res.status(503).json({ error: 'M-Pesa settings need administrator attention. Please contact Tmommycare.' });
+    }
   }
   const safeDocuments = documents.filter((doc: any) => doc && typeof doc.path === 'string' && doc.path.startsWith(`${id}/`) &&
     typeof doc.name === 'string' && typeof doc.kind === 'string');
@@ -802,13 +804,11 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
     referencePhone: referencePhone.slice(0, 40),
     emergencyContactName: profile.emergencyContactName.trim().slice(0, 100),
     emergencyContactPhone: profile.emergencyContactPhone.trim().slice(0, 40),
-    gender: profile.gender, role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate,
+    gender: profile.gender, role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate.trim().slice(0, 100),
     age: Math.max(18, Math.min(75, Number(profile.age) || 18)),
     experienceYears: Math.max(0, Math.min(60, Number(profile.experienceYears) || 0)),
     monthlySalaryRange,
-    monthlySalaryKsh: monthlySalaryRange
-      ? providerSalaryRanges[monthlySalaryRange]
-      : Math.max(0, Math.min(1000000, Number(profile.monthlySalaryKsh) || 0)),
+    monthlySalaryKsh: salaryBand.monthlySalaryKsh,
     languages: Array.isArray(profile.languages) ? profile.languages.filter((v: unknown) => typeof v === 'string').slice(0, 10) : [],
     skills: Array.isArray(profile.skills) ? profile.skills.filter((v: unknown) => typeof v === 'string').slice(0, 20) : [],
     bio: typeof profile.bio === 'string' ? profile.bio.trim().slice(0, 1500) : '',
@@ -817,8 +817,28 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
     signatureDataUrl: profile.signatureDataUrl,
     termsAcceptedAt: new Date().toISOString()
   };
+  if (isFreeRegistration) {
+    const { error } = await supabase!.from('provider_applications').insert({
+      id, profile: submittedProfile, documents: safeDocuments, status: 'pending'
+    });
+    if (error) {
+      if (reportPaymentSchemaError('Free provider application save', error, res)) return;
+      if (error.code === '23505') return res.status(409).json({ error: 'This application has already been submitted.' });
+      console.error(`[API] Free provider application save failed: ${error.message}`);
+      return res.status(500).json({ error: 'We could not submit your free application. Please try again.' });
+    }
+    await sendSubmissionNotification('free provider application', {
+      'Application reference': id,
+      Name: submittedProfile.name,
+      Email: submittedProfile.email,
+      Phone: submittedProfile.phone,
+      'Expected salary': monthlySalaryRange,
+      'Registration fee': 'Free'
+    });
+    return res.status(201).json({ id, status: 'submitted', amountKes: 0 });
+  }
   const { error } = await supabase!.from('provider_payment_attempts').insert({
-    id, profile: submittedProfile, documents: safeDocuments, status: 'awaiting_payment'
+    id, profile: submittedProfile, documents: safeDocuments, status: 'awaiting_payment', amount_kes: registrationFeeKes
   });
   if (error) {
     if (reportPaymentSchemaError('Provider payment draft save', error, res)) return;
@@ -923,7 +943,7 @@ app.post('/api/payments/mpesa/stk-push', requireSupabase, async (req, res) => {
     console.error(`[API] M-Pesa credential decryption failed: ${message}`);
     return res.status(503).json({ error: 'M-Pesa credentials cannot be read. Check the server encryption key and saved settings.' });
   }
-  const { data: attempt, error: attemptError } = await supabase!.from('provider_payment_attempts').select('id, status')
+  const { data: attempt, error: attemptError } = await supabase!.from('provider_payment_attempts').select('id, status, amount_kes')
     .eq('id', id).maybeSingle();
   if (attemptError) {
     if (reportPaymentSchemaError('Provider payment draft lookup', attemptError, res)) return;
@@ -933,7 +953,7 @@ app.post('/api/payments/mpesa/stk-push', requireSupabase, async (req, res) => {
   if (!['awaiting_payment', 'failed'].includes(attempt.status)) {
     return res.status(409).json({ error: 'A payment request for this application is already in progress or complete.' });
   }
-  const amountKes = Number(settings.fee_kes);
+  const amountKes = Number(attempt.amount_kes);
   if (!Number.isInteger(amountKes) || amountKes < 1) return res.status(503).json({ error: 'The provider registration fee is not configured.' });
   if (!isMpesaCallbackConfigured()) return res.status(503).json({ error: 'The M-Pesa callback URL must be a public HTTPS URL.' });
   const callbackUrl = new URL(mpesaCallbackUrl).toString();
@@ -1118,7 +1138,7 @@ app.post('/api/admin/provider-applications/:id/:action', requireAdmin, async (re
       }
     }
     staffProfileId = staffProfileId || `provider-${id}`;
-    const roleTitle = ({ nanny: 'Nanny & Childcare Professional', 'house-manager': 'House Manager', 'house-girl': 'Housekeeper', 'house-boy': 'Domestic Steward', 'shamba-boy': 'Gardener & Groundskeeper', caretaker: 'Compound Caretaker', 'cook-chef': 'Cook & Chef', 'home-driver': 'Family Driver' } as Record<string, string>)[profile.role] || 'Homecare Professional';
+    const roleTitle = ({ nanny: 'Nanny & Childcare Professional', babysitter: 'Babysitter', 'house-manager': 'House Manager', 'house-girl': 'Housekeeper', mamafua: 'Mamafua (One-Time Housekeeper)', 'house-boy': 'Domestic Steward', 'shamba-boy': 'Gardener & Groundskeeper', caretaker: 'Caretaker', 'cook-chef': 'Cook & Chef', 'home-driver': 'Family Driver' } as Record<string, string>)[profile.role] || 'Homecare Professional';
     const publicStaff = {
       id: staffProfileId, name: profile.name, avatar: profile.avatar, age: profile.age, role: profile.role,
       role_title: roleTitle, category_label: roleTitle, nanny_type: profile.nannyType,
@@ -1224,7 +1244,6 @@ app.post('/api/bookings', requireSupabase, async (req, res) => {
       number_of_children: Number(booking.numberOfChildren || 0),
       children_ages: booking.childrenAges || '',
       start_date: booking.startDate,
-      preferred_trial_days: Number(booking.preferredTrialDays || 3),
       additional_notes: booking.additionalNotes || '',
       needs_cooking: Boolean(booking.needsCooking),
       needs_pet_friendly: Boolean(booking.needsPetFriendly),
@@ -1247,7 +1266,6 @@ app.post('/api/bookings', requireSupabase, async (req, res) => {
     'Start date': booking.startDate,
     'Number of children': booking.numberOfChildren,
     'Children ages': booking.childrenAges,
-    'Preferred trial days': booking.preferredTrialDays,
     'Additional notes': booking.additionalNotes,
     'Needs cooking': booking.needsCooking,
     'Pet-friendly required': booking.needsPetFriendly,

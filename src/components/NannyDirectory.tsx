@@ -43,7 +43,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
   onInspectNannyVetting
 }) => {
   const { nannies } = useContent();
-  const [selectedEstate, setSelectedEstate] = useState<NairobiEstate | 'All Nairobi'>(initialEstate);
+  const [selectedEstate, setSelectedEstate] = useState<NairobiEstate | 'All Nairobi'>(initialEstate === 'All Nairobi' ? '' : initialEstate);
   const [selectedRole, setSelectedRole] = useState<string>(initialRole);
   const [selectedType, setSelectedType] = useState<NannyType | 'all'>(initialType);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,8 +63,10 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
     }
 
     // Estate matching
-    if (selectedEstate !== 'All Nairobi') {
-      const matchesEstate = staff.primaryEstate === selectedEstate || staff.availableEstates.includes(selectedEstate);
+    if (selectedEstate !== 'All Nairobi' && selectedEstate.trim()) {
+      const query = selectedEstate.trim().toLowerCase();
+      const matchesEstate = [staff.primaryEstate, ...staff.availableEstates]
+        .some(estate => estate.toLowerCase().includes(query));
       if (!matchesEstate) return false;
     }
 
@@ -97,11 +99,13 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
   const roleTabs = [
     { id: 'all', label: 'All Professionals', icon: Layers, count: nannies.length },
     { id: 'nanny', label: 'Vetted Nannies', icon: Baby, count: nannies.filter(s => s.role === 'nanny').length },
+    { id: 'babysitter', label: 'Babysitters', icon: Baby, count: nannies.filter(s => s.role === 'babysitter').length },
     { id: 'house-manager', label: 'House Managers', icon: Home, count: nannies.filter(s => s.role === 'house-manager').length },
     { id: 'house-girl', label: 'House Girls (Housekeepers)', icon: Shirt, count: nannies.filter(s => s.role === 'house-girl').length },
+    { id: 'mamafua', label: 'Mamafua (One-Time Housekeepers)', icon: Shirt, count: nannies.filter(s => s.role === 'mamafua').length },
     { id: 'house-boy', label: 'House Boys (Stewards)', icon: UserCheck, count: nannies.filter(s => s.role === 'house-boy').length },
     { id: 'shamba-boy', label: 'Shamba Boys (Gardeners)', icon: Trees, count: nannies.filter(s => s.role === 'shamba-boy').length },
-    { id: 'caretaker', label: 'Compound Caretakers', icon: Wrench, count: nannies.filter(s => s.role === 'caretaker').length },
+    { id: 'caretaker', label: 'Caretakers', icon: Wrench, count: nannies.filter(s => s.role === 'caretaker').length },
     { id: 'chef', label: 'Private Chefs & Cooks', icon: UtensilsCrossed, count: nannies.filter(s => s.role === 'chef' || s.role === 'cook-chef').length },
     { id: 'home-driver', label: 'Home & Family Drivers', icon: Car, count: nannies.filter(s => s.role === 'home-driver').length },
   ];
@@ -144,7 +148,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
             From nurturing infant nannies and executive house managers to private chefs, professional family drivers, 
-            meticulous housekeepers, groundskeepers (shamba boys), and compound caretakers. 
+            meticulous housekeepers, groundskeepers (shamba boys), and caretakers.
             All 100% DCI fingerprint cleared, medically screened, and background verified.
           </p>
         </div>
@@ -192,27 +196,15 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
               />
             </div>
 
-            {/* Estate Selector */}
+            {/* Estate Search */}
             <div className="md:col-span-4">
-              <select
+              <input
+                type="text"
                 value={selectedEstate}
-                onChange={(e) => setSelectedEstate(e.target.value as NairobiEstate | 'All Nairobi')}
+                onChange={(e) => setSelectedEstate(e.target.value)}
+                placeholder="All city neighbourhoods"
                 className="w-full px-3.5 py-2.5 bg-white border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
-              >
-                <option value="All Nairobi">All City Neighbourhoods</option>
-                <option value="Kilimani">Kilimani</option>
-                <option value="Westlands">Westlands</option>
-                <option value="Karen">Karen</option>
-                <option value="Lavington">Lavington</option>
-                <option value="Kileleshwa">Kileleshwa</option>
-                <option value="Runda">Runda</option>
-                <option value="Muthaiga">Muthaiga</option>
-                <option value="South C">South C</option>
-                <option value="Parklands">Parklands</option>
-                <option value="Gigiri">Gigiri</option>
-                <option value="Kiambu Road">Kiambu Road</option>
-                <option value="Ruaka">Ruaka</option>
-              </select>
+              />
             </div>
 
             {/* Living Arrangement Selector */}
@@ -224,7 +216,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
               >
                 <option value="all">All Arrangements (Live-In & Day)</option>
                 <option value="live-in">Full-Time Live-In</option>
-                <option value="day-care">Day Staff (8am - 5pm)</option>
+                <option value="day-care">Live-out / Day Work</option>
                 <option value="night-nurse">Night Shifts / Overnight</option>
                 <option value="temporary-backup">Emergency / Temporary Standby</option>
               </select>
@@ -282,7 +274,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
             <button
               onClick={() => {
                 setSelectedRole('all');
-                setSelectedEstate('All Nairobi');
+                setSelectedEstate('');
                 setSelectedType('all');
                 setSearchQuery('');
                 setFilterDriveOnly(false);
@@ -439,7 +431,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                     onClick={() => onSelectNannyForBooking(staff)}
                     className="w-full py-2.5 px-2 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-[#D96B43]/20 transition-all hover:scale-[1.02]"
                   >
-                    <span>Book 3-Day Trial</span>
+                    <span>Book now</span>
                   </button>
                 </div>
 

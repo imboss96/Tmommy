@@ -1,8 +1,8 @@
 import React, { FormEvent, PointerEvent, useRef, useState } from 'react';
-import { ArrowRight, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
+import { ArrowRight, BadgeCheck, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
-import { HomecareRole, NairobiEstate, NannyType } from '../types';
+import { HomecareRole, NannyType } from '../types';
 
 type DocumentKind = 'profile-photo' | 'identity' | 'good-conduct' | 'training' | 'cv' | 'other';
 type ApplicationDocument = { path: string; name: string; kind: DocumentKind };
@@ -14,31 +14,29 @@ const documentFields: { kind: DocumentKind; label: string; required?: boolean; h
   { kind: 'cv', label: 'CV or work history', hint: 'Optional supporting document.' }
 ];
 const roles: { value: HomecareRole; label: string }[] = [
-  { value: 'nanny', label: 'Nanny / childcare provider' }, { value: 'house-manager', label: 'House manager' },
-  { value: 'house-girl', label: 'Housekeeper' }, { value: 'house-boy', label: 'Domestic steward' },
+  { value: 'nanny', label: 'Nanny / childcare provider' }, { value: 'babysitter', label: 'Babysitter' },
+  { value: 'house-manager', label: 'House manager' }, { value: 'house-girl', label: 'Housekeeper' },
+  { value: 'mamafua', label: 'Mamafua (One-Time Housekeeper)' }, { value: 'house-boy', label: 'Domestic steward' },
   { value: 'shamba-boy', label: 'Gardener / groundskeeper' }, { value: 'caretaker', label: 'Caretaker' },
   { value: 'cook-chef', label: 'Cook / chef' }, { value: 'home-driver', label: 'Family driver' }
 ];
-const estates: NairobiEstate[] = ['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka'];
 const salaryRanges = [
-  'KES 10,000–12,000',
+  'KES 6,000–8,000',
+  'KES 8,001–12,000',
   'KES 12,001–15,000',
   'KES 15,001–20,000',
-  'KES 20,001–25,000',
-  'KES 25,001–30,000',
-  'Above KES 30,000',
-  'Negotiable'
+  'Above KES 20,000'
 ];
 const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', gender: '' as '' | 'male' | 'female', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', gender: '' as '' | 'male' | 'female', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: '', age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
   const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ 'profile-photo': null, identity: null, 'good-conduct': null, training: null, cv: null, other: null });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState('');
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawingSignatureRef = useRef(false);
-  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error' | 'submitted'>('idle');
   const [error, setError] = useState('');
 
   const setField = <Key extends keyof typeof form>(key: Key, value: (typeof form)[Key]) => setForm(current => ({ ...current, [key]: value }));
@@ -139,6 +137,10 @@ export const ProviderApplicationPage: React.FC = () => {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'We could not submit your application. Please try again.');
+      if (result.status === 'submitted') {
+        setStatus('submitted');
+        return;
+      }
       sessionStorage.setItem(`Tmommycare-provider-payment-phone-${id}`, form.phone);
       window.location.assign(`/provider-payment?id=${encodeURIComponent(id)}`);
     } catch (submissionError) {
@@ -147,13 +149,24 @@ export const ProviderApplicationPage: React.FC = () => {
     }
   };
 
+  if (status === 'submitted') {
+    return <main className="flex flex-1 items-center justify-center bg-[radial-gradient(ellipse_at_top,_#f1e9dc_0%,_#faf7f2_45%)] px-4 py-10 sm:px-6">
+      <section className="w-full max-w-xl rounded-[2rem] border border-[#E8DFD3] bg-white p-8 text-center shadow-[0_24px_70px_rgba(42,35,25,0.08)] sm:p-10">
+        <BadgeCheck className="mx-auto h-14 w-14 text-[#1D432D]" />
+        <h1 className="mt-5 font-['Outfit'] text-3xl font-extrabold text-[#1A201C]">Free application submitted</h1>
+        <p className="mt-4 text-sm leading-7 text-[#635E59]">Your application has been submitted to the Tmommycare review team. No registration payment is required for the KES 6,000–8,000 salary band.</p>
+        <a href="/" className="mt-7 inline-block rounded-xl bg-[#1D432D] px-6 py-3.5 text-sm font-bold text-white">Return to Tmommycare</a>
+      </section>
+    </main>;
+  }
+
   return <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_#f1e9dc_0%,_#faf7f2_45%)] px-4 py-10 sm:px-6 sm:py-14 lg:py-20">
     <div className="mx-auto max-w-6xl">
       <header className="mb-9 grid gap-7 lg:mb-12 lg:grid-cols-[1fr_340px] lg:items-end">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm"><Sparkles className="h-4 w-4" /> PROVIDER APPLICATIONS</div>
           <h1 className="max-w-3xl font-['Outfit'] text-4xl font-extrabold leading-[1.05] tracking-tight text-[#1A201C] sm:text-5xl lg:text-6xl">Your next chapter in <span className="text-[#D96B43]">homecare</span> starts here.</h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. After completing the form, you’ll continue to the secure registration-fee payment step. Your application is created for review only after M-Pesa confirms payment.</p>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Registration is free for the KES 6,000–8,000 salary band; other bands continue to secure M-Pesa payment. Paid applications enter review after payment is confirmed.</p>
         </div>
         <aside className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white/80 p-5 shadow-[0_12px_32px_rgba(42,35,25,0.05)]">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><LockKeyhole className="h-5 w-5" /></span>
@@ -203,10 +216,10 @@ export const ProviderApplicationPage: React.FC = () => {
               </div>
               <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
                 <label className="text-xs font-bold text-[#514B44]">Profession *<select value={form.role} onChange={e => setField('role', e.target.value as HomecareRole)} className={inputClass}>{roles.map(role => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
-                <label className="text-xs font-bold text-[#514B44]">Preferred arrangement *<select value={form.nannyType} onChange={e => setField('nannyType', e.target.value as NannyType)} className={inputClass}><option value="live-in">Live-in</option><option value="day-care">Day work</option><option value="night-nurse">Night shifts</option><option value="temporary-backup">Temporary / relief</option></select></label>
-                <label className="text-xs font-bold text-[#514B44]">Home area / neighbourhood *<select value={form.primaryEstate} onChange={e => setField('primaryEstate', e.target.value as NairobiEstate)} className={inputClass}>{estates.map(estate => <option key={estate}>{estate}</option>)}</select></label>
+                <label className="text-xs font-bold text-[#514B44]">Preferred arrangement *<select value={form.nannyType} onChange={e => setField('nannyType', e.target.value as NannyType)} className={inputClass}><option value="live-in">Live-in</option><option value="day-care">Live-out / Day Work</option><option value="night-nurse">Night shifts</option><option value="temporary-backup">Temporary / relief</option></select></label>
+                <label className="text-xs font-bold text-[#514B44]">Home area / neighbourhood *<input required minLength={2} maxLength={100} value={form.primaryEstate} onChange={e => setField('primaryEstate', e.target.value)} placeholder="Enter your town, estate, or neighbourhood" className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Years of experience *<input required type="number" min="0" max="60" value={form.experienceYears} onChange={e => setField('experienceYears', e.target.value)} className={inputClass} /></label>
-                <label className="text-xs font-bold text-[#514B44]">Expected monthly salary<select value={form.monthlySalaryRange} onChange={e => setField('monthlySalaryRange', e.target.value)} className={inputClass}><option value="">Select a salary range</option>{salaryRanges.map(range => <option key={range} value={range}>{range}</option>)}</select></label>
+                <label className="text-xs font-bold text-[#514B44]">Expected monthly salary *<select required value={form.monthlySalaryRange} onChange={e => setField('monthlySalaryRange', e.target.value)} className={inputClass}><option value="">Select a salary range</option>{salaryRanges.map(range => <option key={range} value={range}>{range}</option>)}</select><span className="mt-1 block font-normal text-[#777067]">KES 6,000–8,000 is free. Higher bands add KES 200, 250, 300, or 500 to the base fee set by Tmommycare.</span></label>
                 <label className="text-xs font-bold text-[#514B44]">Languages<span className="font-normal text-[#91897F]"> · comma separated</span><input value={form.languages} onChange={e => setField('languages', e.target.value)} placeholder="Kiswahili, English" className={inputClass} /></label>
               </div>
               <div className="mt-4 grid gap-4">
@@ -269,7 +282,7 @@ export const ProviderApplicationPage: React.FC = () => {
               {status === 'error' && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-center gap-2 text-xs text-[#777067]"><LockKeyhole className="h-4 w-4 text-[#1D432D]" /> Your documents are submitted securely</p>
-                <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-6 py-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,67,45,0.2)] transition hover:-translate-y-0.5 hover:bg-[#143020] hover:shadow-[0_14px_28px_rgba(29,67,45,0.25)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Preparing your payment…</> : <>Continue to registration payment <ArrowRight className="h-4 w-4" /></>}</button>
+                <button type="submit" disabled={status === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-6 py-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,67,45,0.2)] transition hover:-translate-y-0.5 hover:bg-[#143020] hover:shadow-[0_14px_28px_rgba(29,67,45,0.25)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">{status === 'sending' ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Submitting application…</> : <>Submit provider application <ArrowRight className="h-4 w-4" /></>}</button>
               </div>
             </section>
           </div>

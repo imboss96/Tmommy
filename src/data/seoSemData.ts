@@ -66,19 +66,19 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
       '90-Day Free Replacement Warranty',
       'Red Cross CPR Certified Nannies',
       'Live-In Nannies Karen & Runda',
-      'Try Risk-Free 3-Day Home Trial',
+      'Book Vetted Homecare Staff',
       'Ethical Domestic Childcare Kenya'
     ],
     descriptions: [
       'Connect with experienced, hospital-screened, and CPR-certified nannies in Nairobi. 90-day replacement guarantee included.',
-      'Peace of mind for your home with thoughtful matching, trusted references, and infant first aid training. Book a trial today.',
+      'Peace of mind for your home with thoughtful matching, trusted references, and infant first aid training. Book homecare staff today.',
       'Serving Karen, Runda, Westlands & Lavington. Transparent contracts and fair wages. Schedule your nanny interview in 24 hours.'
     ],
     sitelinks: [
       { title: 'Browse Nannies', desc: 'Explore household care profiles and fit options' },
       { title: 'Care Standards', desc: 'See how we assess and support every caregiver' },
       { title: 'Nairobi Salary Calculator', desc: 'Check fair monthly salary for your estate' },
-      { title: 'Book 3-Day Home Trial', desc: 'Interview and test compatibility risk-free' }
+      { title: 'Book Homecare Staff', desc: 'Request vetted household staff placement' }
     ],
     callouts: [
       'Thoughtful Matching',
@@ -103,7 +103,7 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
     ],
     estimatedMonthlyBudgetKsh: 45000,
     expectedCtr: '8.4%',
-    conversionGoal: 'Consultation & Trial Booking Form Submissions'
+    conversionGoal: 'Direct Booking Form Submissions'
   },
   {
     id: 'sem-02',

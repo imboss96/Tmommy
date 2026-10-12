@@ -36,7 +36,7 @@ export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
   },
   {
     id: 'caretakers',
-    title: 'Compound Caretakers and Custodians',
+    title: 'Caretakers and Custodians',
     description: 'Vetted property custodians supporting gate access, compound upkeep, security routines, and maintenance.',
     action: 'Find a Caretaker',
     image: '',

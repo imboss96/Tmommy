@@ -32,7 +32,7 @@ function MainWebsite() {
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
   const [isVettingBadgeOpen, setIsVettingBadgeOpen] = useState(false);
 
-  // Selected Staff for Trial or Inspection
+  // Selected staff for booking or inspection
   const [activeNanny, setActiveNanny] = useState<NannyProfile | null>(null);
 
   // Global search filters passed from Hero to Directory
@@ -101,7 +101,7 @@ function MainWebsite() {
       },
       '/compare-care': {
         title: 'Tmommycare vs Other Nanny Options in Nairobi',
-        description: 'Compare managed nanny placement, household support, first aid training, trial periods, replacement support, and informal childcare options.'
+        description: 'Compare managed nanny placement, household support, first aid training, replacement support, and informal childcare options.'
       },
       '/academy': {
         title: 'Tmommycare Domestic & Homecare Academy | Nairobi',
@@ -113,7 +113,7 @@ function MainWebsite() {
       },
       '/pricing': {
         title: 'Private Placement Pricing | Tmommycare Nairobi',
-        description: 'Learn how Tmommycare structures private placement pricing, trial arrangements, and tailored household staffing quotes.'
+        description: 'Learn how Tmommycare structures private placement pricing and tailored household staffing quotes.'
       },
       '/careers': {
         title: 'Careers at Tmommycare | Domestic Staffing & Homecare Jobs',
@@ -259,10 +259,10 @@ function MainWebsite() {
           title="Private placement pricing"
           intro="Every household is different, so our pricing is tailored to the role, number of responsibilities, schedule, required experience, and the level of live-in or live-out support needed."
           items={[
-            'Trial placement and short-term coverage pricing is discussed after a consultation with our team.',
+            'Placement and short-term coverage pricing is discussed after a consultation with our team.',
             'Live-in roles, child-specific care, household management, and specialist roles are quoted individually.',
             'All pricing is confirmed in writing before placement or onboarding is finalised.',
-            'Replacement guarantee conditions and terms are outlined in your placement agreement before any trial begins.'
+            'Replacement guarantee conditions and terms are outlined in your placement agreement before onboarding.'
           ]}
         />
       );
@@ -307,7 +307,7 @@ function MainWebsite() {
           title="Terms of placement"
           intro="Our placements are structured to help families and professionals work with clarity and confidence from the start."
           items={[
-            'Trial, placement, and replacement support terms are confirmed before onboarding begins.',
+            'Placement and replacement support terms are confirmed before onboarding begins.',
             'Working hours, duties, leave, salary expectations, and role scope should be agreed in writing.',
             'Our team supports transparent communication between families and staff to reduce confusion and protect both sides.',
             'Replacement, suspension, or termination conditions are governed by the agreed placement terms and communication between the parties.'
@@ -408,7 +408,7 @@ function MainWebsite() {
       <FloatingWhatsAppButton />
 
       {/* MODALS */}
-      {/* 1. Schedule 3-Day Risk-Free Trial Booking Modal */}
+      {/* 1. Direct Booking Request Modal */}
       <BookingModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
@@ -420,7 +420,7 @@ function MainWebsite() {
         isOpen={isVettingBadgeOpen}
         onClose={() => setIsVettingBadgeOpen(false)}
         nanny={activeNanny}
-        onBookTrial={handleSelectNannyForBooking}
+        onBookNow={handleSelectNannyForBooking}
       />
 
       {/* 3. Emergency Backup 2-4h Dispatch Modal */}

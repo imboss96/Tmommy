@@ -18,13 +18,13 @@ const steps = [
   },
   {
     number: '03',
-    title: 'Review the terms before a trial',
-    description: 'Before making a commitment, ask us to confirm the placement fee, trial arrangements, salary, duties, working hours, and replacement guarantee terms in writing.'
+    title: 'Review the terms before booking',
+    description: 'Before making a commitment, ask us to confirm the placement fee, salary, duties, working hours, and replacement guarantee terms in writing.'
   },
   {
     number: '04',
-    title: 'Meet and decide on the match',
-    description: 'The booking form offers a three-day home trial. Use the time to assess how the professional and your household routines fit before deciding on placement.'
+    title: 'Confirm the placement and start date',
+    description: 'Once you are ready to proceed, confirm the selected professional, agreed terms, and start date with our placement team.'
   }
 ];
 
@@ -56,7 +56,7 @@ export const HiringGuide: React.FC<HiringGuideProps> = ({ onOpenBooking }) => (
           <BadgeCheck className="mt-1 h-6 w-6 shrink-0 text-[#F4A261]" />
           <div>
             <h3 className="font-['Outfit'] text-xl font-bold">Get the costs and terms before you commit</h3>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">Placement pricing is discussed after consultation. Ask for the full fee, what it covers, any trial costs, and the written conditions for the 90-day replacement guarantee. Agree on the worker’s salary, duties, hours, leave, and statutory contributions directly with the placement team before confirming.</p>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">Placement pricing is discussed after consultation. Ask for the full fee, what it covers, and the written conditions for the 90-day replacement guarantee. Agree on the worker’s salary, duties, hours, leave, and statutory contributions directly with the placement team before confirming.</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-3 lg:justify-end">

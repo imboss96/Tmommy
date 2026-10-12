@@ -87,15 +87,14 @@ export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> 
               Ready for Uncompromised Childcare Security?
             </h3>
             <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-xl">
-              Start with our 3-Day Risk-Free Guided Trial. If the nanny is not the right fit for your home, 
-              we replace them immediately at zero additional agency fee.
+              Book vetted homecare staff directly, with replacement support provided according to your placement agreement.
             </p>
           </div>
           <button
             onClick={onBookConsultation}
             className="shrink-0 px-6 py-3 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-sm tracking-wide shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
           >
-            <span>Begin 3-Day Risk-Free Trial</span>
+            <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

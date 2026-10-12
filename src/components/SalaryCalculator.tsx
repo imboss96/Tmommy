@@ -19,10 +19,9 @@ import {
   Car
 } from 'lucide-react';
 import { NairobiEstate, HomecareRole, NannyType } from '../types';
-import { NAIROBI_ESTATES } from '../data/estates';
 
 export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({ onBookConsultation }) => {
-  const [estate, setEstate] = useState<NairobiEstate>('Kilimani');
+  const [estate, setEstate] = useState<NairobiEstate>('');
   const [role, setRole] = useState<HomecareRole>('nanny');
   const [arrangement, setArrangement] = useState<NannyType>('live-in');
   
@@ -74,7 +73,8 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                 className="w-full px-4 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
               >
                 <option value="nanny">Vetted Nanny & Childcare Specialist</option>
-                <option value="nanny">Au Pairs / Elite Nannies</option>
+                <option value="babysitter">Babysitter</option>
+                <option value="mamafua">Mamafua (One-Time Housekeeper)</option>
                 <option value="temporary-backup">Holiday Relievers</option>
                 <option value="house-manager">Executive House Manager</option>
                 <option value="chef">Executive Private Chef</option>
@@ -83,26 +83,22 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                 <option value="house-girl">House Girl (Professional Housekeeper)</option>
                 <option value="house-boy">House Boy (Domestic Steward)</option>
                 <option value="shamba-boy">Shamba Boy (Groundskeeper & Gardener)</option>
-                <option value="caretaker">Compound Caretaker & Property Custodian</option>
+                <option value="caretaker">Caretaker</option>
               </select>
             </div>
 
-            {/* Estate Select */}
+            {/* Estate */}
             <div>
               <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-2">
                 Your Nairobi Neighborhood
               </label>
-              <select
+              <input
+                type="text"
                 value={estate}
-                onChange={(e) => setEstate(e.target.value as NairobiEstate)}
+                onChange={(e) => setEstate(e.target.value)}
+                placeholder="Enter your estate or neighbourhood"
                 className="w-full px-4 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
-              >
-                {NAIROBI_ESTATES.map(e => (
-                  <option key={e.name} value={e.name}>
-                    {e.name} ({e.subCounty})
-                  </option>
-                ))}
-              </select>
+              />
               <p className="text-[11px] text-[#7D766D] mt-1.5 flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-[#D96B43]" />
                 <span>Pricing is tailored to your household requirements and shared after consultation.</span>
@@ -135,7 +131,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                       : 'border-[#D5C9BA] bg-white text-[#635E59]'
                   }`}
                 >
-                  Day Staff (8am - 5pm)
+                  Live-out / Day Work
                 </button>
               </div>
             </div>
@@ -263,7 +259,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                     <span>Private Agreement Terms</span>
                   </div>
                   <p className="text-[11px] leading-relaxed">
-                    No payroll deductions from the agreed rate. Full labor contract template, 3-day paid trial, 
+                    No payroll deductions from the agreed rate. Full labor contract template,
                     and our signature <strong>90-Day Free Replacement Guarantee</strong> included.
                   </p>
                 </div>

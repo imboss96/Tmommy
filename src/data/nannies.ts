@@ -301,15 +301,15 @@ export const VETTED_NANNIES: NannyProfile[] = [
     canDrive: false
   },
 
-  // --- 5. COMPOUND CARETAKERS & ESTATE CUSTODIANS ---
+  // --- 5. CARETAKERS & ESTATE CUSTODIANS ---
   {
     id: 'ct-001',
     name: 'Dennis Kipkoech R.',
     avatar: '',
     age: 37,
     role: 'caretaker',
-    roleTitle: 'Technical Compound Caretaker & Facility Custodian',
-    categoryLabel: 'Compound Caretaker',
+    roleTitle: 'Technical Caretaker & Facility Custodian',
+    categoryLabel: 'Caretaker',
     nannyType: 'live-in',
     primaryEstate: 'Kileleshwa',
     availableEstates: ['Kileleshwa', 'Westlands', 'Kilimani', 'Parklands', 'Lavington'],
@@ -346,7 +346,7 @@ export const VETTED_NANNIES: NannyProfile[] = [
     age: 41,
     role: 'caretaker',
     roleTitle: 'Senior Residential Property Caretaker & Gate Steward',
-    categoryLabel: 'Compound Caretaker',
+    categoryLabel: 'Caretaker',
     nannyType: 'live-in',
     primaryEstate: 'Karen',
     availableEstates: ['Karen', 'Lavington', 'Runda', 'Muthaiga'],

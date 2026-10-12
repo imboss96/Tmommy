@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { compressImageToJpeg } from '../../lib/imageUpload';
-import { NannyProfile, HomecareRole, NairobiEstate, NannyType } from '../../types';
+import { NannyProfile, HomecareRole, NannyType } from '../../types';
 import { ProviderCvButton } from './ProviderDocuments';
 
 export const StaffManager: React.FC = () => {
@@ -62,17 +62,14 @@ export const StaffManager: React.FC = () => {
   const roles: { value: string; label: string }[] = [
     { value: 'all', label: 'All Professions' },
     { value: 'nanny', label: 'Nannies & Childcare' },
+    { value: 'babysitter', label: 'Babysitters' },
     { value: 'house-manager', label: 'House Managers' },
     { value: 'house-girl', label: 'House Girls' },
+    { value: 'mamafua', label: 'Mamafua (One-Time Housekeepers)' },
     { value: 'house-boy', label: 'House Boys' },
     { value: 'shamba-boy', label: 'Shamba Boys' },
     { value: 'caretaker', label: 'Caretakers' },
     { value: 'cook-chef', label: 'Cooks & Chefs' }
-  ];
-
-  const estates: NairobiEstate[] = [
-    'Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 
-    'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka'
   ];
 
   const filteredStaff = nannies.filter(staff => {
@@ -270,7 +267,7 @@ export const StaffManager: React.FC = () => {
                           : 'bg-gray-100 text-gray-600 border-gray-300'
                       }`}
                     >
-                      {staff.isAvailableNow ? '● Ready for Trial' : '○ Booked / Offline'}
+                      {staff.isAvailableNow ? '● Available for Booking' : '○ Booked / Offline'}
                     </button>
                   </td>
 
@@ -429,11 +426,13 @@ export const StaffManager: React.FC = () => {
                     className="w-full px-3.5 py-2 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold"
                   >
                     <option value="nanny">Nanny & Childcare</option>
+                    <option value="babysitter">Babysitter</option>
                     <option value="house-manager">Executive House Manager</option>
                     <option value="house-girl">House Girl (Housekeeper)</option>
+                    <option value="mamafua">Mamafua (One-Time Housekeeper)</option>
                     <option value="house-boy">House Boy (Steward)</option>
                     <option value="shamba-boy">Shamba Boy (Grounds)</option>
-                    <option value="caretaker">Compound Caretaker</option>
+                    <option value="caretaker">Caretaker</option>
                     <option value="cook-chef">Private Domestic Cook / Chef</option>
                   </select>
                 </div>
@@ -459,15 +458,16 @@ export const StaffManager: React.FC = () => {
                   <label className="block text-xs font-bold uppercase text-[#7D766D] tracking-wider mb-1">
                     Primary Nairobi Estate *
                   </label>
-                  <select
-                    value={formData.primaryEstate || 'Kilimani'}
-                    onChange={(e) => setFormData({ ...formData, primaryEstate: e.target.value as NairobiEstate })}
+                  <input
+                    type="text"
+                    required
+                    minLength={2}
+                    maxLength={100}
+                    value={formData.primaryEstate || ''}
+                    onChange={(e) => setFormData({ ...formData, primaryEstate: e.target.value })}
+                    placeholder="Enter an estate or neighbourhood"
                     className="w-full px-3.5 py-2 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold"
-                  >
-                    {estates.map(est => (
-                      <option key={est} value={est}>{est}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -480,7 +480,7 @@ export const StaffManager: React.FC = () => {
                     className="w-full px-3.5 py-2 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold"
                   >
                     <option value="live-in">Live-in</option>
-                    <option value="day-care">Day Care (Daily 8am-5pm)</option>
+                    <option value="day-care">Live-out / Day Work</option>
                     <option value="night-nurse">Night Nurse</option>
                     <option value="temporary-backup">Temporary Relief</option>
                   </select>

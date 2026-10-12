@@ -85,14 +85,14 @@ export const MpesaSettingsPanel: React.FC = () => {
   return <section className="rounded-2xl border border-[#E8DFD3] bg-white p-5 shadow-sm sm:p-6">
     <div className="mb-5">
       <h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Provider registration payments · Safaricom M-Pesa</h3>
-      <p className="mt-1 text-xs leading-5 text-[#635E59]">Configure the KES registration fee and Daraja STK Push credentials. Credentials are encrypted on the server and cannot be read back from this form.</p>
+      <p className="mt-1 text-xs leading-5 text-[#635E59]">Set the base registration fee in KES. Salary-band surcharges are added automatically; the KES 6,000–8,000 band is always free. Daraja credentials are encrypted on the server and cannot be read back from this form.</p>
     </div>
     {loading ? <div className="flex items-center gap-2 py-4 text-sm text-[#635E59]"><LoaderCircle className="h-4 w-4 animate-spin" /> Loading payment settings…</div> : <form onSubmit={save} className="space-y-4">
       {!settings.encryptionKeyConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set the backend-only MPESA_CONFIG_ENCRYPTION_KEY (64 hexadecimal characters) in the server environment before saving credentials.</p>}
       {!settings.callbackConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set MPESA_CALLBACK_URL to the public HTTPS API callback URL in the server environment before enabling payments.</p>}
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="text-xs font-bold text-[#635E59]">Registration fee (KES)
-          <input required type="number" min="1" max="1000000" step="1" value={settings.feeKes || ''} onChange={event => setSettings(current => ({ ...current, feeKes: Number(event.target.value) }))} className={fieldClass} />
+        <label className="text-xs font-bold text-[#635E59]">Base registration fee (KES)
+          <input required type="number" min="0" max="1000000" step="1" value={settings.feeKes} onChange={event => setSettings(current => ({ ...current, feeKes: Number(event.target.value) }))} className={fieldClass} />
         </label>
         <label className="text-xs font-bold text-[#635E59]">Daraja environment
           <select value={settings.environment} onChange={event => setSettings(current => ({ ...current, environment: event.target.value as MpesaSettings['environment'] }))} className={fieldClass}>
@@ -123,7 +123,7 @@ export const MpesaSettingsPanel: React.FC = () => {
       </div>
       <label className="flex items-start gap-2 text-xs font-semibold text-[#3D3A36]">
         <input type="checkbox" checked={settings.enabled} onChange={event => setSettings(current => ({ ...current, enabled: event.target.checked }))} className="mt-0.5 accent-[#1D432D]" />
-        Enable provider registration payments. Applicants will not enter the admin review queue until M-Pesa payment is confirmed.
+        Enable M-Pesa payments for paid salary bands. Those applications enter the review queue after payment is confirmed; the KES 6,000–8,000 band is submitted free.
       </label>
       {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
       {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}

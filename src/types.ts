@@ -2,8 +2,10 @@ export type NannyType = 'live-in' | 'day-care' | 'night-nurse' | 'temporary-back
 
 export type HomecareRole = 
   | 'nanny' 
+  | 'babysitter'
   | 'house-manager' 
   | 'house-girl' 
+  | 'mamafua'
   | 'house-boy' 
   | 'shamba-boy' 
   | 'caretaker' 
@@ -12,20 +14,7 @@ export type HomecareRole =
   | 'home-driver'
   | 'temporary-backup';
 
-export type NairobiEstate = 
-  | 'Kilimani' 
-  | 'Westlands' 
-  | 'Karen' 
-  | 'Lavington' 
-  | 'Kileleshwa' 
-  | 'Runda' 
-  | 'Muthaiga' 
-  | 'South C' 
-  | 'Parklands' 
-  | 'Gigiri' 
-  | 'Kiambu Road' 
-  | 'Ruaka' 
-  | 'All Nairobi';
+export type NairobiEstate = string;
 
 export interface VettingPillar {
   id: string;
@@ -98,7 +87,6 @@ export interface BookingFormData {
   numberOfChildren: number;
   childrenAges: string;
   startDate: string;
-  preferredTrialDays: number;
   additionalNotes: string;
   needsCooking: boolean;
   needsPetFriendly: boolean;
@@ -181,7 +169,7 @@ export interface ParentingInsight {
   featured?: boolean;
 }
 
-export type BookingStatus = 'New' | 'Contacted' | 'Trial Scheduled' | 'Completed' | 'Archived';
+export type BookingStatus = 'New' | 'Contacted' | 'Completed' | 'Archived';
 export type EmergencyStatus = 'Pending Dispatch' | 'Staff Contacted' | 'Dispatched' | 'Resolved' | 'Archived';
 export type ContactInquiryStatus = 'New' | 'Contacted' | 'Resolved' | 'Archived';
 export type ReviewStatus = 'pending' | 'published' | 'hidden';

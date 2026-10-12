@@ -21,7 +21,7 @@ export const DEFAULT_REVIEWS: Review[] = [
     familyRole: 'Diplomatic Mission Staff',
     estate: 'Runda',
     nannyName: 'Esther Moraa B.',
-    comment: 'Security vetting was our primary requirement in Runda. Tmommycare provided full biometric background checks, Chief verification letters, and medical clearances before Esther even arrived for her 3-day trial. She is gentle, structured, and an absolute delight with our twins.',
+    comment: 'Security vetting was our primary requirement in Runda. Tmommycare provided full biometric background checks, Chief verification letters, and medical clearances before Esther started. She is gentle, structured, and an absolute delight with our twins.',
     rating: 5,
     childrenAge: '2-year-old Twins',
     serviceType: 'Live-In Specialist',

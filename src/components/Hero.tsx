@@ -64,7 +64,7 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenEmergency
 }) => {
   const { mediaItems } = useContent();
-  const [selectedEstate, setSelectedEstate] = useState<NairobiEstate | 'All Nairobi'>('All Nairobi');
+  const [selectedEstate, setSelectedEstate] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [activeSlide, setActiveSlide] = useState(0);
   const pointerStartX = useRef<number | null>(null);
@@ -101,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({
 
   const handleHeroSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(selectedEstate, selectedRole);
+    onSearch(selectedEstate.trim() || 'All Nairobi', selectedRole);
     const element = document.getElementById('nanny-directory');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -179,35 +179,23 @@ export const Hero: React.FC<HeroProps> = ({
                     <option value="house-girl">House Girls / Housekeepers</option>
                     <option value="house-boy">House Boys / Domestic Stewards</option>
                     <option value="shamba-boy">Shamba Boys (Gardeners & Landscaping)</option>
-                    <option value="caretaker">Compound Caretakers & Custodians</option>
+                    <option value="caretaker">Caretakers & Custodians</option>
                   </select>
                 </div>
 
-                {/* Estate Select */}
+                {/* City Neighbourhood */}
                 <div className="sm:col-span-4 text-left">
                   <label className="block text-[11px] uppercase font-bold text-[#7D766D] tracking-wider mb-1 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#D96B43]" />
                     City Neighbourhood
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={selectedEstate}
-                    onChange={(e) => setSelectedEstate(e.target.value as NairobiEstate | 'All Nairobi')}
+                    onChange={(e) => setSelectedEstate(e.target.value)}
+                    placeholder="All city neighbourhoods"
                     className="w-full bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl px-3 py-2.5 text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
-                  >
-                    <option value="All Nairobi">All City Neighbourhoods</option>
-                    <option value="Kilimani">Kilimani</option>
-                    <option value="Westlands">Westlands</option>
-                    <option value="Karen">Karen</option>
-                    <option value="Lavington">Lavington</option>
-                    <option value="Kileleshwa">Kileleshwa</option>
-                    <option value="Runda">Runda</option>
-                    <option value="Muthaiga">Muthaiga</option>
-                    <option value="South C">South C</option>
-                    <option value="Parklands">Parklands</option>
-                    <option value="Gigiri">Gigiri</option>
-                    <option value="Kiambu Road">Kiambu Road</option>
-                    <option value="Ruaka">Ruaka</option>
-                  </select>
+                  />
                 </div>
 
                 {/* Search CTA */}
@@ -223,7 +211,7 @@ export const Hero: React.FC<HeroProps> = ({
               </form>
             </div>
 
-            {/* Emergency & Trial Secondary Links */}
+            {/* Emergency and additional service links */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 text-xs sm:text-sm">
               <span className="text-[#635E59]">Need emergency backup staff or weekend coverage?</span>
               <button 
@@ -334,7 +322,7 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#1D432D] font-['Outfit']">99.2%</p>
-            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">Trial-to-Placement Success Rate</p>
+            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">Successful Placements</p>
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#D96B43] font-['Outfit']">&lt; 3 Hours</p>

@@ -19,14 +19,14 @@ interface VettingBadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   nanny: NannyProfile | null;
-  onBookTrial: (nanny: NannyProfile) => void;
+  onBookNow: (nanny: NannyProfile) => void;
 }
 
 export const VettingBadgeModal: React.FC<VettingBadgeModalProps> = ({
   isOpen,
   onClose,
   nanny,
-  onBookTrial
+  onBookNow
 }) => {
   if (!isOpen || !nanny) return null;
 
@@ -190,11 +190,11 @@ export const VettingBadgeModal: React.FC<VettingBadgeModalProps> = ({
           <button
             onClick={() => {
               onClose();
-              onBookTrial(nanny);
+              onBookNow(nanny);
             }}
             className="px-6 py-3 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#D96B43]/20 transition-all hover:scale-105"
           >
-            Start 3-Day Trial with {nanny.name.split(' ')[0]}
+            Book {nanny.name.split(' ')[0]}
           </button>
         </div>
 

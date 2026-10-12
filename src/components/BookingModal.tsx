@@ -1,20 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  HeartHandshake, 
-  Calendar, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  User, 
-  Home, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Sparkles,
-  Clock,
+import {
+  X,
+  MapPin,
+  Phone,
+  Mail,
+  ShieldCheck,
+  CheckCircle2,
   Briefcase
 } from 'lucide-react';
-import { NairobiEstate, NannyType, NannyProfile, BookingFormData, HomecareRole } from '../types';
+import { NannyType, NannyProfile, BookingFormData, HomecareRole } from '../types';
 import { useContent } from '../context/ContentContext';
 import { TmommycareLogo } from './TmommycareLogo';
 
@@ -37,14 +31,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     parentName: '',
     phone: '',
     email: '',
-    estate: (preSelectedNanny?.primaryEstate || 'Kilimani') as NairobiEstate,
+    estate: preSelectedNanny?.primaryEstate || '',
     residenceDetails: '',
     residenceType: 'Apartment',
     nannyType: (preSelectedNanny?.nannyType || 'live-in') as NannyType,
     numberOfChildren: 1,
     childrenAges: '',
     startDate: '',
-    preferredTrialDays: 3,
     additionalNotes: '',
     needsCooking: true,
     needsPetFriendly: false,
@@ -90,7 +83,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             <TmommycareLogo variant="icon" size="sm" />
             <div>
               <h2 className="text-xl font-bold text-[#1A201C] font-['Outfit']">
-                Schedule a 3-Day Risk-Free Home Trial
+                Book Homecare Staff
               </h2>
               <p className="text-xs text-[#635E59]">
                 {preSelectedNanny 
@@ -117,12 +110,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h3 className="text-2xl font-bold text-[#1A201C] font-['Outfit']">
-                Trial Request Received!
+                Booking Request Received!
               </h3>
               <p className="text-sm text-[#524D47] max-w-md mx-auto leading-relaxed">
                 Thank you, <strong>{formData.parentName}</strong>. Our senior Nairobi placement coordinator 
-                will call you on <strong>{formData.phone}</strong> within 30–45 minutes to confirm candidate 
-                availability, share complete verification documents, and arrange your 3-day home trial.
+                will call you on <strong>{formData.phone}</strong> within 30–45 minutes to confirm staff
+                availability, share verification details, and coordinate your requested start date.
               </p>
 
               <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8DFD3] text-xs text-left max-w-md mx-auto space-y-1.5">
@@ -195,13 +188,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
                   >
                     <option value="nanny">Vetted Nanny & Childcare Specialist</option>
-                    <option value="nanny">Au Pairs / Elite Nannies</option>
+                    <option value="babysitter">Babysitter</option>
+                    <option value="mamafua">Mamafua (One-Time Housekeeper)</option>
                     <option value="temporary-backup">Holiday Relievers</option>
                     <option value="house-manager">Executive House Manager</option>
                     <option value="house-girl">House Girl / Professional Housekeeper</option>
                     <option value="house-boy">House Boy / Domestic Steward</option>
                     <option value="shamba-boy">Shamba Boy / Groundskeeper & Gardener</option>
-                    <option value="caretaker">Compound Caretaker & Property Custodian</option>
+                    <option value="caretaker">Caretaker</option>
                     <option value="cook-chef">Private Domestic Cook / Chef</option>
                   </select>
                 </div>
@@ -258,24 +252,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
                     Nairobi Estate *
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    minLength={2}
+                    maxLength={100}
                     value={formData.estate}
-                    onChange={(e) => setFormData({ ...formData, estate: e.target.value as NairobiEstate })}
+                    onChange={(e) => setFormData({ ...formData, estate: e.target.value })}
+                    placeholder="Enter your estate or neighbourhood"
                     className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
-                  >
-                    <option value="Kilimani">Kilimani</option>
-                    <option value="Westlands">Westlands</option>
-                    <option value="Karen">Karen</option>
-                    <option value="Lavington">Lavington</option>
-                    <option value="Kileleshwa">Kileleshwa</option>
-                    <option value="Runda">Runda</option>
-                    <option value="Muthaiga">Muthaiga</option>
-                    <option value="South C">South C</option>
-                    <option value="Parklands">Parklands</option>
-                    <option value="Gigiri">Gigiri</option>
-                    <option value="Kiambu Road">Kiambu Road</option>
-                    <option value="Ruaka">Ruaka</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -321,7 +307,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
                   >
                     <option value="live-in">Full-Time Live-In (Room Provided)</option>
-                    <option value="day-care">Day Staff (8:00 AM - 5:00 PM)</option>
+                    <option value="day-care">Live-out / Day Work</option>
                     <option value="night-nurse">Overnight / Night Shift</option>
                     <option value="temporary-backup">Temporary / Emergency Backup</option>
                   </select>
@@ -378,7 +364,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="p-3.5 rounded-2xl bg-[#E8F0EA] border border-[#C5DDCB] flex items-center gap-3 text-xs text-[#1D432D]">
                 <ShieldCheck className="w-5 h-5 text-[#1D432D] shrink-0" />
                 <span>
-                  <strong>Our 90-Day Guarantee:</strong> If the candidate is not the perfect fit during or after the 3-day home trial, we replace them at zero extra agency cost.
+                  <strong>Our 90-Day Guarantee:</strong> If a placement is not the right fit, replacement support is provided according to the terms in your placement agreement.
                 </span>
               </div>
 
@@ -387,7 +373,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 type="submit"
                 className="w-full py-3.5 px-4 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#D96B43]/20 transition-all hover:scale-[1.01]"
               >
-                Confirm 3-Day Home Trial Booking
+                Submit Booking Request
               </button>
 
             </form>

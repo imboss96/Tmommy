@@ -116,7 +116,6 @@ const bookingRows = DEFAULT_BOOKINGS.map(booking => ({
   number_of_children: booking.numberOfChildren,
   children_ages: booking.childrenAges,
   start_date: booking.startDate,
-  preferred_trial_days: booking.preferredTrialDays,
   additional_notes: booking.additionalNotes,
   needs_cooking: booking.needsCooking,
   needs_pet_friendly: booking.needsPetFriendly,

@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, EyeOff, MessageSquareQuote, Pencil, Trash2 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
-import { NairobiEstate, Review, ReviewStatus } from '../../types';
-
-const estates: NairobiEstate[] = ['Kilimani', 'Westlands', 'Karen', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'South C', 'Parklands', 'Gigiri', 'Kiambu Road', 'Ruaka'];
+import { Review, ReviewStatus } from '../../types';
 
 export const ReviewsManager: React.FC = () => {
   const { reviews, updateReview, deleteReview } = useContent();
@@ -80,7 +78,7 @@ export const ReviewsManager: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input value={draft.parentName} onChange={e => setDraft({ ...draft, parentName: e.target.value })} required placeholder="Parent name" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm" />
               <input value={draft.familyRole} onChange={e => setDraft({ ...draft, familyRole: e.target.value })} required placeholder="Family role" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm" />
-              <select value={draft.estate} onChange={e => setDraft({ ...draft, estate: e.target.value as NairobiEstate })} className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm">{estates.map(estate => <option key={estate}>{estate}</option>)}</select>
+              <input required minLength={2} maxLength={100} value={draft.estate} onChange={e => setDraft({ ...draft, estate: e.target.value })} placeholder="Estate or neighbourhood" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm" />
               <input value={draft.serviceType} onChange={e => setDraft({ ...draft, serviceType: e.target.value })} placeholder="Service type" className="rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm" />
             </div>
             <textarea value={draft.comment} onChange={e => setDraft({ ...draft, comment: e.target.value })} required rows={5} className="w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] px-3 py-2 text-sm" />

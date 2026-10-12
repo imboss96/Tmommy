@@ -358,7 +358,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
                   }}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white font-bold text-xs sm:text-sm shadow-md"
                 >
-                  Book a 3-Day Nanny Trial
+                  Book a Nanny
                 </button>
               </div>
 

@@ -311,7 +311,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
                 <div className="flex items-center justify-between border-b border-[#F2ECE1] pb-3">
                   <h3 className="font-bold text-sm text-[#1A201C] flex items-center gap-2">
                     <Inbox className="w-4 h-4 text-[#D96B43]" />
-                    <span>Recent 3-Day Trial Bookings</span>
+                    <span>Recent Bookings</span>
                   </h3>
                   <button
                     onClick={() => setActiveTab('submissions')}
@@ -332,7 +332,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
                           </span>
                         </div>
                         <p className="text-[11px] text-[#635E59] mt-0.5">
-                          {b.estate} • {b.role || 'nanny'} • {b.preferredTrialDays} Days Trial
+                          {b.estate} • {b.role || 'nanny'} • Starts {b.startDate || 'date to be confirmed'}
                         </p>
                       </div>
                       <a

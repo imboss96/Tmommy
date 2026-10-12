@@ -169,16 +169,19 @@ function mapBookingRow(row: Record<string, unknown>): BookingSubmission {
     numberOfChildren: row.number_of_children as number,
     childrenAges: row.children_ages as string,
     startDate: row.start_date as string,
-    preferredTrialDays: row.preferred_trial_days as number,
     additionalNotes: row.additional_notes as string,
     needsCooking: row.needs_cooking as boolean,
     needsPetFriendly: row.needs_pet_friendly as boolean,
     hasGardenOrLawn: row.has_garden_or_lawn as boolean,
     submittedAt: row.submitted_at as string,
-    status: row.status as BookingSubmission['status'],
+    status: normalizeBookingStatus(row.status),
     internalNotes: (row.internal_notes as string | null) || undefined,
     assignedCoordinator: (row.assigned_coordinator as string | null) || undefined
   };
+}
+
+function normalizeBookingStatus(status: unknown): BookingStatus {
+  return status === 'Trial Scheduled' ? 'Contacted' : status as BookingStatus;
 }
 
 function mapEmergencyRow(row: Record<string, unknown>): EmergencySubmission {
@@ -330,6 +333,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [bookings, setBookings] = useState<BookingSubmission[]>(() => 
     isSupabaseConfigured ? [] : safeStorageGet(STORAGE_KEYS.BOOKINGS, DEFAULT_BOOKINGS)
+      .map(booking => ({ ...booking, status: normalizeBookingStatus(booking.status) }))
   );
 
   const [emergencyRequests, setEmergencyRequests] = useState<EmergencySubmission[]>(() => 

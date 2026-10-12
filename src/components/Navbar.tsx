@@ -236,7 +236,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               className="w-full py-3 rounded-xl bg-[#D96B43] text-white font-bold text-sm shadow-md"
             >
-              Book 3-Day Risk-Free Trial
+              Book Now
             </button>
             <button
               onClick={() => {
