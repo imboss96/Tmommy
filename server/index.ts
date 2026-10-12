@@ -17,11 +17,11 @@ const publicAppUrl = (() => {
   try {
     const configuredUrl = new URL(appUrl);
     if (['localhost', '127.0.0.1', '0.0.0.0'].includes(configuredUrl.hostname)) {
-      return 'https://tmommycares.com';
+      return 'https://tTmommycares.com';
     }
     return configuredUrl.origin;
   } catch {
-    return 'https://tmommycares.com';
+    return 'https://tTmommycares.com';
   }
 })();
 const configuredAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
@@ -36,9 +36,9 @@ const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
 const mpesaConfigEncryptionKey = process.env.MPESA_CONFIG_ENCRYPTION_KEY || '';
 const mpesaCallbackUrl = process.env.MPESA_CALLBACK_URL || '';
 const brevoApiKey = process.env.BREVO_API_KEY;
-const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tmommycares.com';
-const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tmommycares.com';
-const brevoSenderName = process.env.BREVO_SENDER_NAME || 'MommyCare';
+const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tTmommycares.com';
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tTmommycares.com';
+const brevoSenderName = process.env.BREVO_SENDER_NAME || 'Tmommycare';
 
 const hasRealValue = (...values: Array<string | undefined>) =>
   values.every(value => Boolean(value && !value.includes('YOUR_')));
@@ -71,7 +71,7 @@ async function sendSubmissionNotification(
     .map(([label, value]) => `<tr><td style="width:38%;padding:12px 14px;border-bottom:1px solid #eee7df;color:#635e59;font-size:13px;font-weight:700;vertical-align:top">${escapeHtml(label)}</td><td style="padding:12px 14px;border-bottom:1px solid #eee7df;color:#1a201c;font-size:14px;line-height:1.5;vertical-align:top;white-space:pre-wrap;word-break:break-word">${escapeHtml(value)}</td></tr>`)
     .join('');
   const textDetails = fields.map(([label, value]) => `${label}: ${value}`).join('\n');
-  const logoUrl = `${publicAppUrl}/mommycare-logo-transparent.png`;
+  const logoUrl = `${publicAppUrl}/Tmommycare-logo-transparent.png`;
   const htmlContent = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background-color:#f7f3ef;font-family:Arial,Helvetica,sans-serif;color:#1a201c">
@@ -80,7 +80,7 @@ async function sendSubmissionNotification(
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background-color:#ffffff;border:1px solid #e8dfd3;border-radius:16px;overflow:hidden">
         <tr><td style="height:8px;background-color:#1d432d;font-size:0;line-height:0">&nbsp;</td></tr>
         <tr><td align="center" style="padding:26px 28px 20px;background-color:#fff">
-          <img src="${escapeHtml(logoUrl)}" width="190" alt="MommyCare - Quality Care. Safer Homes." style="display:block;width:190px;max-width:80%;height:auto;border:0;outline:none;text-decoration:none">
+          <img src="${escapeHtml(logoUrl)}" width="190" alt="Tmommycare - Quality Care. Safer Homes." style="display:block;width:190px;max-width:80%;height:auto;border:0;outline:none;text-decoration:none">
         </td></tr>
         <tr><td style="padding:26px 30px;background-color:#faf7f2;border-top:1px solid #eee7df;border-bottom:1px solid #eee7df">
           <p style="margin:0 0 8px;color:#d96b43;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">New submission</p>
@@ -91,8 +91,8 @@ async function sendSubmissionNotification(
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee7df;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden">${htmlRows}</table>
         </td></tr>
         <tr><td align="center" style="padding:18px 24px;background-color:#1d432d;color:#e8f0ea;font-size:12px;line-height:1.6">
-          MommyCare <span style="color:#f4a261">&bull;</span> Quality Care. Safer Homes.<br>
-          <a href="${escapeHtml(publicAppUrl)}" style="color:#ffffff;text-decoration:underline">Visit MommyCare</a>
+          Tmommycare <span style="color:#f4a261">&bull;</span> Quality Care. Safer Homes.<br>
+          <a href="${escapeHtml(publicAppUrl)}" style="color:#ffffff;text-decoration:underline">Visit Tmommycare</a>
         </td></tr>
       </table>
     </td></tr>
@@ -110,7 +110,7 @@ async function sendSubmissionNotification(
       body: JSON.stringify({
         sender: { name: brevoSenderName, email: brevoSenderEmail },
         to: [{ email: notificationEmail }],
-        subject: `New MommyCare ${submissionType}`,
+        subject: `New Tmommycare ${submissionType}`,
         htmlContent,
         textContent: `New ${submissionType}\n\n${textDetails}`
       }),
@@ -135,7 +135,7 @@ async function uploadImageBufferToCloudinary(imageBuffer: Buffer, contentType: '
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = 'mommycare';
+  const folder = 'Tmommycare';
   const signature = crypto
     .createHash('sha1')
     .update(`folder=${folder}&timestamp=${timestamp}${cloudinaryApiSecret}`)
@@ -144,7 +144,7 @@ async function uploadImageBufferToCloudinary(imageBuffer: Buffer, contentType: '
   const fileBytes = new Uint8Array(imageBuffer.length);
   fileBytes.set(imageBuffer);
   const extension = contentType === 'image/png' ? 'png' : 'jpg';
-  form.append('file', new Blob([fileBytes.buffer], { type: contentType }), `mommycare-image.${extension}`);
+  form.append('file', new Blob([fileBytes.buffer], { type: contentType }), `Tmommycare-image.${extension}`);
   form.append('api_key', cloudinaryApiKey!);
   form.append('timestamp', String(timestamp));
   form.append('folder', folder);
@@ -309,10 +309,10 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://tmommycares.com',
-  'https://www.tmommycares.com',
-  'http://tmommycares.com',
-  'http://www.tmommycares.com',
+  'https://tTmommycares.com',
+  'https://www.tTmommycares.com',
+  'http://tTmommycares.com',
+  'http://www.tTmommycares.com',
   'https://179.198.201.64',
   'http://179.198.201.64',
   'https://179.198.201.64:3000',
@@ -470,7 +470,7 @@ app.get('/api/admin/mpesa-settings', requireAdmin, async (_req, res) => {
     environment: data?.environment || 'sandbox',
     merchantType: data?.merchant_type || 'paybill',
     shortcode: data?.shortcode || '',
-    accountReference: data?.account_reference || 'MOMMYCARE',
+    accountReference: data?.account_reference || 'Tmommycare',
     credentialsConfigured: Boolean(data?.consumer_key_ciphertext && data?.consumer_secret_ciphertext && data?.passkey_ciphertext),
     encryptionKeyConfigured: /^[0-9a-f]{64}$/i.test(mpesaConfigEncryptionKey),
     callbackConfigured: isMpesaCallbackConfigured()
@@ -536,7 +536,7 @@ app.put('/api/admin/mpesa-settings', requireAdmin, async (req, res) => {
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
-    service: 'mommycare-api',
+    service: 'Tmommycare-api',
     port,
     supabaseConfigured: Boolean(supabase),
     cloudinaryConfigured: hasRealValue(cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret)
@@ -715,7 +715,7 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
   if (!paymentSettings?.enabled || Number(paymentSettings.fee_kes) < 1 ||
       !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
       !paymentSettings.passkey_ciphertext || !isMpesaCallbackConfigured()) {
-    return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact MommyCare.' });
+    return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact Tmommycare.' });
   }
   try {
     decryptMpesaSecret(paymentSettings.consumer_key_ciphertext);
@@ -724,19 +724,31 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
   } catch (configurationError) {
     const message = configurationError instanceof Error ? configurationError.message : 'M-Pesa credentials cannot be read.';
     console.error(`[API] Provider application draft blocked by M-Pesa configuration: ${message}`);
-    return res.status(503).json({ error: 'M-Pesa settings need administrator attention. Please contact MommyCare.' });
+    return res.status(503).json({ error: 'M-Pesa settings need administrator attention. Please contact Tmommycare.' });
   }
   if (!profile || typeof profile !== 'object' || typeof profile.name !== 'string' || profile.name.trim().length < 2 ||
       typeof profile.phone !== 'string' || profile.phone.trim().length < 7 ||
       typeof profile.email !== 'string' || !profile.email.includes('@') ||
       typeof profile.contactAddress !== 'string' || profile.contactAddress.trim().length < 5 ||
-      typeof profile.referenceName !== 'string' || profile.referenceName.trim().length < 2 ||
-      typeof profile.referencePhone !== 'string' || profile.referencePhone.trim().length < 7 ||
       typeof profile.emergencyContactName !== 'string' || profile.emergencyContactName.trim().length < 2 ||
       typeof profile.emergencyContactPhone !== 'string' || profile.emergencyContactPhone.trim().length < 7 ||
+      !['male', 'female'].includes(profile.gender) ||
       !providerRoles.has(profile.role) || !providerArrangements.has(profile.nannyType) ||
       !providerEstates.has(profile.primaryEstate) || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
-    return res.status(400).json({ error: 'Complete the required contact address, one reference with a valid contact number, emergency contact, role, availability, and document fields.' });
+    return res.status(400).json({ error: 'Complete the required contact address, emergency contact, gender, role, availability, and document fields.' });
+  }
+  const referenceName = typeof profile.referenceName === 'string' ? profile.referenceName.trim() : '';
+  const referenceRelationship = typeof profile.referenceRelationship === 'string' ? profile.referenceRelationship.trim() : '';
+  const referencePhone = typeof profile.referencePhone === 'string' ? profile.referencePhone.trim() : '';
+  if ((profile.referenceName !== undefined && typeof profile.referenceName !== 'string') ||
+      (profile.referenceRelationship !== undefined && typeof profile.referenceRelationship !== 'string') ||
+      (profile.referencePhone !== undefined && typeof profile.referencePhone !== 'string') ||
+      referenceName.length > 100 || referenceRelationship.length > 100 || referencePhone.length > 40) {
+    return res.status(400).json({ error: 'Reference details must be valid text within the allowed length.' });
+  }
+  if ((referenceName || referenceRelationship || referencePhone) &&
+      (referenceName.length < 2 || referencePhone.length < 7)) {
+    return res.status(400).json({ error: 'If you add a reference, enter their full name and a valid phone number.' });
   }
   if (profile.termsAccepted !== true || typeof profile.signatureDataUrl !== 'string') {
     return res.status(400).json({ error: 'Agree to the provider terms and provide your signature before submitting.' });
@@ -785,12 +797,12 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
   const submittedProfile = {
     name: profile.name.trim().slice(0, 100), email: profile.email.trim().slice(0, 160), phone: profile.phone.trim().slice(0, 40),
     contactAddress: profile.contactAddress.trim().slice(0, 500),
-    referenceName: profile.referenceName.trim().slice(0, 100),
-    referenceRelationship: typeof profile.referenceRelationship === 'string' ? profile.referenceRelationship.trim().slice(0, 100) : '',
-    referencePhone: profile.referencePhone.trim().slice(0, 40),
+    referenceName: referenceName.slice(0, 100),
+    referenceRelationship: referenceRelationship.slice(0, 100),
+    referencePhone: referencePhone.slice(0, 40),
     emergencyContactName: profile.emergencyContactName.trim().slice(0, 100),
     emergencyContactPhone: profile.emergencyContactPhone.trim().slice(0, 40),
-    role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate,
+    gender: profile.gender, role: profile.role, nannyType: profile.nannyType, primaryEstate: profile.primaryEstate,
     age: Math.max(18, Math.min(75, Number(profile.age) || 18)),
     experienceYears: Math.max(0, Math.min(60, Number(profile.experienceYears) || 0)),
     monthlySalaryRange,
@@ -1113,7 +1125,7 @@ app.post('/api/admin/provider-applications/:id/:action', requireAdmin, async (re
       primary_estate: profile.primaryEstate, available_estates: [profile.primaryEstate],
       experience_years: profile.experienceYears, rating: 0, review_count: 0,
       monthly_salary_ksh: profile.monthlySalaryKsh, hourly_rate_ksh: 0,
-      tagline: `${profile.experienceYears} years of experience. Contact MommyCare to discuss availability.`, bio: profile.bio,
+      tagline: `${profile.experienceYears} years of experience. Contact Tmommycare to discuss availability.`, bio: profile.bio,
       certifications: [], skills: profile.skills || [], languages: profile.languages || [], education: '',
       dci_good_conduct_number: profile.dciGoodConductNumber || '', dci_issue_date: '', first_aid_cert_number: '',
       medical_clearance_date: '', verified_reference_count: 0, is_available_now: true,
@@ -1349,7 +1361,7 @@ app.post('/api/cloudinary/signature', requireAdmin, (req, res) => {
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = typeof req.body?.folder === 'string' && req.body.folder.trim()
     ? req.body.folder.trim()
-    : 'mommycare';
+    : 'Tmommycare';
   const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
   const signature = crypto
     .createHash('sha1')
@@ -1493,6 +1505,6 @@ app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.listen(port, () => {
-  console.log(`MommyCare API listening on http://localhost:${port}`);
+  console.log(`Tmommycare API listening on http://localhost:${port}`);
   console.log(`[API] Supabase configured: ${Boolean(supabase)} | Cloudinary configured: ${hasRealValue(cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret)}`);
 });

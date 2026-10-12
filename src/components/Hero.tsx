@@ -30,7 +30,7 @@ const heroSlides = [
     description: 'Protect your home and family with trusted care from professionals selected around your household needs.',
     points: ['DCI Biometric Clearance', 'Reference Verified', '90-Day Replacement Support'],
     image: '',
-    alt: 'MommyCare vetted homecare professional in Nairobi',
+    alt: 'Tmommycare vetted homecare professional in Nairobi',
     caption: 'Care matched to your household',
     captionDetail: 'Nannies, household staff, and emergency cover'
   },

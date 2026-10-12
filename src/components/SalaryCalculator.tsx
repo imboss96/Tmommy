@@ -256,7 +256,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
                   </div>
                 </div>
 
-                {/* MommyCare Assurance Note */}
+                {/* Tmommycare Assurance Note */}
                 <div className="p-4 rounded-2xl bg-[#FAF0EB] border border-[#F2C2B2] text-xs text-[#2C2723] space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-[#D96B43]">
                     <ShieldCheck className="w-4 h-4" />

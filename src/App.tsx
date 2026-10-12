@@ -45,7 +45,7 @@ function MainWebsite() {
   };
 
   const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminPath);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('mommycare_admin_authenticated') === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('Tmommycare_admin_authenticated') === 'true');
   const [, setRouteVersion] = useState(0);
   const pathname = window.location.pathname.replace(/\/$/, '') || '/';
   const requestedRole = new URLSearchParams(window.location.search).get('role') || 'all';
@@ -72,68 +72,68 @@ function MainWebsite() {
   useEffect(() => {
     const routeSeo: Record<string, { title: string; description: string }> = {
       '/': {
-        title: 'MommyCare Nairobi | Nannies & Homecare Professionals',
+        title: 'Tmommycare Nairobi | Nannies & Homecare Professionals',
         description: 'Find nannies, house managers, caregivers, and domestic professionals in Nairobi with guided placement support and replacement options.'
       },
       '/nannies': {
-        title: 'Nannies & Domestic Staff in Nairobi | MommyCare',
+        title: 'Nannies & Domestic Staff in Nairobi | Tmommycare',
         description: 'Browse nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi estates.'
       },
       '/vetting': {
-        title: 'Nanny Care Standards in Nairobi | MommyCare',
-        description: 'See how MommyCare supports quality care through thoughtful screening, reference checks, training, and household support.'
+        title: 'Nanny Care Standards in Nairobi | Tmommycare',
+        description: 'See how Tmommycare supports quality care through thoughtful screening, reference checks, training, and household support.'
       },
       '/salary-guide': {
-        title: 'Nairobi Nanny Salary Guide & Take-Home Calculator | MommyCare',
+        title: 'Nairobi Nanny Salary Guide & Take-Home Calculator | Tmommycare',
         description: 'Estimate fair private-agreement take-home salaries for nannies, house managers, cooks, drivers, gardeners, and other domestic professionals in Nairobi.'
       },
       '/mission-vision': {
-        title: 'Our Mission & Vision | MommyCare Nairobi',
-        description: 'Learn how MommyCare is raising the standard for trusted childcare, dignified domestic employment, and safer Nairobi homes.'
+        title: 'Our Mission & Vision | Tmommycare Nairobi',
+        description: 'Learn how Tmommycare is raising the standard for trusted childcare, dignified domestic employment, and safer Nairobi homes.'
       },
       '/insights': {
-        title: 'Nairobi Parenting & Childcare Insights | MommyCare',
+        title: 'Nairobi Parenting & Childcare Insights | Tmommycare',
         description: 'Read practical Nairobi childcare, infant nutrition, safety, developmental milestone, and nanny-management guides.'
       },
       '/reviews': {
-        title: 'Parent Reviews of MommyCare Nairobi | Trusted Homecare',
-        description: 'Read verified family reviews about MommyCare nanny placement, newborn care, household support, and domestic staffing in Nairobi.'
+        title: 'Parent Reviews of Tmommycare Nairobi | Trusted Homecare',
+        description: 'Read verified family reviews about Tmommycare nanny placement, newborn care, household support, and domestic staffing in Nairobi.'
       },
       '/compare-care': {
-        title: 'MommyCare vs Other Nanny Options in Nairobi',
+        title: 'Tmommycare vs Other Nanny Options in Nairobi',
         description: 'Compare managed nanny placement, household support, first aid training, trial periods, replacement support, and informal childcare options.'
       },
       '/academy': {
-        title: 'MommyCare Domestic & Homecare Academy | Nairobi',
+        title: 'Tmommycare Domestic & Homecare Academy | Nairobi',
         description: 'Explore professional training and continuous learning for nannies, house managers, housekeepers, cooks, gardeners, and homecare staff.'
       },
       '/contact': {
-        title: 'Contact MommyCare Nairobi | Nanny & Homecare Placement',
-        description: 'Contact MommyCare for nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
+        title: 'Contact Tmommycare Nairobi | Nanny & Homecare Placement',
+        description: 'Contact Tmommycare for nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
       },
       '/pricing': {
-        title: 'Private Placement Pricing | MommyCare Nairobi',
-        description: 'Learn how MommyCare structures private placement pricing, trial arrangements, and tailored household staffing quotes.'
+        title: 'Private Placement Pricing | Tmommycare Nairobi',
+        description: 'Learn how Tmommycare structures private placement pricing, trial arrangements, and tailored household staffing quotes.'
       },
       '/careers': {
-        title: 'Careers at MommyCare | Domestic Staffing & Homecare Jobs',
-        description: 'Explore domestic staffing and homecare career opportunities with MommyCare in Nairobi and beyond.'
+        title: 'Careers at Tmommycare | Domestic Staffing & Homecare Jobs',
+        description: 'Explore domestic staffing and homecare career opportunities with Tmommycare in Nairobi and beyond.'
       },
       '/privacy-policy': {
-        title: 'Privacy Policy | MommyCare Nairobi',
-        description: 'Read how MommyCare protects your personal data, householder information, and staff records.'
+        title: 'Privacy Policy | Tmommycare Nairobi',
+        description: 'Read how Tmommycare protects your personal data, householder information, and staff records.'
       },
       '/terms-of-placement': {
-        title: 'Terms of Placement | MommyCare Nairobi',
+        title: 'Terms of Placement | Tmommycare Nairobi',
         description: 'Review the placement, replacement, and service terms for nannies, household staff, and homecare professionals.'
       },
       '/safety-policy': {
-        title: 'Child & Household Safety Policy | MommyCare Nairobi',
-        description: 'Learn about MommyCare’s safety commitments, vetting standards, and household care policies.'
+        title: 'Child & Household Safety Policy | Tmommycare Nairobi',
+        description: 'Learn about Tmommycare’s safety commitments, vetting standards, and household care policies.'
       },
       '/provider-apply': {
-        title: 'Apply as a Homecare Provider | MommyCare Nairobi',
-        description: 'Apply to be considered for the MommyCare public directory. Submit your professional details and supporting documents for admin review.'
+        title: 'Apply as a Homecare Provider | Tmommycare Nairobi',
+        description: 'Apply to be considered for the Tmommycare public directory. Submit your professional details and supporting documents for admin review.'
       }
     };
     const seo = routeSeo[pathname] || routeSeo['/'];
@@ -174,8 +174,8 @@ function MainWebsite() {
   }, []);
 
   const handleReturnToWebsite = () => {
-    sessionStorage.removeItem('mommycare_admin_authenticated');
-    sessionStorage.removeItem('mommycare_admin_access_token');
+    sessionStorage.removeItem('Tmommycare_admin_authenticated');
+    sessionStorage.removeItem('Tmommycare_admin_access_token');
     void supabase?.auth.signOut();
     setIsAuthenticated(false);
     setIsAdminRoute(false);
@@ -191,10 +191,10 @@ function MainWebsite() {
   useEffect(() => {
     if (!supabase) return;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (sessionStorage.getItem('mommycare_admin_authenticated') === 'true' && session) {
-        sessionStorage.setItem('mommycare_admin_access_token', session.access_token);
+      if (sessionStorage.getItem('Tmommycare_admin_authenticated') === 'true' && session) {
+        sessionStorage.setItem('Tmommycare_admin_access_token', session.access_token);
       } else if (!session) {
-        sessionStorage.removeItem('mommycare_admin_access_token');
+        sessionStorage.removeItem('Tmommycare_admin_access_token');
       }
     });
     return () => subscription.unsubscribe();
@@ -272,7 +272,7 @@ function MainWebsite() {
       return (
         <InfoPage
           kicker="Careers"
-          title="Work with MommyCare"
+          title="Work with Tmommycare"
           intro="We are building a more dignified, better-trained future for domestic and homecare professionals across Nairobi."
           items={[
             'We hire vetted household professionals, nannies, caregivers, housekeepers, gardeners, cooks, and home managers.',

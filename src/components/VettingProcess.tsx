@@ -151,7 +151,7 @@ export const VettingProcess: React.FC = () => {
                       <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#D96B43]" />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#7D766D]">
-                          MommyCare Verification Protocol
+                          Tmommycare Verification Protocol
                         </p>
                         <p className="mt-0.5 text-sm font-semibold text-[#1A201C]">
                           {activePillar.verificationMethod}

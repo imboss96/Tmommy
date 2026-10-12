@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'mommycare-api',
+      name: 'Tmommycare-api',
       script: 'npm',
       args: 'run server',
       cwd: __dirname,

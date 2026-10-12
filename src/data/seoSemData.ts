@@ -61,7 +61,7 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
     targetAudience: 'Parents aged 28-48 living in affluent Nairobi gated estates seeking long-term professional childcare.',
     targetEstates: ['Karen', 'Runda', 'Lavington', 'Westlands', 'Muthaiga', 'Gigiri'],
     headlines: [
-      'Nanny Agency Nairobi | MommyCare',
+      'Nanny Agency Nairobi | Tmommycare',
       'Experienced Nannies in Nairobi',
       '90-Day Free Replacement Warranty',
       'Red Cross CPR Certified Nannies',
@@ -111,7 +111,7 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
     targetAudience: 'Expectant mothers and parents of newborns (0-6 months) suffering from sleep deprivation in Nairobi.',
     targetEstates: ['Kilimani', 'Kileleshwa', 'Westlands', 'Parklands', 'Lavington'],
     headlines: [
-      'Newborn Night Nurse Nairobi | MommyCare',
+      'Newborn Night Nurse Nairobi | Tmommycare',
       'Sleep Soundly Tonight | Nurse Care',
       'Postpartum & Infant Care Experts',
       'Colic & Lactation Support Nairobi',
@@ -153,7 +153,7 @@ export const SEM_CAMPAIGNS: SEMCampaign[] = [
       'Call +254 700 MOMMY Care'
     ],
     descriptions: [
-      'Don’t miss your executive meeting. MommyCare dispatches a first-aid trained emergency nanny to your door within 2-4 hours.',
+      'Don’t miss your executive meeting. Tmommycare dispatches a first-aid trained emergency nanny to your door within 2-4 hours.',
       'Reliable emergency childcare across Nairobi. Ready on standby for urgent backup support. Tap to dispatch immediately.'
     ],
     sitelinks: [

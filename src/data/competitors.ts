@@ -3,7 +3,7 @@ import { CompetitorComparisonItem } from '../types';
 export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   {
     feature: 'Background & Identity Check',
-    mommyCare: 'Documented identity review and reference follow-up before staff join the roster',
+    Tmommycare: 'Documented identity review and reference follow-up before staff join the roster',
     informalBrokers: 'May rely on informal references or document copies',
     generalAgencies: 'Verification practices vary by provider',
     whatsappGroups: 'Profile information may vary and should be confirmed',
@@ -11,7 +11,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Certified First Aid & CPR (Red Cross / St. John Ambulance)',
-    mommyCare: '100% Mandatory hands-on practical certification (Infant CPR, burn care, choking)',
+    Tmommycare: '100% Mandatory hands-on practical certification (Infant CPR, burn care, choking)',
     informalBrokers: 'Training availability varies by individual',
     generalAgencies: 'May be available depending on the provider',
     whatsappGroups: 'Training information should be confirmed',
@@ -19,7 +19,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Comprehensive Medical Screening (TB, Hep B, Stool & Blood Analysis)',
-    mommyCare: 'Partner hospital verified panel (Gertrude’s, Aga Khan, Nairobi Hospital, MP Shah)',
+    Tmommycare: 'Partner hospital verified panel (Gertrude’s, Aga Khan, Nairobi Hospital, MP Shah)',
     informalBrokers: 'Screening arrangements vary by individual',
     generalAgencies: 'Screening scope and coordination vary',
     whatsappGroups: 'Health information should be confirmed',
@@ -27,7 +27,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Roles Covered & Specialized Skills Verification',
-    mommyCare: 'Complete staff roster: Nannies, House Managers, House Girls, House Boys, Shamba Boys & Caretakers',
+    Tmommycare: 'Complete staff roster: Nannies, House Managers, House Girls, House Boys, Shamba Boys & Caretakers',
     informalBrokers: 'Skills and credentials vary by individual',
     generalAgencies: 'Role coverage and specialist training vary',
     whatsappGroups: 'Role details should be confirmed directly',
@@ -35,7 +35,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Trial Period Before Full Placement',
-    mommyCare: '3-Day Risk-Free Guided Paid Trial in your home before commitment',
+    Tmommycare: '3-Day Risk-Free Guided Paid Trial in your home before commitment',
     informalBrokers: 'Trial arrangements vary by individual agreement',
     generalAgencies: 'Trial terms vary by provider',
     whatsappGroups: 'Trial terms should be agreed in advance',
@@ -43,7 +43,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Free Replacement Guarantee Period',
-    mommyCare: '90-Day Hassle-Free Free Replacement Warranty across all professions',
+    Tmommycare: '90-Day Hassle-Free Free Replacement Warranty across all professions',
     informalBrokers: 'Replacement terms vary by individual agreement',
     generalAgencies: 'Coverage periods and processes vary',
     whatsappGroups: 'Any replacement terms should be agreed in advance',
@@ -51,7 +51,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Fair Wages & Dignified Employment Contract (Statutory NSSF/SHA guidance)',
-    mommyCare: 'Transparent salary bands, formal contracts & labor law compliance with 0% staff commission',
+    Tmommycare: 'Transparent salary bands, formal contracts & labor law compliance with 0% staff commission',
     informalBrokers: 'Payment and contract terms vary by arrangement',
     generalAgencies: 'Contract and payment structures vary',
     whatsappGroups: 'Payment terms should be agreed clearly in advance',
@@ -59,7 +59,7 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
   },
   {
     feature: 'Emergency 2-4 Hour Backup Staff Dispatch in Nairobi',
-    mommyCare: 'Guaranteed standby dispatch for sudden illness, family travel, or urgent cover',
+    Tmommycare: 'Guaranteed standby dispatch for sudden illness, family travel, or urgent cover',
     informalBrokers: 'Availability varies by individual network',
     generalAgencies: 'Response times vary by provider and availability',
     whatsappGroups: 'Availability should be confirmed directly',
@@ -74,7 +74,7 @@ export const VETTING_PILLARS = [
     shortDesc: 'Documented identity verification and reference checks for every candidate.',
     fullDesc: 'We review identity documents, reference history, and role fit before a domestic professional is introduced into a home or household team.',
     verificationMethod: 'Document review and reference follow-up',
-    issuingAuthority: 'MommyCare quality review team',
+    issuingAuthority: 'Tmommycare quality review team',
     iconName: 'ShieldCheck',
     status: 'mandatory' as const
   },
@@ -102,7 +102,7 @@ export const VETTING_PILLARS = [
     id: 'first-aid',
     title: '4. Red Cross Infant CPR & First Aid',
     shortDesc: 'Practical, hands-on pediatric life-saving, fire safety, and emergency response.',
-    fullDesc: 'All MommyCare homecare professionals receive training in Pediatric & Workplace First Aid, Infant Choking Management, Burn Response, Fire Extinguisher Safety, and Emergency Dispatch Protocols through the Kenya Red Cross Society or St. John Ambulance.',
+    fullDesc: 'All Tmommycare homecare professionals receive training in Pediatric & Workplace First Aid, Infant Choking Management, Burn Response, Fire Extinguisher Safety, and Emergency Dispatch Protocols through the Kenya Red Cross Society or St. John Ambulance.',
     verificationMethod: 'Practical simulation assessment & official certification registry number',
     issuingAuthority: 'Kenya Red Cross Society Training Institute',
     iconName: 'HeartPulse',
@@ -113,8 +113,8 @@ export const VETTING_PILLARS = [
     title: '5. Deep Traceable Employer Reference Audit',
     shortDesc: 'In-depth phone and in-person interviews with at least 3 previous Nairobi employers.',
     fullDesc: 'Our placement team conducts thorough 30-minute structured reference interviews with past homeowners and expatriates, probing honesty, integrity with household valuables, work ethic, punctuality, compound vigilance, and reasons for departure.',
-    verificationMethod: 'Direct phone & verified residential employer audit by MommyCare senior coordinators',
-    issuingAuthority: 'MommyCare Verification Integrity Board',
+    verificationMethod: 'Direct phone & verified residential employer audit by Tmommycare senior coordinators',
+    issuingAuthority: 'Tmommycare Verification Integrity Board',
     iconName: 'PhoneCall',
     status: 'forensic' as const
   },
@@ -124,17 +124,17 @@ export const VETTING_PILLARS = [
     shortDesc: 'Structured evaluation of emotional regulation, household honesty, and reliability.',
     fullDesc: 'Domestic stewardship requires trust and emotional balance. Candidates complete our proprietary situational test: handling emergencies, conflict resolution, property confidentiality, and ethical family privacy boundaries.',
     verificationMethod: 'In-person behavioral simulation and scenario-based psychometric scoring',
-    issuingAuthority: 'MommyCare Domestic Academy Evaluators',
+    issuingAuthority: 'Tmommycare Domestic Academy Evaluators',
     iconName: 'Sparkles',
     status: 'mandatory' as const
   },
   {
     id: 'academy',
-    title: '7. MommyCare Domestic & Homecare Academy',
+    title: '7. Tmommycare Domestic & Homecare Academy',
     shortDesc: 'Intensive upskilling in hygiene, modern equipment, estate security, and hospitality.',
     fullDesc: 'Candidates receive specialized training by profession: pediatric nutrition and Montessori milestones for Nannies; fine linen and steam cleaning for Housekeepers; organic horticulture and irrigation for Shamba Boys; technical facility upkeep for Caretakers; and executive estate supervision for House Managers.',
     verificationMethod: 'Graduation capstone exam and ongoing quarterly continuous learning credits',
-    issuingAuthority: 'MommyCare Domestic Training Academy',
+    issuingAuthority: 'Tmommycare Domestic Training Academy',
     iconName: 'GraduationCap',
     status: 'mandatory' as const
   }

@@ -1,6 +1,6 @@
-# MommyCare Nairobi
+# Tmommycare Nairobi
 
-MommyCare Nairobi is a homecare and domestic staffing platform for families looking for skilled nannies and household professionals across Nairobi.
+Tmommycare Nairobi is a homecare and domestic staffing platform for families looking for skilled nannies and household professionals across Nairobi.
 
 The platform supports nanny placement, domestic staff browsing, bookings, emergency backup requests, public reviews, SEO-focused service pages, media management, and an admin operations dashboard.
 
@@ -124,7 +124,7 @@ git push origin main
 The deployment files are in `deploy/`:
 
 - `deploy/README.md` Full Ubuntu, Namecheap DNS, Nginx, PM2, and HTTPS instructions
-- `deploy/nginx-mommycare.conf` Nginx configuration
+- `deploy/nginx-Tmommycare.conf` Nginx configuration
 - `ecosystem.config.cjs` PM2 configuration for the Express API
 
 The production setup uses Nginx for the Vite `dist` frontend and proxies `/api` requests to the Express server on port `5000`.

@@ -32,7 +32,7 @@ const salaryRanges = [
 const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', gender: '' as '' | 'male' | 'female', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: 'Kilimani' as NairobiEstate, age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
   const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ 'profile-photo': null, identity: null, 'good-conduct': null, training: null, cv: null, other: null });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState('');
@@ -94,9 +94,15 @@ export const ProviderApplicationPage: React.FC = () => {
     setError('');
     if (!supabase) { setStatus('error'); setError('Applications are temporarily unavailable. Please contact us directly.'); return; }
     if (!documents['profile-photo'] || !documents.identity || !documents['good-conduct']) { setStatus('error'); setError('Please attach your profile photo, identity document, and Certificate of Good Conduct.'); return; }
-    if (![form.contactAddress, form.referenceName, form.referencePhone, form.emergencyContactName, form.emergencyContactPhone].every(value => value.trim())) {
+    if (![form.contactAddress, form.emergencyContactName, form.emergencyContactPhone].every(value => value.trim())) {
       setStatus('error');
-      setError('Enter your contact address, at least one reference with a phone number, and an emergency contact with a phone number.');
+      setError('Enter your contact address and an emergency contact with a phone number.');
+      return;
+    }
+    const hasReferenceDetails = [form.referenceName, form.referenceRelationship, form.referencePhone].some(value => value.trim());
+    if (hasReferenceDetails && (form.referenceName.trim().length < 2 || form.referencePhone.trim().length < 7)) {
+      setStatus('error');
+      setError('If you add a reference, enter their full name and a valid phone number.');
       return;
     }
     if (!termsAccepted || !signatureDataUrl) {
@@ -133,7 +139,7 @@ export const ProviderApplicationPage: React.FC = () => {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'We could not submit your application. Please try again.');
-      sessionStorage.setItem(`mommycare-provider-payment-phone-${id}`, form.phone);
+      sessionStorage.setItem(`Tmommycare-provider-payment-phone-${id}`, form.phone);
       window.location.assign(`/provider-payment?id=${encodeURIComponent(id)}`);
     } catch (submissionError) {
       setStatus('error');
@@ -172,17 +178,18 @@ export const ProviderApplicationPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#514B44]">Phone / WhatsApp *<input required type="tel" autoComplete="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Email address *<input required type="email" autoComplete="email" value={form.email} onChange={e => setField('email', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Age *<input required type="number" min="18" max="75" value={form.age} onChange={e => setField('age', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">Gender *<select required value={form.gender} onChange={e => setField('gender', e.target.value as typeof form.gender)} className={inputClass}><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option></select></label>
               </div>
               <div className="mt-6 rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 sm:p-5">
                 <div className="mb-4">
-                  <h4 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Address, reference & emergency contact</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-[#777067]">These required details are stored privately for application review and are not included in your public profile.</p>
+                  <h4 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Address, optional reference & emergency contact</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-[#777067]">Your address and emergency contact are required. Reference details are optional and stored privately for application review; they are not included in your public profile.</p>
                 </div>
                 <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
                   <label className="text-xs font-bold text-[#514B44] sm:col-span-2">Current residential / contact address *<textarea required minLength={5} autoComplete="street-address" rows={2} value={form.contactAddress} onChange={e => setField('contactAddress', e.target.value)} placeholder="Estate, area, town and any directions needed to contact you" className={inputClass} /></label>
-                  <label className="text-xs font-bold text-[#514B44]">At least one reference — full name *<input required minLength={2} autoComplete="off" value={form.referenceName} onChange={e => setField('referenceName', e.target.value)} className={inputClass} /></label>
-                  <label className="text-xs font-bold text-[#514B44]">Reference relationship / workplace<input value={form.referenceRelationship} onChange={e => setField('referenceRelationship', e.target.value)} placeholder="e.g. Previous employer" className={inputClass} /></label>
-                  <label className="text-xs font-bold text-[#514B44]">Reference contact number *<input required minLength={7} type="tel" autoComplete="off" value={form.referencePhone} onChange={e => setField('referencePhone', e.target.value)} className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Reference full name (optional)<input minLength={2} autoComplete="off" value={form.referenceName} onChange={e => setField('referenceName', e.target.value)} className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Reference relationship / workplace (optional)<input value={form.referenceRelationship} onChange={e => setField('referenceRelationship', e.target.value)} placeholder="e.g. Previous employer" className={inputClass} /></label>
+                  <label className="text-xs font-bold text-[#514B44]">Reference contact number (optional)<input minLength={7} type="tel" autoComplete="off" value={form.referencePhone} onChange={e => setField('referencePhone', e.target.value)} className={inputClass} /></label>
                   <label className="text-xs font-bold text-[#514B44]">Emergency contact full name *<input required minLength={2} autoComplete="off" value={form.emergencyContactName} onChange={e => setField('emergencyContactName', e.target.value)} className={inputClass} /></label>
                   <label className="text-xs font-bold text-[#514B44]">Emergency contact number *<input required minLength={7} type="tel" autoComplete="off" value={form.emergencyContactPhone} onChange={e => setField('emergencyContactPhone', e.target.value)} className={inputClass} /></label>
                 </div>
@@ -237,7 +244,7 @@ export const ProviderApplicationPage: React.FC = () => {
                     }}
                     className="mt-1 h-4 w-4 shrink-0 accent-[#1D432D]"
                   />
-                  <span>I confirm that the information I have provided is accurate, consent to MommyCare reviewing my application and supporting documents, and agree to the provider application terms. If approved, I consent to my name, role, area, arrangement, experience, skills, introduction, and expected salary appearing in the public directory. My contact details and documents remain private.</span>
+                  <span>I confirm that the information I have provided is accurate, consent to Tmommycare reviewing my application and supporting documents, and agree to the provider application terms. If approved, I consent to my name, role, area, arrangement, experience, skills, introduction, and expected salary appearing in the public directory. My contact details and documents remain private.</span>
                 </label>
                 <div className="mt-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">

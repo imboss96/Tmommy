@@ -78,10 +78,10 @@
           fill="#DE6C5D" />
   </g>
 
-  <!-- Right Typography: MommyCare + Tagline -->
+  <!-- Right Typography: Tmommycare + Tagline -->
   <g transform="translate(435, 275)">
-    <!-- MommyCare in Deep Pine Teal -->
-    <text x="0" y="0" class="mc-brand-title" fill="#234537">MommyCare</text>
+    <!-- Tmommycare in Deep Pine Teal -->
+    <text x="0" y="0" class="mc-brand-title" fill="#234537">Tmommycare</text>
     
     <!-- Quality Care You Can Trust............ in Italic Coral -->
     <text x="8" y="52" class="mc-brand-tagline" fill="#DE6C5D">Quality Care You Can Trust............</text>

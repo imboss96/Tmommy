@@ -35,7 +35,7 @@ export const HiringGuide: React.FC<HiringGuideProps> = ({ onOpenBooking }) => (
         <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1D432D]">
           <ClipboardList className="h-4 w-4" /> A clear path to placement
         </div>
-        <h2 id="hiring-guide-title" className="font-['Outfit'] text-3xl font-extrabold tracking-tight text-[#1A201C] sm:text-4xl">How hiring through MommyCare works</h2>
+        <h2 id="hiring-guide-title" className="font-['Outfit'] text-3xl font-extrabold tracking-tight text-[#1A201C] sm:text-4xl">How hiring through Tmommycare works</h2>
         <p className="mt-4 text-base leading-relaxed text-[#635E59]">Start with your household needs, get the details confirmed, then decide whether a candidate is the right fit.</p>
       </div>
 

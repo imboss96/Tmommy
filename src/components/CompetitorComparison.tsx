@@ -4,7 +4,7 @@ import { COMPETITOR_COMPARISON } from '../data/competitors';
 
 export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> = ({ onBookConsultation }) => {
   return (
-    <section id="why-mommycare" className="py-16 lg:py-24 bg-white border-b border-[#E8DFD3]">
+    <section id="why-Tmommycare" className="py-16 lg:py-24 bg-white border-b border-[#E8DFD3]">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -14,7 +14,7 @@ export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> 
             <span>Nairobi Market Reality</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A201C] tracking-tight font-['Outfit']">
-            How MommyCare Compares With Other Care Options
+            How Tmommycare Compares With Other Care Options
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
             Families have different ways to find homecare support. Here is a clear, respectful comparison
@@ -32,7 +32,7 @@ export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> 
                 </th>
                 <th className="p-5 font-extrabold text-sm text-[#D96B43] bg-[#FAF0EB]/60 w-1/4">
                   <div className="flex items-center gap-1.5 font-['Outfit'] text-base">
-                    <span>MommyCare Kenya</span>
+                    <span>Tmommycare Kenya</span>
                     <span className="text-[10px] bg-[#D96B43] text-white px-1.5 py-0.5 rounded font-bold uppercase">Gold Standard</span>
                   </div>
                 </th>
@@ -51,11 +51,11 @@ export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> 
                     {item.feature}
                   </td>
                   
-                  {/* MommyCare Column (Highlighted) */}
+                  {/* Tmommycare Column (Highlighted) */}
                   <td className="p-5 font-semibold text-[#1D432D] bg-[#FAF0EB]/20 border-x border-[#F2C2B2]/40">
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{item.mommyCare}</span>
+                      <span>{item.Tmommycare}</span>
                     </div>
                   </td>
 

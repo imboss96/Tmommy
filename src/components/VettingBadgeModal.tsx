@@ -167,7 +167,7 @@ export const VettingBadgeModal: React.FC<VettingBadgeModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-[#35523D]">
-                All {nanny.verifiedReferenceCount} previous residential employers directly interviewed via phone by MommyCare senior coordinators verifying honesty, punctuality, and work ethic.
+                All {nanny.verifiedReferenceCount} previous residential employers directly interviewed via phone by Tmommycare senior coordinators verifying honesty, punctuality, and work ethic.
               </p>
               <div className="p-2.5 rounded-xl bg-white/80 border border-emerald-200 text-[11px] italic text-[#2D4A35]">
                 “{nanny.name.split(' ')[0]} was exceptionally trustworthy, honest with compound property and groceries, and diligent throughout their tenure with us.” — Verified Nairobi Residential Employer

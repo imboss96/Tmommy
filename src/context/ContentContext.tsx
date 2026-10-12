@@ -80,13 +80,13 @@ interface ContentContextType {
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  NANNIES: 'mommycare_nannies_v2',
-  INSIGHTS: 'mommycare_insights_v2',
-  BOOKINGS: 'mommycare_bookings_v2',
-  EMERGENCY: 'mommycare_emergency_v2',
-  MEDIA: 'mommycare_media_v2',
-  CONFIG: 'mommycare_config_v2'
-  ,REVIEWS: 'mommycare_reviews_v1'
+  NANNIES: 'Tmommycare_nannies_v2',
+  INSIGHTS: 'Tmommycare_insights_v2',
+  BOOKINGS: 'Tmommycare_bookings_v2',
+  EMERGENCY: 'Tmommycare_emergency_v2',
+  MEDIA: 'Tmommycare_media_v2',
+  CONFIG: 'Tmommycare_config_v2'
+  ,REVIEWS: 'Tmommycare_reviews_v1'
 };
 
 function safeStorageGet<T>(key: string, fallback: T): T {
@@ -445,7 +445,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           hotlinePhone: configResult.data.hotline_phone,
           emergencyDispatchPhone: configResult.data.emergency_dispatch_phone,
           whatsappPhone: configResult.data.whatsapp_phone || configResult.data.hotline_phone,
-          whatsappMessage: configResult.data.whatsapp_message || 'Hello MommyCare, I would like help finding vetted homecare staff.',
+          whatsappMessage: configResult.data.whatsapp_message || 'Hello Tmommycare, I would like help finding vetted homecare staff.',
           notificationBanner: configResult.data.notification_banner,
           headquartersAddress: configResult.data.headquarters_address,
           conciergeEmail: configResult.data.concierge_email,
@@ -463,7 +463,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     void loadLiveContent();
     const { data: authListener } = client.auth.onAuthStateChange((_event, session) => {
-      if (session?.access_token && sessionStorage.getItem('mommycare_admin_authenticated') === 'true') {
+      if (session?.access_token && sessionStorage.getItem('Tmommycare_admin_authenticated') === 'true') {
         void loadAdminSubmissions(session.access_token);
       }
     });
@@ -471,11 +471,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const accessToken = getAdminAccessToken();
       if (accessToken) void loadAdminSubmissions(accessToken);
     };
-    window.addEventListener('mommycare-admin-authenticated', handleAdminAuthenticated);
+    window.addEventListener('Tmommycare-admin-authenticated', handleAdminAuthenticated);
     return () => {
       isActive = false;
       authListener.subscription.unsubscribe();
-      window.removeEventListener('mommycare-admin-authenticated', handleAdminAuthenticated);
+      window.removeEventListener('Tmommycare-admin-authenticated', handleAdminAuthenticated);
     };
   }, []);
 

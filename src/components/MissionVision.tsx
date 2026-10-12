@@ -10,14 +10,14 @@ export const MissionVision: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EDF5EE] text-[#1D432D] text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] mb-4 border border-[#D7E6DA]">
             <Heart className="w-3.5 h-3.5 text-[#D96B43]" />
-            <span>The MommyCare Difference</span>
+            <span>The Tmommycare Difference</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-[3.15rem] font-extrabold text-[#1A201C] tracking-[-0.04em] font-['Outfit'] leading-[1.04]">
             Elevating Childcare in Nairobi Through Clear, Trusted Standards
           </h2>
           <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#635E59] leading-relaxed">
             Nairobi parents deserve clear choices, reliable information, and support throughout the homecare journey.
-            MommyCare was established to bring radical safety, institutional trust, and human dignity to Kenyan homes.
+            Tmommycare was established to bring radical safety, institutional trust, and human dignity to Kenyan homes.
           </p>
         </div>
 

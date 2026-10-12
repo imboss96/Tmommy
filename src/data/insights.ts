@@ -96,7 +96,7 @@ export const PARENTING_INSIGHTS: ParentingInsight[] = [
     category: 'Nanny Management',
     author: {
       name: 'Faith Mwangi',
-      role: 'Family & Caregiver Placement Director, MommyCare',
+      role: 'Family & Caregiver Placement Director, Tmommycare',
       avatar: ''
     },
     readTime: '5 min read',

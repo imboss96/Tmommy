@@ -52,7 +52,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onOpenBooking, onOpenE
       <section className="relative overflow-hidden border-b border-[#E8DFD3] py-16 sm:py-20">
         <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[#E76F51]/10 blur-3xl" />
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F2C2B2] bg-[#FAF0EB] px-3.5 py-1.5 text-xs font-bold text-[#D96B43]"><MessageCircle className="h-4 w-4" /> Contact MommyCare</div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F2C2B2] bg-[#FAF0EB] px-3.5 py-1.5 text-xs font-bold text-[#D96B43]"><MessageCircle className="h-4 w-4" /> Contact Tmommycare</div>
           <h1 className="font-['Outfit'] text-4xl font-extrabold leading-tight tracking-tight text-[#1A201C] sm:text-5xl">Let&apos;s find the right care together.</h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-[#635E59]">Whether you are planning ahead or need support today, our care team is ready to help you take the next step.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">

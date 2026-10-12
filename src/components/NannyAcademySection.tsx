@@ -32,7 +32,7 @@ export const NannyAcademySection: React.FC = () => {
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#F4A261] text-xs font-bold uppercase tracking-wider">
               <GraduationCap className="w-4 h-4" />
-              <span>MommyCare Professional Academy • Fast-Growing Care Network</span>
+              <span>Tmommycare Professional Academy • Fast-Growing Care Network</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-['Outfit'] leading-tight">
@@ -41,7 +41,7 @@ export const NannyAcademySection: React.FC = () => {
             </h2>
 
             <p className="text-base sm:text-lg text-white/90 leading-relaxed max-w-2xl">
-              MommyCare is rapidly expanding across Nairobi to redefine domestic childcare standards. 
+              Tmommycare is rapidly expanding across Nairobi to redefine domestic childcare standards. 
               We never deduct commissions from a nanny’s hard-earned salary. We provide free Red Cross infant CPR 
               training, fair living wages, written legal contracts with paid leave days,
               statutory NSSF/SHA medical cover, and direct placements with verified, respectful families.

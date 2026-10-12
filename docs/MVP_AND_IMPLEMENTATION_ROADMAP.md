@@ -1,10 +1,10 @@
-# MommyCare Nairobi MVP and Implementation Roadmap
+# Tmommycare Nairobi MVP and Implementation Roadmap
 
 ## 1. Product summary
 
-MommyCare Nairobi helps families find vetted nannies and household professionals, and helps those professionals apply to be considered for work. MommyCare is the trusted placement operator: the website captures demand and supply, while a coordinator reviews requests and makes introductions.
+Tmommycare Nairobi helps families find vetted nannies and household professionals, and helps those professionals apply to be considered for work. Tmommycare is the trusted placement operator: the website captures demand and supply, while a coordinator reviews requests and makes introductions.
 
-**MVP product promise:** A Nairobi household can understand the available care options, review eligible professionals, and ask MommyCare for a placement consultation. MommyCare can review that request and respond using a clear, human-led process.
+**MVP product promise:** A Nairobi household can understand the available care options, review eligible professionals, and ask Tmommycare for a placement consultation. Tmommycare can review that request and respond using a clear, human-led process.
 
 This is a managed lead-generation and placement service, not an instant-booking marketplace. The website must not imply that a profile is currently available, a placement is guaranteed, or emergency coverage is confirmed unless the operations team has verified it.
 
@@ -14,16 +14,16 @@ This is a managed lead-generation and placement service, not an instant-booking 
 
 - Find a nanny or household professional by role and Nairobi area.
 - Understand the provider's experience, skills, and vetting status without seeing sensitive documents.
-- Request a consultation or placement and know that MommyCare received the request.
+- Request a consultation or placement and know that Tmommycare received the request.
 - Contact the team directly for urgent needs, with realistic expectations about dispatch availability.
 
 ### Homecare professionals
 
 - Submit contact, role, availability, experience, and required supporting documents.
 - Understand that an application is pending review and is not a promise of placement.
-- Receive a clear next step from MommyCare outside the website during the MVP.
+- Receive a clear next step from Tmommycare outside the website during the MVP.
 
-### MommyCare coordinators
+### Tmommycare coordinators
 
 - Review placement, emergency, contact, and provider applications in one operational workflow.
 - Contact a household or applicant, record progress, and close or archive requests.
@@ -82,7 +82,7 @@ The current site contains additional marketing, editorial, comparison, salary-gu
 1. A visitor reaches the directory or placement call to action.
 2. They browse/filter professionals or submit a general request.
 3. They provide required contact and service details, review their information, and submit.
-4. The site confirms receipt only after persistence succeeds; otherwise it explains that the request did not submit and how to contact MommyCare.
+4. The site confirms receipt only after persistence succeeds; otherwise it explains that the request did not submit and how to contact Tmommycare.
 5. A coordinator sees the enquiry, contacts the household, records the outcome, and updates the status.
 
 **Acceptance:** A submitted enquiry is persisted once, appears in the coordinator workflow, retains relevant provider context where applicable, and can be progressed to a terminal status. Validation errors are shown beside the relevant fields. No payment or confirmed booking is implied.

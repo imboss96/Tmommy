@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { NairobiEstate, NannyType, NannyProfile, BookingFormData, HomecareRole } from '../types';
 import { useContent } from '../context/ContentContext';
-import { MommyCareLogo } from './MommyCareLogo';
+import { TmommycareLogo } from './TmommycareLogo';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -87,7 +87,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 z-10 p-6 bg-[#FAF7F2] border-b border-[#E8DFD3] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MommyCareLogo variant="icon" size="sm" />
+            <TmommycareLogo variant="icon" size="sm" />
             <div>
               <h2 className="text-xl font-bold text-[#1A201C] font-['Outfit']">
                 Schedule a 3-Day Risk-Free Home Trial

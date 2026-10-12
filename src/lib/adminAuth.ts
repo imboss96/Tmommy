@@ -1,5 +1,5 @@
 export const getAdminAccessToken = () =>
-  sessionStorage.getItem('mommycare_admin_access_token') || '';
+  sessionStorage.getItem('Tmommycare_admin_access_token') || '';
 
 export const getAdminAuthHeaders = (): Record<string, string> => {
   const token = getAdminAccessToken();

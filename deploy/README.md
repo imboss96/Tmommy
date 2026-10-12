@@ -1,6 +1,6 @@
 # GitHub -> Hostinger VPS deployment
 
-For a domain-specific Ubuntu VPS walkthrough for `tmommycares.com`, see [TMOMMYCARES_VPS_SETUP.md](./TMOMMYCARES_VPS_SETUP.md).
+For a domain-specific Ubuntu VPS walkthrough for `tTmommycares.com`, see [TTmommycareS_VPS_SETUP.md](./TTmommycareS_VPS_SETUP.md).
 
 ## 1. Push the project to GitHub
 
@@ -9,7 +9,7 @@ Run these commands on your Windows machine after installing Git and creating an 
 ```powershell
 git init
 git add .
-git commit -m "Prepare MommyCare for deployment"
+git commit -m "Prepare Tmommycare for deployment"
 git branch -M main
 git remote add origin https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git
 git push -u origin main
@@ -34,8 +34,8 @@ sudo apt install -y nginx git curl
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pm2
-sudo mkdir -p /var/www/mommycare
-sudo chown -R $USER:$USER /var/www/mommycare
+sudo mkdir -p /var/www/Tmommycare
+sudo chown -R $USER:$USER /var/www/Tmommycare
 ```
 
 ## 4. Clone and build
@@ -44,16 +44,16 @@ Replace the repository URL with your GitHub repository:
 
 ```bash
 cd /var/www
-rm -rf mommycare
-git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git mommycare
-cd /var/www/mommycare
+rm -rf Tmommycare
+git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git Tmommycare
+cd /var/www/Tmommycare
 npm ci
 ```
 
 Create the private production environment file:
 
 ```bash
-nano /var/www/mommycare/.env.local
+nano /var/www/Tmommycare/.env.local
 ```
 
 Use your real values. The frontend must use the same public origin for API requests:
@@ -87,9 +87,9 @@ Run the command printed by `pm2 startup`, then run `pm2 save` again.
 ## 5. Configure Nginx
 
 ```bash
-sudo cp deploy/nginx-mommycare.conf /etc/nginx/sites-available/mommycare
-sudo sed -i 's/example.com/your-real-domain.com/g' /etc/nginx/sites-available/mommycare
-sudo ln -s /etc/nginx/sites-available/mommycare /etc/nginx/sites-enabled/mommycare
+sudo cp deploy/nginx-Tmommycare.conf /etc/nginx/sites-available/Tmommycare
+sudo sed -i 's/example.com/your-real-domain.com/g' /etc/nginx/sites-available/Tmommycare
+sudo ln -s /etc/nginx/sites-available/Tmommycare /etc/nginx/sites-enabled/Tmommycare
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx
@@ -108,12 +108,12 @@ sudo certbot renew --dry-run
 ## 7. Future deployments
 
 ```bash
-cd /var/www/mommycare
+cd /var/www/Tmommycare
 git pull origin main
 npm ci
 npm run lint
 npm run build
-pm2 restart mommycare-api
+pm2 restart Tmommycare-api
 ```
 
 Apply Supabase migrations separately from the VPS using the Supabase dashboard or Supabase CLI, including `supabase/migrations/006_provider_applications.sql` for provider applications and private documents.

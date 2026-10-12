@@ -37,7 +37,7 @@ export const ProviderPaymentPage: React.FC = () => {
       setError('This payment link is invalid. Please return to provider registration and try again.');
       return;
     }
-    const savedPhone = sessionStorage.getItem(`mommycare-provider-payment-phone-${paymentId}`);
+    const savedPhone = sessionStorage.getItem(`Tmommycare-provider-payment-phone-${paymentId}`);
     if (savedPhone) setPhoneNumber(savedPhone);
     void Promise.all([
       fetch(`${api}/api/provider-payment-settings`).then(async response => {
@@ -59,7 +59,7 @@ export const ProviderPaymentPage: React.FC = () => {
   }, [checkStatus, status]);
 
   useEffect(() => {
-    if (status === 'paid') sessionStorage.removeItem(`mommycare-provider-payment-phone-${paymentId}`);
+    if (status === 'paid') sessionStorage.removeItem(`Tmommycare-provider-payment-phone-${paymentId}`);
   }, [paymentId, status]);
 
   const startPayment = async (event: FormEvent<HTMLFormElement>) => {
@@ -97,9 +97,9 @@ export const ProviderPaymentPage: React.FC = () => {
         {isPaid ? 'Payment confirmed' : isPending ? 'Complete payment on your phone' : 'Registration fee'}
       </h1>
       {isPaid ? <>
-        <p className="mt-4 text-center text-sm leading-7 text-[#635E59]">Your payment has been confirmed and your application is now in the private MommyCare review queue.</p>
+        <p className="mt-4 text-center text-sm leading-7 text-[#635E59]">Your payment has been confirmed and your application is now in the private Tmommycare review queue.</p>
         {receiptNumber && <p className="mt-3 text-center text-sm font-bold text-[#1D432D]">M-Pesa receipt: {receiptNumber}</p>}
-        <a href="/" className="mt-7 block rounded-xl bg-[#1D432D] px-5 py-3.5 text-center text-sm font-bold text-white">Return to MommyCare</a>
+        <a href="/" className="mt-7 block rounded-xl bg-[#1D432D] px-5 py-3.5 text-center text-sm font-bold text-white">Return to Tmommycare</a>
       </> : isPending ? <>
         <p className="mt-4 text-center text-sm leading-7 text-[#635E59]">An M-Pesa STK Push was sent to <strong>{phoneNumber}</strong>. Enter your M-Pesa PIN on your phone. This page will update after Safaricom confirms the payment.</p>
         {(message || error) && <p role={error ? 'alert' : 'status'} className={`mt-4 rounded-xl p-3 text-center text-sm ${error ? 'border border-red-200 bg-red-50 text-red-800' : 'bg-[#FAF7F2] text-[#635E59]'}`}>{error || message}</p>}
@@ -115,7 +115,7 @@ export const ProviderPaymentPage: React.FC = () => {
             <input required type="tel" autoComplete="tel" value={phoneNumber} onChange={event => setPhoneNumber(event.target.value)} placeholder="07XXXXXXXX or 2547XXXXXXXX" className="mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none focus:border-[#1D432D] focus:ring-4 focus:ring-[#1D432D]/10" />
           </label>
           {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-          {!available && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">M-Pesa payments are not available yet. Please contact MommyCare or try again later.</p>}
+          {!available && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">M-Pesa payments are not available yet. Please contact Tmommycare or try again later.</p>}
           <button type="submit" disabled={!available || !feeKes || busy} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D432D] px-5 py-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
             {busy ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Requesting payment…</> : <><LockKeyhole className="h-4 w-4" /> Pay KES {feeKes ? feeKes.toLocaleString() : ''} with M-Pesa</>}
           </button>

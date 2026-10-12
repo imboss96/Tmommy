@@ -28,7 +28,7 @@ import { SubmissionsManager } from './SubmissionsManager';
 import { MediaManager } from './MediaManager';
 import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
-import { MommyCareLogo } from '../MommyCareLogo';
+import { TmommycareLogo } from '../TmommycareLogo';
 import { ProviderApplicationsManager } from './ProviderApplicationsManager';
 
 interface AdminDashboardProps {
@@ -78,14 +78,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           <div className="flex items-center gap-3">
-            <MommyCareLogo 
+            <TmommycareLogo 
               variant="icon" 
               colorScheme="white" 
               size="sm" 
             />
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold font-['Outfit'] tracking-tight">MommyCare Operations</h1>
+                <h1 className="text-base font-bold font-['Outfit'] tracking-tight">Tmommycare Operations</h1>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
                   Console
                 </span>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Lock, Mail, ShieldAlert } from 'lucide-react';
-import { MommyCareLogo } from '../MommyCareLogo';
+import { TmommycareLogo } from '../TmommycareLogo';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
 
@@ -59,12 +59,12 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
     setIsLoading(false);
     if (!response.ok) {
       await supabase.auth.signOut();
-      setError('This account is not an active MommyCare administrator.');
+      setError('This account is not an active Tmommycare administrator.');
       return;
     }
-    sessionStorage.setItem('mommycare_admin_access_token', data.session.access_token);
-    sessionStorage.setItem('mommycare_admin_authenticated', 'true');
-    window.dispatchEvent(new Event('mommycare-admin-authenticated'));
+    sessionStorage.setItem('Tmommycare_admin_access_token', data.session.access_token);
+    sessionStorage.setItem('Tmommycare_admin_authenticated', 'true');
+    window.dispatchEvent(new Event('Tmommycare-admin-authenticated'));
     onSuccess();
   };
 
@@ -74,7 +74,7 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
         <ArrowLeft className="w-4 h-4" /> Return to Public Website
       </button>
       <div className="w-full max-w-md bg-[#1A3324] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div className="flex justify-center mb-5"><MommyCareLogo colorScheme="white" size="lg" showTagline showLocationBadge={false} /></div>
+        <div className="flex justify-center mb-5"><TmommycareLogo colorScheme="white" size="lg" showTagline showLocationBadge={false} /></div>
         <div className="inline-flex items-center gap-2 text-emerald-300 text-xs font-bold mb-3"><Lock className="w-4 h-4 text-[#F4A261]" /> Restricted Coordinator Console</div>
         <h1 className="text-2xl font-bold font-['Outfit']">Administrator sign in</h1>
         <p className="text-sm text-[#A8C2B0] mt-2 mb-6">Use your invited email address. We will send a one-time verification code.</p>

@@ -5,7 +5,7 @@ create table if not exists public.mpesa_settings (
   environment text not null default 'sandbox' check (environment in ('sandbox', 'production')),
   merchant_type text not null default 'paybill' check (merchant_type in ('paybill', 'till')),
   shortcode text not null default '',
-  account_reference text not null default 'MOMMYCARE',
+  account_reference text not null default 'Tmommycare',
   consumer_key_ciphertext text not null default '',
   consumer_secret_ciphertext text not null default '',
   passkey_ciphertext text not null default '',

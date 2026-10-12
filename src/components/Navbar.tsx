@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { NairobiEstate } from '../types';
 import { useContent } from '../context/ContentContext';
-import { MommyCareLogo } from './MommyCareLogo';
+import { TmommycareLogo } from './TmommycareLogo';
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -90,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Logo & Brand Identity (4 quick clicks triggers secret admin access) */}
           <div className="shrink-0 py-1">
-            <MommyCareLogo 
+            <TmommycareLogo 
               onClick={handleLogoClick} 
               size="sm"
               showTagline={true}

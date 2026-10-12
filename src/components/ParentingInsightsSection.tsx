@@ -230,7 +230,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
               Want a Nanny Trained in These Exact Standards?
             </h4>
             <p className="text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed">
-              Every MommyCare nanny undergoes verified training in infant weaning nutrition, pediatric CPR, 
+              Every Tmommycare nanny undergoes verified training in infant weaning nutrition, pediatric CPR, 
               Montessori developmental activities, and high-rise apartment safety.
             </p>
           </div>

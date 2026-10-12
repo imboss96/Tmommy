@@ -306,7 +306,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                   <div className="relative h-64 overflow-hidden bg-stone-100">
                     <img
                       src={staff.avatar || undefined}
-                      alt={`${staff.name} - MommyCare Vetted ${staff.categoryLabel} in Nairobi`}
+                      alt={`${staff.name} - Tmommycare Vetted ${staff.categoryLabel} in Nairobi`}
                       className="w-full h-full object-contain object-center"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/30" />

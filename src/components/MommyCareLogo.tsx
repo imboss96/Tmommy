@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface MommyCareLogoProps {
+interface TmommycareLogoProps {
   variant?: 'full' | 'compact' | 'icon';
   colorScheme?: 'default' | 'white' | 'light';
   className?: string;
@@ -11,7 +11,7 @@ interface MommyCareLogoProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
+export const TmommycareLogo: React.FC<TmommycareLogoProps> = ({
   variant = 'compact',
   colorScheme = 'default',
   className = '',
@@ -37,8 +37,8 @@ export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
 
   if (variant === 'icon') {
     return (
-      <a href="/" onClick={onClick} className={`inline-flex items-center cursor-pointer ${className}`} aria-label="Go to MommyCare home page">
-        <img src="/logo-icon.svg" alt="MommyCare" className={`${iconDimensions} object-contain ${iconClassName}`} />
+      <a href="/" onClick={onClick} className={`inline-flex items-center cursor-pointer ${className}`} aria-label="Go to Tmommycare home page">
+        <img src="/logo-icon.svg" alt="Tmommycare" className={`${iconDimensions} object-contain ${iconClassName}`} />
       </a>
     );
   }
@@ -50,8 +50,8 @@ export const MommyCareLogo: React.FC<MommyCareLogoProps> = ({
       className={`inline-flex items-center cursor-pointer group select-none ${className}`}
     >
       <img
-        src="/mommycare-logo.svg"
-        alt="MommyCare - Quality Care. Safer Homes."
+        src="/Tmommycare-logo.svg"
+        alt="Tmommycare - Quality Care. Safer Homes."
         className={`${logoDimensions} object-contain object-left`}
       />
     </a>

@@ -34,7 +34,7 @@ export const Testimonials: React.FC = () => {
             Trusted in Over 280 Homes Across Nairobi
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
-            Read verified reviews from parents in Karen, Westlands, Kilimani, and Runda who found peace of mind with MommyCare.
+            Read verified reviews from parents in Karen, Westlands, Kilimani, and Runda who found peace of mind with Tmommycare.
           </p>
         </div>
 

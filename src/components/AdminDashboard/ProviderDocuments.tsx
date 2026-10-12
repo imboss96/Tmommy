@@ -99,7 +99,7 @@ const printDocument = async (title: string, content: string, stampDate?: string)
   const printWindow = window.open('', '_blank');
   if (!printWindow) throw new Error('Allow pop-ups for this site to prepare the PDF.');
 
-  const logoUrl = new URL('/mommycare-logo-transparent.png', window.location.href).href;
+  const logoUrl = new URL('/Tmommycare-logo-transparent.png', window.location.href).href;
   let stampUrl = new URL('/STAMP.png', window.location.href).href;
   try {
     if (stampDate) stampUrl = await createDatedStamp(stampDate);
@@ -150,8 +150,8 @@ const printDocument = async (title: string, content: string, stampDate?: string)
         </style>
       </head>
       <body>${content
-        .replaceAll('__MOMMYCARE_LOGO_URL__', escapeHtml(logoUrl))
-        .replaceAll('__MOMMYCARE_STAMP_URL__', escapeHtml(stampUrl))}</body>
+        .replaceAll('__Tmommycare_LOGO_URL__', escapeHtml(logoUrl))
+        .replaceAll('__Tmommycare_STAMP_URL__', escapeHtml(stampUrl))}</body>
     </html>`);
   printWindow.addEventListener('load', () => {
     printWindow.focus();
@@ -172,7 +172,7 @@ export const printProviderCv = async (profile: ProviderDocumentProfile) => {
   await printDocument(`${profile.name} - CV`, `
     <main class="document">
       <header class="brand">
-        <img class="brand-logo" src="__MOMMYCARE_LOGO_URL__" alt="MommyCare — Quality Care. Safer Homes.">
+        <img class="brand-logo" src="__Tmommycare_LOGO_URL__" alt="Tmommycare — Quality Care. Safer Homes.">
         <div class="reference">PROVIDER PROFILE<br>CURRICULUM VITAE</div>
       </header>
       <section class="cv-header">
@@ -285,7 +285,7 @@ export const ProviderContractButton: React.FC<{ profile: ProviderDocumentProfile
       await printDocument(`${details.contractNumber} - ${profile.name}`, `
         <main class="document">
           <header class="brand">
-            <img class="brand-logo" src="__MOMMYCARE_LOGO_URL__" alt="MommyCare — Quality Care. Safer Homes.">
+            <img class="brand-logo" src="__Tmommycare_LOGO_URL__" alt="Tmommycare — Quality Care. Safer Homes.">
             <div class="reference">SERVICE PROVIDER AGREEMENT<br>${value(details.contractNumber)}</div>
           </header>
           <h1>SERVICE PROVIDER AGREEMENT</h1>
@@ -299,15 +299,15 @@ export const ProviderContractButton: React.FC<{ profile: ProviderDocumentProfile
             <div class="field"><strong>Assigned household</strong> ${value(details.clientName)}</div>
             <div class="field"><strong>Service location</strong> ${value(details.serviceLocation)}</div>
           </section>
-          <p><strong>BETWEEN:</strong> MommyCare Nairobi, referred to in this agreement as “MommyCare”; and <strong>${escapeHtml(profile.name)}</strong>, referred to as the “Service Provider”. The parties agree as follows:</p>
+          <p><strong>BETWEEN:</strong> Tmommycare Nairobi, referred to in this agreement as “Tmommycare”; and <strong>${escapeHtml(profile.name)}</strong>, referred to as the “Service Provider”. The parties agree as follows:</p>
           <h2>Definitions</h2>
           <ul>
-            <li><strong>MommyCare:</strong> MommyCare Nairobi, coordinating the introduction and placement.</li>
+            <li><strong>Tmommycare:</strong> Tmommycare Nairobi, coordinating the introduction and placement.</li>
             <li><strong>Service Provider:</strong> ${escapeHtml(profile.name)}, providing the services described in this agreement.</li>
             <li><strong>Assigned Household:</strong> the household identified above where the agreed services will be performed.</li>
           </ul>
           <h2>1. Appointment and assignment</h2>
-          <p>MommyCare introduces the Service Provider for the service assignment described in this agreement. The Service Provider will provide the agreed ${escapeHtml(title.toLowerCase())} services to the assigned household. The household, duties, work arrangements, and any changes must be confirmed with the relevant parties in writing.</p>
+          <p>Tmommycare introduces the Service Provider for the service assignment described in this agreement. The Service Provider will provide the agreed ${escapeHtml(title.toLowerCase())} services to the assigned household. The household, duties, work arrangements, and any changes must be confirmed with the relevant parties in writing.</p>
           <h2>2. Service details</h2>
           <div class="meta">
             <p><strong>Commencement:</strong> ${date(details.startDate)}</p>
@@ -321,31 +321,31 @@ export const ProviderContractButton: React.FC<{ profile: ProviderDocumentProfile
             <li>Perform the agreed duties with reasonable care, professionalism, and respect for the household’s routines and property.</li>
             <li>Follow reasonable safety instructions and promptly communicate any incident, absence, or concern affecting the service.</li>
             <li>Keep household, family, and child information confidential and use it only to perform the agreed duties.</li>
-            <li>Not accept duties or working arrangements that materially differ from those agreed without discussing them with the household and MommyCare.</li>
+            <li>Not accept duties or working arrangements that materially differ from those agreed without discussing them with the household and Tmommycare.</li>
           </ul>
-          <h2>4. Household and MommyCare responsibilities</h2>
+          <h2>4. Household and Tmommycare responsibilities</h2>
           <ul>
             <li>The household will explain duties, routines, work arrangements, and applicable safety requirements before service begins.</li>
             <li>Payment arrangements, including payment date and method, must be agreed directly and recorded by the relevant parties.</li>
-            <li>MommyCare will provide placement coordination and receive concerns about the assignment for follow-up.</li>
+            <li>Tmommycare will provide placement coordination and receive concerns about the assignment for follow-up.</li>
           </ul>
           <h2>5. Pay, working time, and rest</h2>
           <p>The pay, work schedule, and rest days set out above are the agreed terms for this assignment. Any additional hours, deductions, benefits, leave, or changes must be discussed and documented in writing by the parties concerned, in line with applicable law.</p>
           <h2>6. Safety, conduct, and confidentiality</h2>
-          <p>The Service Provider will observe household safety instructions, maintain appropriate professional boundaries, and protect confidential information during and after the assignment. Concerns about safety or conduct should be raised promptly with the household and MommyCare.</p>
+          <p>The Service Provider will observe household safety instructions, maintain appropriate professional boundaries, and protect confidential information during and after the assignment. Concerns about safety or conduct should be raised promptly with the household and Tmommycare.</p>
           <h2>7. Changes and ending the assignment</h2>
           <p>Any change to this agreement should be recorded in writing. The parties should give reasonable written notice before ending the assignment, except where urgent safety concerns or applicable law require otherwise. Outstanding pay and any handover arrangements should be discussed promptly.</p>
           <h2>8. Concerns and resolution</h2>
-          <p>The parties will first try to resolve concerns through prompt, respectful discussion, with MommyCare available to assist with placement-related issues. Nothing in this agreement limits any rights or obligations provided by applicable law.</p>
+          <p>The parties will first try to resolve concerns through prompt, respectful discussion, with Tmommycare available to assist with placement-related issues. Nothing in this agreement limits any rights or obligations provided by applicable law.</p>
           <h2>9. Acknowledgement</h2>
           <p>Each signatory confirms they have read and understood this agreement, had an opportunity to ask questions, and received a copy. This template should be completed and reviewed before signing.</p>
           <section class="signatures">
             <div class="signature"><strong>Service Provider: ${escapeHtml(profile.name)}</strong><span>Signature · Date</span></div>
             <div class="signature company-signature">
-              <strong>MommyCare representative</strong>
+              <strong>Tmommycare representative</strong>
               <span>Name · Signature · Date</span>
               <div class="company-stamp">
-                <img src="__MOMMYCARE_STAMP_URL__" alt="MommyCare company stamp">
+                <img src="__Tmommycare_STAMP_URL__" alt="Tmommycare company stamp">
               </div>
             </div>
             <div class="signature"><strong>Household representative</strong><span>Name · Signature · Date</span></div>

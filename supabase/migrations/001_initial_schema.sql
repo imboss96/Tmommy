@@ -116,7 +116,7 @@ create table if not exists public.site_config (
   hotline_phone text not null,
   emergency_dispatch_phone text not null,
   whatsapp_phone text not null default '+254 700 666 227',
-  whatsapp_message text not null default 'Hello MommyCare, I would like help finding vetted homecare staff.',
+  whatsapp_message text not null default 'Hello Tmommycare, I would like help finding vetted homecare staff.',
   notification_banner text not null,
   headquarters_address text not null,
   concierge_email text not null,

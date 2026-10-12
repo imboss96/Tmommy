@@ -118,7 +118,7 @@ export interface EmergencyRequestData {
 
 export interface CompetitorComparisonItem {
   feature: string;
-  mommyCare: string | boolean;
+  Tmommycare: string | boolean;
   informalBrokers: string | boolean;
   generalAgencies: string | boolean;
   whatsappGroups: string | boolean;

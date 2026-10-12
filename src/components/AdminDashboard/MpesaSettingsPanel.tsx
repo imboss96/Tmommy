@@ -21,7 +21,7 @@ const initialSettings: MpesaSettings = {
   environment: 'sandbox',
   merchantType: 'paybill',
   shortcode: '',
-  accountReference: 'MOMMYCARE',
+  accountReference: 'Tmommycare',
   credentialsConfigured: false,
   encryptionKeyConfigured: false,
   callbackConfigured: false

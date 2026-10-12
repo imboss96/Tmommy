@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { NAIROBI_ESTATES } from '../data/estates';
 import { useContent } from '../context/ContentContext';
-import { MommyCareLogo } from './MommyCareLogo';
+import { TmommycareLogo } from './TmommycareLogo';
 
 export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
   onOpenBooking
@@ -27,7 +27,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
           
           {/* Col 1: Brand & Nairobi Mission (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
-            <MommyCareLogo 
+            <TmommycareLogo 
               colorScheme="white" 
               size="md" 
               showTagline={true} 
@@ -125,7 +125,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
 
         {/* Bottom Legal & Copyright Bar */}
         <div className="pt-8 border-t border-[#233F2E] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#8BA593]">
-          <p>© {new Date().getFullYear()} MommyCare Homecare & Domestic Staff Agency Limited (Kenya). All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Tmommycare Homecare & Domestic Staff Agency Limited (Kenya). All rights reserved.</p>
           <div className="flex items-center gap-4 flex-wrap">
             <a href="/contact" className="hover:text-white transition-colors">Contact us</a>
             <span>â€¢</span>

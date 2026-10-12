@@ -111,9 +111,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   hotlinePhone: '+254 700 666 227',
   emergencyDispatchPhone: '+254 700 666 227',
   whatsappPhone: '+254 700 666 227',
-  whatsappMessage: 'Hello MommyCare, I would like help finding vetted homecare staff.',
+  whatsappMessage: 'Hello Tmommycare, I would like help finding vetted homecare staff.',
   notificationBanner: 'Serving Karen, Westlands, Kilimani, Lavington, Runda, Muthaiga & Greater Nairobi',
   headquartersAddress: 'The Promenade, General Mathenge Drive, Westlands, Nairobi',
-  conciergeEmail: 'concierge@mommycare.co.ke',
+  conciergeEmail: 'concierge@Tmommycare.co.ke',
   replacementWarrantyDays: 90
 };

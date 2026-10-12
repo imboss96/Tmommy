@@ -7,7 +7,7 @@ export type CoreServiceCategory = {
   image: string;
 };
 
-export const CORE_SERVICE_CATEGORY_STORAGE_KEY = 'mommycare_core_service_categories';
+export const CORE_SERVICE_CATEGORY_STORAGE_KEY = 'Tmommycare_core_service_categories';
 
 export const DEFAULT_CORE_SERVICE_CATEGORIES: CoreServiceCategory[] = [
   {
