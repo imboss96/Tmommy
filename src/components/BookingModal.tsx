@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { NannyType, NannyProfile, BookingFormData, HomecareRole } from '../types';
 import { useContent } from '../context/ContentContext';
-import { TmommycareLogo } from './TmommycareLogo';
+import { TmommycareLogo } from './MommyCareLogo';
 
 interface BookingModalProps {
   isOpen: boolean;

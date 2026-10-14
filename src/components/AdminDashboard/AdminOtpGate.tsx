@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Lock, Mail, ShieldAlert } from 'lucide-react';
-import { TmommycareLogo } from '../TmommycareLogo';
+import { TmommycareLogo } from '../MommyCareLogo';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
 

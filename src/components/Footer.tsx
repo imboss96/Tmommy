@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { NAIROBI_ESTATES } from '../data/estates';
 import { useContent } from '../context/ContentContext';
-import { TmommycareLogo } from './TmommycareLogo';
+import { TmommycareLogo } from './MommyCareLogo';
 
 export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
   onOpenBooking

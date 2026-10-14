@@ -28,7 +28,7 @@ import { SubmissionsManager } from './SubmissionsManager';
 import { MediaManager } from './MediaManager';
 import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
-import { TmommycareLogo } from '../TmommycareLogo';
+import { TmommycareLogo } from '../MommyCareLogo';
 import { ProviderApplicationsManager } from './ProviderApplicationsManager';
 
 interface AdminDashboardProps {
