@@ -1,69 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://Tmommycare.co.ke/</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <loc>https://tmommycare.co.ke/</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/nannies</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <loc>https://tmommycare.co.ke/nannies</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/vetting</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <loc>https://tmommycare.co.ke/vetting</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/salary-guide</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://tmommycare.co.ke/salary-guide</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/mission-vision</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://tmommycare.co.ke/mission-vision</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/insights</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://tmommycare.co.ke/insights</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/reviews</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://tmommycare.co.ke/reviews</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/compare-care</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://tmommycare.co.ke/compare-care</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/academy</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <loc>https://tmommycare.co.ke/academy</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/contact</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://tmommycare.co.ke/contact</loc>
   </url>
   <url>
-    <loc>https://Tmommycare.co.ke/provider-apply</loc>
-    <lastmod>2026-09-27</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://tmommycare.co.ke/provider-apply</loc>
+  </url>
+  <url>
+    <loc>https://tmommycare.co.ke/pricing</loc>
+  </url>
+  <url>
+    <loc>https://tmommycare.co.ke/careers</loc>
+  </url>
+  <url>
+    <loc>https://tmommycare.co.ke/privacy-policy</loc>
+  </url>
+  <url>
+    <loc>https://tmommycare.co.ke/terms-of-placement</loc>
+  </url>
+  <url>
+    <loc>https://tmommycare.co.ke/safety-policy</loc>
   </url>
 </urlset>

@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /#admin
 
-Sitemap: https://Tmommycare.co.ke/sitemap.xml
+Sitemap: https://tmommycare.co.ke/sitemap.xml

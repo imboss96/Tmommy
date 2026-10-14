@@ -70,14 +70,14 @@ function MainWebsite() {
   }, [pathname]);
 
   useEffect(() => {
-    const routeSeo: Record<string, { title: string; description: string }> = {
+    const routeSeo: Record<string, { title: string; description: string; robots?: string }> = {
       '/': {
         title: 'Tmommycare Nairobi | Nannies & Homecare Professionals',
         description: 'Find nannies, house managers, caregivers, and domestic professionals in Nairobi with guided placement support and replacement options.'
       },
       '/nannies': {
         title: 'Nannies & Domestic Staff in Nairobi | Tmommycare',
-        description: 'Browse nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi estates.'
+        description: 'Browse nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi.'
       },
       '/vetting': {
         title: 'Nanny Care Standards in Nairobi | Tmommycare',
@@ -134,11 +134,25 @@ function MainWebsite() {
       '/provider-apply': {
         title: 'Apply as a Homecare Provider | Tmommycare Nairobi',
         description: 'Apply to be considered for the Tmommycare public directory. Submit your professional details and supporting documents for admin review.'
+      },
+      '/provider-payment': {
+        title: 'Provider Payment | Tmommycare Nairobi',
+        description: 'Complete your Tmommycare provider registration payment.',
+        robots: 'noindex, nofollow'
       }
     };
     const seo = routeSeo[pathname] || routeSeo['/'];
+    const canonicalUrl = `https://tmommycare.co.ke${pathname}`;
     document.title = seo.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', seo.description);
+    document.querySelector('meta[name="title"]')?.setAttribute('content', seo.title);
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', seo.robots || 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonicalUrl);
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', seo.description);
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', seo.title);
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', seo.description);
   }, [pathname]);
 
   useEffect(() => {
