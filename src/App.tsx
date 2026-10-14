@@ -142,7 +142,7 @@ function MainWebsite() {
       }
     };
     const seo = routeSeo[pathname] || routeSeo['/'];
-    const canonicalUrl = `https://tmommycare.co.ke${pathname}`;
+    const canonicalUrl = `https://www.tmommycares.com${pathname}`;
     document.title = seo.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', seo.description);
     document.querySelector('meta[name="title"]')?.setAttribute('content', seo.title);
