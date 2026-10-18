@@ -301,7 +301,7 @@ export const Hero: React.FC<HeroProps> = ({
                       ))}
                     </span>
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-[#635E59]">380+ Nairobi Estates</p>
+                  <p className="text-[10px] sm:text-[11px] text-[#635E59]">380+ Locations</p>
                 </div>
               </div>
 

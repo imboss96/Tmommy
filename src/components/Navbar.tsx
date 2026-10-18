@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="w-full flex items-center gap-2 sm:gap-3 overflow-hidden">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <span className="inline-flex shrink-0 items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-[#128C7E] text-white text-[10px] sm:text-[11px] font-semibold tracking-wide">
-              <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" /> DCI Biometric Verified
+              <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" /> 99% Verified
             </span>
             <span className="hidden md:block min-w-0 truncate whitespace-nowrap text-[#075E54]">
               {siteConfig.notificationBanner}

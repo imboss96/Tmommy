@@ -456,7 +456,7 @@ export const StaffManager: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#7D766D] tracking-wider mb-1">
-                    Primary Nairobi Estate *
+                    Primary Location *
                   </label>
                   <input
                     type="text"

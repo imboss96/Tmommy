@@ -47,7 +47,7 @@ export const SalaryCalculator: React.FC<{ onBookConsultation: () => void }> = ({
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
             Fair compensation retains trustworthy staff. Calculate prevailing wage benchmarks across 
-            Nairobi estates, private placement rates, and contract terms with zero guesswork.
+            Locations, private placement rates, and contract terms with zero guesswork.
           </p>
         </div>
 

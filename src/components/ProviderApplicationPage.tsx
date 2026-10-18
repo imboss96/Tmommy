@@ -27,6 +27,15 @@ const salaryRanges = [
   'KES 15,001–20,000',
   'Above KES 20,000'
 ];
+const homecareSkillOptions = [
+  'Infant care', 'Newborn care', 'Toddler care', 'Child supervision', 'School run support',
+  'Meal preparation', 'Healthy cooking', 'Baby food preparation', 'Housekeeping', 'Laundry',
+  'Ironing', 'Dishwashing', 'General cleaning', 'Deep cleaning', 'Bathroom cleaning',
+  'Pet care', 'Gardening', 'Lawn care', 'Pool maintenance', 'Elderly care', 'Care for special needs',
+  'First aid', 'CPR', 'Medication reminders', 'Home organization', 'Errands', 'Shopping',
+  'Babysitting', 'Nanny duties', 'Family support', 'Cooking for toddlers', 'Companionship'
+];
+const languageOptions = ['English', 'Kiswahili', 'Swahili', 'French', 'Arabic', 'German', 'Spanish', 'Italian', 'Portuguese'];
 const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
@@ -40,6 +49,26 @@ export const ProviderApplicationPage: React.FC = () => {
   const [error, setError] = useState('');
 
   const setField = <Key extends keyof typeof form>(key: Key, value: (typeof form)[Key]) => setForm(current => ({ ...current, [key]: value }));
+  const selectedSkills = form.skills.split(',').map(skill => skill.trim()).filter(Boolean);
+  const selectedLanguages = form.languages.split(',').map(language => language.trim()).filter(Boolean);
+  const toggleSkill = (skill: string) => {
+    const nextSkills = new Set(selectedSkills);
+    if (nextSkills.has(skill)) {
+      nextSkills.delete(skill);
+    } else {
+      nextSkills.add(skill);
+    }
+    setField('skills', [...nextSkills].join(', '));
+  };
+  const toggleLanguage = (language: string) => {
+    const nextLanguages = new Set(selectedLanguages);
+    if (nextLanguages.has(language)) {
+      nextLanguages.delete(language);
+    } else {
+      nextLanguages.add(language);
+    }
+    setField('languages', [...nextLanguages].join(', '));
+  };
   const clearSignature = () => {
     const canvas = signatureCanvasRef.current;
     canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
@@ -220,10 +249,55 @@ export const ProviderApplicationPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#514B44]">Home area / neighbourhood *<input required minLength={2} maxLength={100} value={form.primaryEstate} onChange={e => setField('primaryEstate', e.target.value)} placeholder="Enter your town, estate, or neighbourhood" className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Years of experience *<input required type="number" min="0" max="60" value={form.experienceYears} onChange={e => setField('experienceYears', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Expected monthly salary *<select required value={form.monthlySalaryRange} onChange={e => setField('monthlySalaryRange', e.target.value)} className={inputClass}><option value="">Select a salary range</option>{salaryRanges.map(range => <option key={range} value={range}>{range}</option>)}</select><span className="mt-1 block font-normal text-[#777067]">KES 6,000–8,000 is free. Higher bands add KES 200, 250, 300, or 500 to the base fee set by Tmommycare.</span></label>
-                <label className="text-xs font-bold text-[#514B44]">Languages<span className="font-normal text-[#91897F]"> · comma separated</span><input value={form.languages} onChange={e => setField('languages', e.target.value)} placeholder="Kiswahili, English" className={inputClass} /></label>
+                <div className="text-xs font-bold text-[#514B44]">
+                  Languages
+                  <span className="font-normal text-[#91897F]"> · tap to choose all that apply</span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {languageOptions.map(language => {
+                      const isSelected = selectedLanguages.includes(language);
+                      return (
+                        <button
+                          key={language}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => toggleLanguage(language)}
+                          className={`min-h-10 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                            isSelected
+                              ? 'border-[#1D432D] bg-[#1D432D] text-white shadow-sm'
+                              : 'border-[#D7CDBD] bg-[#FCFBF9] text-[#3D3A36] hover:border-[#1D432D] hover:text-[#1D432D]'
+                          }`}
+                        >
+                          {language}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <div className="mt-4 grid gap-4">
-                <label className="text-xs font-bold text-[#514B44]">Skills and experience<span className="font-normal text-[#91897F]"> · comma separated</span><textarea rows={2} value={form.skills} onChange={e => setField('skills', e.target.value)} placeholder="Infant care, first aid, meal preparation" className={inputClass} /></label>
+                <div className="text-xs font-bold text-[#514B44]">
+                  Skills and experience
+                  <span className="font-normal text-[#91897F]"> · choose multiple skills</span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {homecareSkillOptions.map(skill => {
+                      const isSelected = selectedSkills.includes(skill);
+                      return (
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() => toggleSkill(skill)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            isSelected
+                              ? 'border-[#1D432D] bg-[#1D432D] text-white shadow-sm'
+                              : 'border-[#D7CDBD] bg-[#FCFBF9] text-[#3D3A36] hover:border-[#1D432D] hover:text-[#1D432D]'
+                          }`}
+                        >
+                          {skill}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <label className="text-xs font-bold text-[#514B44]">Short introduction<textarea rows={4} value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder="Tell us about your work experience and the kind of role you are looking for." className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Certificate of Good Conduct reference <span className="font-normal text-[#91897F]">· if available</span><input value={form.dciGoodConductNumber} onChange={e => setField('dciGoodConductNumber', e.target.value)} className={inputClass} /></label>
               </div>

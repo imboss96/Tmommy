@@ -47,7 +47,7 @@ export const MediaManager: React.FC = () => {
     { value: 'all', label: 'All Photos' },
     { value: 'staff', label: 'Domestic Staff Profiles' },
     { value: 'insights', label: 'Insights & Nutrition' },
-    { value: 'estate', label: 'Nairobi Estates' },
+    { value: 'estate', label: 'Locations' },
     { value: 'general', label: 'General & Academy' }
   ];
 
@@ -545,7 +545,7 @@ export const MediaManager: React.FC = () => {
                 >
                   <option value="staff">Domestic Staff Profile</option>
                   <option value="insights">Insights & Nutrition Article</option>
-                  <option value="estate">Nairobi Estate & Residence</option>
+                  <option value="estate">Location & Residence</option>
                   <option value="general">General & Training</option>
                 </select>
               </div>
@@ -641,7 +641,7 @@ export const MediaManager: React.FC = () => {
                 >
                   <option value="staff">Domestic Staff Profile</option>
                   <option value="insights">Insights & Nutrition Article</option>
-                  <option value="estate">Nairobi Estate & Residence</option>
+                  <option value="estate">Location & Residence</option>
                   <option value="general">General & Training</option>
                 </select>
               </div>

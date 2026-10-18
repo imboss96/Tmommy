@@ -250,7 +250,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs uppercase font-bold text-[#7D766D] tracking-wider mb-1">
-                    Nairobi Estate *
+                    Location *
                   </label>
                   <input
                     type="text"

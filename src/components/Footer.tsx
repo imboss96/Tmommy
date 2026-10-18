@@ -73,7 +73,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
             </ul>
           </div>
 
-          {/* Col 3: Nairobi Estates Covered (3 cols) */}
+          {/* Col 3: Locations Covered (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-widest text-[#F4A261]">
               Estates Served (SEO Geo-Targeted)

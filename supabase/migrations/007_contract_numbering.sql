@@ -5,10 +5,6 @@ create table if not exists public.contract_number_counters (
 
 alter table public.contract_number_counters enable row level security;
 
-insert into public.contract_number_counters (contract_year, last_number)
-values (2026, 1)
-on conflict (contract_year) do nothing;
-
 create or replace function public.next_contract_number(p_year integer)
 returns text
 language plpgsql

@@ -101,7 +101,7 @@ const printDocument = async (title: string, content: string, stampDate?: string)
   const printWindow = window.open('', '_blank');
   if (!printWindow) throw new Error('Allow pop-ups for this site to prepare the PDF.');
 
-  const logoUrl = new URL('/Tmommycare-logo-transparent.png', window.location.href).href;
+  const logoUrl = new URL('/mommycare-logo-transparent.png', window.location.href).href;
   let stampUrl = new URL('/STAMP.png', window.location.href).href;
   try {
     if (stampDate) stampUrl = await createDatedStamp(stampDate);
