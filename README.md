@@ -102,10 +102,14 @@ Supabase migrations are stored in `supabase/migrations/`. Apply them in order, i
 - `006_provider_applications.sql` (creates the provider review queue and private document bucket)
 - `007_contract_numbering.sql` (creates the atomic yearly counter for unique contract numbers)
 - `008_provider_registration_mpesa.sql` (adds private provider-payment drafts and M-Pesa settings)
+- `009_provider_payment_internal_rename.sql` (renames internal payment tables/fields to neutral payment naming)
+- `010_payment_salary_band_fees.sql` (adds dashboard-configurable registration fees per provider salary band)
+- `011_provider_portal_identity_links.sql` (adds provider email/phone lookup indexes for the self-serve provider portal)
+- `012_provider_reference_codes.sql` (adds friendly provider-facing reference codes in the `XXXXDDMMNO` format)
 
 Never commit `.env`, `.env.local`, Supabase service-role keys, or Cloudinary secrets.
 
-Configure `MPESA_CONFIG_ENCRYPTION_KEY` as a stable, backend-only 64-character hex key before saving M-Pesa credentials in the admin dashboard. Set `MPESA_CALLBACK_URL` to the public HTTPS API callback URL so Safaricom can reach the payment confirmation endpoint. M-Pesa credentials are encrypted in Supabase; only the one-time encryption key belongs in the server environment.
+Configure `PAYMENT_CONFIG_ENCRYPTION_KEY` as a stable, backend-only 64-character hex key before saving TinyPesa M-Pesa credentials in the admin dashboard. Set `PAYMENT_CALLBACK_URL` to the public HTTPS API callback URL so TinyPesa can reach the payment confirmation endpoint. Backward-compatible aliases `MPESA_CONFIG_ENCRYPTION_KEY` and `MPESA_CALLBACK_URL` are also supported. You can optionally set `TINYPESA_API_URL` and `TINYPESA_SANDBOX_API_URL` for custom TinyPesa environments. Payment credentials are encrypted in Supabase; only the one-time encryption key belongs in the server environment.
 
 ## GitHub
 

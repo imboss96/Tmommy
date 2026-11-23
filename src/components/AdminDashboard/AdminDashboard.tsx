@@ -15,11 +15,10 @@ import {
   Clock, 
   ExternalLink,
   ChevronRight,
-  TrendingUp,
-  FileText,
-  Lock
-  ,MessageSquareQuote,
-  UserPlus
+  Lock,
+  MessageSquareQuote,
+  UserPlus,
+  ReceiptText
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { PostsManager } from './PostsManager';
@@ -30,6 +29,7 @@ import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
 import { TmommycareLogo } from '../MommyCareLogo';
 import { ProviderApplicationsManager } from './ProviderApplicationsManager';
+import { ProviderTransactionsManager } from './ProviderTransactionsManager';
 
 interface AdminDashboardProps {
   onBackToWebsite: () => void;
@@ -48,7 +48,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
     dismissAlert 
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'staff' | 'applications' | 'submissions' | 'media' | 'reviews' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'staff' | 'applications' | 'transactions' | 'submissions' | 'media' | 'reviews' | 'settings'>('overview');
 
   const newBookings = bookings.filter(b => b.status === 'New');
   const pendingEmergency = emergencyRequests.filter(e => e.status === 'Pending Dispatch');
@@ -128,6 +128,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
               { id: 'posts' as const, label: 'Posts & Articles', icon: BookOpen, count: insights.length },
               { id: 'staff' as const, label: 'Domestic Staff Directory', icon: Users, count: nannies.length },
               { id: 'applications' as const, label: 'Provider Applications', icon: UserPlus },
+              { id: 'transactions' as const, label: 'Transactions', icon: ReceiptText },
               { id: 'submissions' as const, label: 'Form Submissions', icon: Inbox, alert: newBookings.length + pendingEmergency.length },
               { id: 'media' as const, label: 'Photos & Media', icon: ImageIcon, count: mediaItems.length },
               { id: 'reviews' as const, label: 'Reviews', icon: MessageSquareQuote, count: reviews.filter(review => review.status === 'pending').length },
@@ -398,6 +399,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite,
         {activeTab === 'staff' && <StaffManager />}
 
         {activeTab === 'applications' && <ProviderApplicationsManager />}
+
+        {activeTab === 'transactions' && <ProviderTransactionsManager />}
 
         {/* SUBMISSIONS TAB */}
         {activeTab === 'submissions' && <SubmissionsManager />}

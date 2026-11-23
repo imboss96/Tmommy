@@ -18,7 +18,7 @@ import { useContent } from '../../context/ContentContext';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
 import { getAdminAccessToken } from '../../lib/adminAuth';
-import { MpesaSettingsPanel } from './MpesaSettingsPanel';
+import { PaymentSettingsPanel } from './MpesaSettingsPanel';
 
 type Administrator = {
   email: string;
@@ -131,7 +131,7 @@ export const SettingsManager: React.FC = () => {
         </p>
       </div>
 
-      <MpesaSettingsPanel />
+      <PaymentSettingsPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         

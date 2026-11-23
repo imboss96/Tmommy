@@ -3,9 +3,10 @@ import { LoaderCircle, Save } from 'lucide-react';
 import { getApiBaseUrl } from '../../lib/api';
 import { getAdminAuthHeaders } from '../../lib/adminAuth';
 
-type MpesaSettings = {
+type PaymentSettings = {
   enabled: boolean;
   feeKes: number;
+  salaryBandFees: Record<string, number>;
   environment: 'sandbox' | 'production';
   merchantType: 'paybill' | 'till';
   shortcode: string;
@@ -15,9 +16,24 @@ type MpesaSettings = {
   callbackConfigured: boolean;
 };
 
-const initialSettings: MpesaSettings = {
+const salaryBandLabels = [
+  'KES 6,000–8,000',
+  'KES 8,001–12,000',
+  'KES 12,001–15,000',
+  'KES 15,001–20,000',
+  'Above KES 20,000'
+] as const;
+
+const initialSettings: PaymentSettings = {
   enabled: false,
   feeKes: 0,
+  salaryBandFees: {
+    'KES 6,000–8,000': 0,
+    'KES 8,001–12,000': 200,
+    'KES 12,001–15,000': 250,
+    'KES 15,001–20,000': 300,
+    'Above KES 20,000': 500
+  },
   environment: 'sandbox',
   merchantType: 'paybill',
   shortcode: '',
@@ -27,7 +43,7 @@ const initialSettings: MpesaSettings = {
   callbackConfigured: false
 };
 
-export const MpesaSettingsPanel: React.FC = () => {
+export const PaymentSettingsPanel: React.FC = () => {
   const api = getApiBaseUrl();
   const [settings, setSettings] = useState(initialSettings);
   const [consumerKey, setConsumerKey] = useState('');
@@ -42,7 +58,7 @@ export const MpesaSettingsPanel: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${api}/api/admin/mpesa-settings`, { headers: getAdminAuthHeaders() });
+      const response = await fetch(`${api}/api/admin/payment-settings`, { headers: getAdminAuthHeaders() });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not load M-Pesa settings.');
       setSettings({ ...initialSettings, ...result });
@@ -61,7 +77,7 @@ export const MpesaSettingsPanel: React.FC = () => {
     setError('');
     setNotice('');
     try {
-      const response = await fetch(`${api}/api/admin/mpesa-settings`, {
+      const response = await fetch(`${api}/api/admin/payment-settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...getAdminAuthHeaders() },
         body: JSON.stringify({ ...settings, consumerKey, consumerSecret, passkey })
@@ -71,7 +87,7 @@ export const MpesaSettingsPanel: React.FC = () => {
       setConsumerKey('');
       setConsumerSecret('');
       setPasskey('');
-      setNotice('M-Pesa settings saved. Secret credentials are stored encrypted and are never shown again.');
+      setNotice('TinyPesa settings saved. Secret credentials are stored encrypted and are never shown again.');
       await load();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Could not save M-Pesa settings.');
@@ -84,23 +100,24 @@ export const MpesaSettingsPanel: React.FC = () => {
 
   return <section className="rounded-2xl border border-[#E8DFD3] bg-white p-5 shadow-sm sm:p-6">
     <div className="mb-5">
-      <h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Provider registration payments · Safaricom M-Pesa</h3>
-      <p className="mt-1 text-xs leading-5 text-[#635E59]">Set the base registration fee in KES. Salary-band surcharges are added automatically; the KES 6,000–8,000 band is always free. Daraja credentials are encrypted on the server and cannot be read back from this form.</p>
+      <h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">Provider registration payments · TinyPesa M-Pesa</h3>
+      <p className="mt-1 text-xs leading-5 text-[#635E59]">Set registration fees per salary band in KES. TinyPesa credentials are encrypted on the server and cannot be read back from this form.</p>
     </div>
     {loading ? <div className="flex items-center gap-2 py-4 text-sm text-[#635E59]"><LoaderCircle className="h-4 w-4 animate-spin" /> Loading payment settings…</div> : <form onSubmit={save} className="space-y-4">
-      {!settings.encryptionKeyConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set the backend-only MPESA_CONFIG_ENCRYPTION_KEY (64 hexadecimal characters) in the server environment before saving credentials.</p>}
-      {!settings.callbackConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set MPESA_CALLBACK_URL to the public HTTPS API callback URL in the server environment before enabling payments.</p>}
+      {!settings.encryptionKeyConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set PAYMENT_CONFIG_ENCRYPTION_KEY (or MPESA_CONFIG_ENCRYPTION_KEY) to a 64-character hexadecimal value in the server environment before saving credentials.</p>}
+      {!settings.callbackConfigured && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Set PAYMENT_CALLBACK_URL (or MPESA_CALLBACK_URL) to a public HTTPS API callback URL before enabling payments.</p>}
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="text-xs font-bold text-[#635E59]">Base registration fee (KES)
+        <label className="text-xs font-bold text-[#635E59]">Fallback base fee (KES)
           <input required type="number" min="0" max="1000000" step="1" value={settings.feeKes} onChange={event => setSettings(current => ({ ...current, feeKes: Number(event.target.value) }))} className={fieldClass} />
+          <span className="mt-1 block font-normal">Used only when a salary-band fee is not set.</span>
         </label>
-        <label className="text-xs font-bold text-[#635E59]">Daraja environment
-          <select value={settings.environment} onChange={event => setSettings(current => ({ ...current, environment: event.target.value as MpesaSettings['environment'] }))} className={fieldClass}>
+        <label className="text-xs font-bold text-[#635E59]">TinyPesa environment
+          <select value={settings.environment} onChange={event => setSettings(current => ({ ...current, environment: event.target.value as PaymentSettings['environment'] }))} className={fieldClass}>
             <option value="sandbox">Sandbox / testing</option><option value="production">Production</option>
           </select>
         </label>
         <label className="text-xs font-bold text-[#635E59]">Merchant type
-          <select value={settings.merchantType} onChange={event => setSettings(current => ({ ...current, merchantType: event.target.value as MpesaSettings['merchantType'] }))} className={fieldClass}>
+          <select value={settings.merchantType} onChange={event => setSettings(current => ({ ...current, merchantType: event.target.value as PaymentSettings['merchantType'] }))} className={fieldClass}>
             <option value="paybill">PayBill</option><option value="till">Buy Goods / Till</option>
           </select>
         </label>
@@ -111,25 +128,40 @@ export const MpesaSettingsPanel: React.FC = () => {
           <input required maxLength={12} pattern="[A-Za-z0-9]{1,12}" value={settings.accountReference} onChange={event => setSettings(current => ({ ...current, accountReference: event.target.value }))} className={fieldClass} />
           <span className="mt-1 block font-normal">For PayBill this appears as the account number; use up to 12 letters or digits.</span>
         </label>
-        <label className="text-xs font-bold text-[#635E59]">Consumer Key {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
+        <label className="text-xs font-bold text-[#635E59]">TinyPesa Username {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
           <input type="password" autoComplete="new-password" value={consumerKey} onChange={event => setConsumerKey(event.target.value)} className={fieldClass} />
         </label>
-        <label className="text-xs font-bold text-[#635E59]">Consumer Secret {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
+        <label className="text-xs font-bold text-[#635E59]">TinyPesa Link API key {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
           <input type="password" autoComplete="new-password" value={consumerSecret} onChange={event => setConsumerSecret(event.target.value)} className={fieldClass} />
         </label>
-        <label className="text-xs font-bold text-[#635E59] sm:col-span-2">Lipa Na M-Pesa Passkey {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
+        <label className="text-xs font-bold text-[#635E59] sm:col-span-2">TinyPesa Account API key (optional) {settings.credentialsConfigured && <span className="font-normal text-emerald-700">· saved; blank keeps current</span>}
           <input type="password" autoComplete="new-password" value={passkey} onChange={event => setPasskey(event.target.value)} className={fieldClass} />
         </label>
       </div>
+      <div className="rounded-2xl border border-[#E8DFD3] bg-[#FCFBF9] p-4 sm:p-5">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-[#635E59]">Registration fee per salary band (KES)</h4>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {salaryBandLabels.map(band => <label key={band} className="text-xs font-bold text-[#635E59]">{band}
+            <input required type="number" min="0" max="1000000" step="1" value={settings.salaryBandFees[band] ?? 0}
+              onChange={event => setSettings(current => ({
+                ...current,
+                salaryBandFees: { ...current.salaryBandFees, [band]: Number(event.target.value) }
+              }))}
+              className={fieldClass} />
+          </label>)}
+        </div>
+      </div>
       <label className="flex items-start gap-2 text-xs font-semibold text-[#3D3A36]">
         <input type="checkbox" checked={settings.enabled} onChange={event => setSettings(current => ({ ...current, enabled: event.target.checked }))} className="mt-0.5 accent-[#1D432D]" />
-        Enable M-Pesa payments for paid salary bands. Those applications enter the review queue after payment is confirmed; the KES 6,000–8,000 band is submitted free.
+        Enable M-Pesa payments for salary bands with a fee above zero. Paid applications enter the review queue after payment is confirmed.
       </label>
       {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
       {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
       <button type="submit" disabled={saving || !settings.encryptionKeyConfigured} className="inline-flex items-center gap-2 rounded-xl bg-[#1D432D] px-4 py-2.5 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
-        {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save M-Pesa settings
+        {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save TinyPesa settings
       </button>
     </form>}
   </section>;
 };
+
+export const MpesaSettingsPanel = PaymentSettingsPanel;

@@ -33,8 +33,10 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME;
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
 const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
-const mpesaConfigEncryptionKey = process.env.MPESA_CONFIG_ENCRYPTION_KEY || '';
-const mpesaCallbackUrl = process.env.MPESA_CALLBACK_URL || '';
+const paymentConfigEncryptionKey = process.env.PAYMENT_CONFIG_ENCRYPTION_KEY || process.env.MPESA_CONFIG_ENCRYPTION_KEY || '';
+const paymentCallbackUrl = process.env.PAYMENT_CALLBACK_URL || process.env.MPESA_CALLBACK_URL || '';
+const tinyPesaApiUrl = (process.env.TINYPESA_API_URL || 'https://api.tinypesa.com/api/v1').trim().replace(/\/+$/, '');
+const tinyPesaSandboxApiUrl = (process.env.TINYPESA_SANDBOX_API_URL || tinyPesaApiUrl).trim().replace(/\/+$/, '');
 const brevoApiKey = process.env.BREVO_API_KEY;
 const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tTmommycares.com';
 const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tTmommycares.com';
@@ -168,60 +170,78 @@ const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServic
     })
   : null;
 
-const getMpesaEncryptionKey = () => {
-  if (!/^[0-9a-f]{64}$/i.test(mpesaConfigEncryptionKey)) {
-    throw new Error('MPESA_CONFIG_ENCRYPTION_KEY must be a 64-character hexadecimal key.');
+const getPaymentEncryptionKey = () => {
+  if (!/^[0-9a-f]{64}$/i.test(paymentConfigEncryptionKey)) {
+    throw new Error('PAYMENT_CONFIG_ENCRYPTION_KEY (or MPESA_CONFIG_ENCRYPTION_KEY) must be a 64-character hexadecimal key.');
   }
-  return Buffer.from(mpesaConfigEncryptionKey, 'hex');
+  return Buffer.from(paymentConfigEncryptionKey, 'hex');
 };
 
-const encryptMpesaSecret = (value: string) => {
+const encryptPaymentSecret = (value: string) => {
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', getMpesaEncryptionKey(), iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getPaymentEncryptionKey(), iv);
   const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
   return `v1:${iv.toString('hex')}:${cipher.getAuthTag().toString('hex')}:${encrypted.toString('hex')}`;
 };
 
-const decryptMpesaSecret = (value: string) => {
+const decryptPaymentSecret = (value: string) => {
   const [version, ivHex, tagHex, encryptedHex] = value.split(':');
   if (version !== 'v1' || !/^[0-9a-f]{24}$/i.test(ivHex || '') ||
       !/^[0-9a-f]{32}$/i.test(tagHex || '') || !encryptedHex || !/^(?:[0-9a-f]{2})+$/i.test(encryptedHex)) {
     throw new Error('Stored M-Pesa credentials have an invalid encrypted format.');
   }
-  const decipher = crypto.createDecipheriv('aes-256-gcm', getMpesaEncryptionKey(), Buffer.from(ivHex, 'hex'));
+  const decipher = crypto.createDecipheriv('aes-256-gcm', getPaymentEncryptionKey(), Buffer.from(ivHex, 'hex'));
   decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
   return Buffer.concat([decipher.update(Buffer.from(encryptedHex, 'hex')), decipher.final()]).toString('utf8');
 };
 
-const normalizeMpesaPhoneNumber = (value: unknown) => {
+const normalizePaymentPhoneNumber = (value: unknown) => {
   if (typeof value !== 'string') return null;
   const digits = value.replace(/[\s()+-]/g, '');
   const normalized = digits.startsWith('0') ? `254${digits.slice(1)}` : digits;
   return /^254[17]\d{8}$/.test(normalized) ? normalized : null;
 };
 
-const getDarajaBaseUrl = (environment: string) =>
-  environment === 'production' ? 'https://api.safaricom.co.ke' : 'https://sandbox.safaricom.co.ke';
+const normalizeProviderLookupEmail = (value: unknown) =>
+  typeof value === 'string' ? value.trim().toLowerCase() : '';
 
-const getMpesaTimestamp = () => new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Africa/Nairobi', year: 'numeric', month: '2-digit', day: '2-digit',
-  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-}).formatToParts(new Date()).reduce<Record<string, string>>((parts, part) => {
-  if (part.type !== 'literal') parts[part.type] = part.value;
-  return parts;
-}, {});
-
-const darajaTimestamp = () => {
-  const parts = getMpesaTimestamp();
-  return `${parts.year}${parts.month}${parts.day}${parts.hour}${parts.minute}${parts.second}`;
+const normalizeProviderLookupPhone = (value: unknown) => {
+  if (typeof value !== 'string') return '';
+  const normalized = normalizePaymentPhoneNumber(value);
+  if (normalized) return normalized;
+  const digits = value.replace(/\D/g, '');
+  if (/^[17]\d{8}$/.test(digits)) return `254${digits}`;
+  return '';
 };
 
-const getMpesaPassword = (shortcode: string, passkey: string, timestamp: string) =>
-  Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
+const providerReferenceAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-const isMpesaCallbackConfigured = () => {
+const buildProviderReferencePrefix = () => {
+  const bytes = crypto.randomBytes(4);
+  return Array.from(bytes).map(byte => providerReferenceAlphabet[byte % providerReferenceAlphabet.length]).join('');
+};
+
+const allocateProviderReferenceCode = async (createdAt: Date) => {
+  const dateIso = createdAt.toISOString().slice(0, 10);
+  const day = createdAt.getUTCDate().toString().padStart(2, '0');
+  const month = (createdAt.getUTCMonth() + 1).toString().padStart(2, '0');
+  const { data, error } = await supabase!.rpc('next_provider_reference_no', { p_date: dateIso });
+  if (error || typeof data !== 'number' || !Number.isInteger(data) || data <= 0) {
+    throw new Error(error?.message || 'Could not allocate a provider reference number.');
+  }
+  if (data > 9999) {
+    throw new Error('Daily provider reference limit reached. Please try again tomorrow.');
+  }
+  const sequence = String(data).padStart(4, '0');
+  return `${buildProviderReferencePrefix()}${day}${month}${sequence}`;
+};
+
+const getTinyPesaBaseUrl = (environment: string) =>
+  environment === 'production' ? tinyPesaApiUrl : tinyPesaSandboxApiUrl;
+
+const isPaymentCallbackConfigured = () => {
   try {
-    const url = new URL(mpesaCallbackUrl);
+    const url = new URL(paymentCallbackUrl);
     return url.protocol === 'https:' && !['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname);
   } catch {
     return false;
@@ -230,13 +250,22 @@ const isMpesaCallbackConfigured = () => {
 
 const isMissingPaymentSchema = (error: { code?: string; message?: string }) =>
   error.code === 'PGRST205' || error.code === '42P01' ||
-  Boolean(error.message?.includes('mpesa_settings') || error.message?.includes('provider_payment_attempts'));
+  Boolean(
+    error.message?.includes('payment_settings') ||
+    error.message?.includes('mpesa_settings') ||
+    error.message?.includes('provider_payment_attempts') ||
+    error.message?.includes('provider_applications') ||
+    error.message?.includes('provider_reference_sequences') ||
+    error.message?.includes('next_provider_reference_no') ||
+    error.message?.includes('reference_code') ||
+    error.message?.includes('provider_phone')
+  );
 
 const reportPaymentSchemaError = (operation: string, error: { code?: string; message?: string }, res: Response) => {
   console.error(`[API] ${operation} failed (${error.code || 'unknown'}): ${error.message || 'Unknown database error'}`);
   if (!isMissingPaymentSchema(error)) return false;
   res.status(503).json({
-    error: 'Provider payments are not initialized in Supabase. Apply supabase/migrations/008_provider_registration_mpesa.sql, then retry.'
+    error: 'Provider payments are not initialized in Supabase. Apply migrations 008_provider_registration_mpesa.sql through 012_provider_reference_codes.sql, then retry.'
   });
   return true;
 };
@@ -356,6 +385,20 @@ const requireSupabase = (_req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+const getBearerToken = (request: Request) => {
+  const authorization = request.headers.authorization;
+  if (!authorization?.startsWith('Bearer ')) return null;
+  return authorization.slice('Bearer '.length);
+};
+
+const getAuthenticatedUserFromRequest = async (request: Request) => {
+  const token = getBearerToken(request);
+  if (!token) return null;
+  const { data, error } = await supabase!.auth.getUser(token);
+  if (error || !data.user) return null;
+  return data.user;
+};
+
 const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
   if (!supabase) {
     return res.status(503).json({ error: 'Supabase server configuration is missing.' });
@@ -407,16 +450,16 @@ app.post('/api/admin/contract-number', requireAdmin, async (_req, res) => {
 });
 
 app.get('/api/provider-payment-settings', requireSupabase, async (_req, res) => {
-  const { data, error } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
+  const { data, error } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
   if (error) {
     if (reportPaymentSchemaError('Public M-Pesa settings lookup', error, res)) return;
     return res.status(500).json({ error: 'Could not load provider payment settings.' });
   }
-  const encryptionConfigured = /^[0-9a-f]{64}$/i.test(mpesaConfigEncryptionKey);
-  const callbackConfigured = isMpesaCallbackConfigured();
+  const encryptionConfigured = /^[0-9a-f]{64}$/i.test(paymentConfigEncryptionKey);
+  const callbackConfigured = isPaymentCallbackConfigured();
   res.json({
     available: Boolean(data?.enabled && data.consumer_key_ciphertext && data.consumer_secret_ciphertext &&
-      data.passkey_ciphertext && encryptionConfigured && callbackConfigured)
+      encryptionConfigured && callbackConfigured)
   });
 });
 
@@ -432,16 +475,19 @@ app.get('/api/provider-payments/:id', requireSupabase, async (req, res) => {
     return res.status(500).json({ error: 'Could not check payment status.' });
   }
   if (!data) return res.status(404).json({ error: 'Payment request was not found.' });
-  if (data.status === 'pending' && data.result_code === 0 && data.mpesa_receipt_number) {
+  if (data.status === 'pending' && data.result_code === 0 && data.payment_receipt_number) {
     try {
       await verifyMpesaPaymentAndCreateApplication(data);
       const { data: confirmed, error: confirmError } = await supabase!.from('provider_payment_attempts')
-        .select('status, amount_kes, mpesa_receipt_number, result_description').eq('id', req.params.id).single();
+        .select('status, amount_kes, payment_receipt_number, result_description').eq('id', req.params.id).single();
       if (confirmError) return res.status(500).json({ error: 'Payment confirmation was saved but could not be loaded.' });
       return res.json({
         status: confirmed.status,
         amountKes: confirmed.amount_kes,
-        receiptNumber: confirmed.mpesa_receipt_number,
+        receiptNumber: confirmed.payment_receipt_number,
+        monthlySalaryRange: typeof (data.profile as Record<string, any> | null)?.monthlySalaryRange === 'string'
+          ? (data.profile as Record<string, any>).monthlySalaryRange
+          : null,
         message: confirmed.status === 'failed' ? confirmed.result_description : undefined
       });
     } catch (verificationError) {
@@ -452,31 +498,158 @@ app.get('/api/provider-payments/:id', requireSupabase, async (req, res) => {
   res.json({
     status: data.status,
     amountKes: data.amount_kes,
-    receiptNumber: data.mpesa_receipt_number,
+    receiptNumber: data.payment_receipt_number,
+    monthlySalaryRange: typeof (data.profile as Record<string, any> | null)?.monthlySalaryRange === 'string'
+      ? (data.profile as Record<string, any>).monthlySalaryRange
+      : null,
     message: data.status === 'failed' ? data.result_description : undefined
   });
 });
 
-app.get('/api/admin/mpesa-settings', requireAdmin, async (_req, res) => {
-  const { data, error } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
+app.post('/api/provider/my-applications', requireSupabase, async (req, res) => {
+  const providerEmail = normalizeProviderLookupEmail(req.body?.email);
+  const providerPhone = normalizeProviderLookupPhone(req.body?.phone);
+  if (!providerEmail && !providerPhone) {
+    return res.status(400).json({ error: 'Enter the email or phone number used when submitting your application.' });
+  }
+
+  const applicationMap = new Map<string, Record<string, any>>();
+  const draftMap = new Map<string, Record<string, any>>();
+
+  const mergeById = (rows: Record<string, any>[] | null | undefined, target: Map<string, Record<string, any>>) => {
+    (rows || []).forEach(row => {
+      if (typeof row?.id === 'string' && !target.has(row.id)) target.set(row.id, row);
+    });
+  };
+
+  const loadApplications = async (field: 'provider_email' | 'provider_phone', value: string) => {
+    const { data, error } = await supabase!
+      .from('provider_applications')
+      .select('id, reference_code, status, admin_notes, submitted_at, reviewed_at, profile')
+      .eq(field, value)
+      .order('submitted_at', { ascending: false });
+    if (error) {
+      if (reportPaymentSchemaError('Provider applications self-serve lookup', error, res)) return false;
+      res.status(500).json({ error: 'Could not load your applications.' });
+      return false;
+    }
+    mergeById(data as Record<string, any>[], applicationMap);
+    return true;
+  };
+
+  const loadDrafts = async (field: 'provider_email' | 'provider_phone', value: string) => {
+    const { data, error } = await supabase!
+      .from('provider_payment_attempts')
+      .select('id, reference_code, status, amount_kes, result_description, created_at, updated_at, profile')
+      .eq(field, value)
+      .in('status', ['awaiting_payment', 'initiating', 'pending', 'failed'])
+      .order('created_at', { ascending: false });
+    if (error) {
+      if (reportPaymentSchemaError('Provider payment draft self-serve lookup', error, res)) return false;
+      res.status(500).json({ error: 'Could not load your payment drafts.' });
+      return false;
+    }
+    mergeById(data as Record<string, any>[], draftMap);
+    return true;
+  };
+
+  if (providerEmail) {
+    if (!(await loadApplications('provider_email', providerEmail))) return;
+    if (!(await loadDrafts('provider_email', providerEmail))) return;
+  }
+  if (providerPhone) {
+    if (!(await loadApplications('provider_phone', providerPhone))) return;
+    if (!(await loadDrafts('provider_phone', providerPhone))) return;
+  }
+
+  const applications = Array.from(applicationMap.values()).sort((a, b) =>
+    String(b.submitted_at || '').localeCompare(String(a.submitted_at || ''))
+  );
+  const paymentDrafts = Array.from(draftMap.values()).sort((a, b) =>
+    String(b.created_at || '').localeCompare(String(a.created_at || ''))
+  );
+
+  return res.json({
+    applications: applications.map((application: Record<string, any>) => ({
+      id: application.id,
+      referenceCode: typeof application.reference_code === 'string' ? application.reference_code : application.id,
+      status: application.status,
+      notes: application.admin_notes || '',
+      submittedAt: application.submitted_at || null,
+      reviewedAt: application.reviewed_at || null,
+      monthlySalaryRange: typeof application.profile?.monthlySalaryRange === 'string' ? application.profile.monthlySalaryRange : null
+    })),
+    paymentDrafts: paymentDrafts.map((draft: Record<string, any>) => ({
+      id: draft.id,
+      referenceCode: typeof draft.reference_code === 'string' ? draft.reference_code : draft.id,
+      status: draft.status,
+      amountKes: Number(draft.amount_kes) || 0,
+      message: draft.result_description || '',
+      createdAt: draft.created_at || null,
+      updatedAt: draft.updated_at || null,
+      monthlySalaryRange: typeof draft.profile?.monthlySalaryRange === 'string' ? draft.profile.monthlySalaryRange : null
+    }))
+  });
+});
+
+app.post('/api/provider-payments/:id/cancel', requireSupabase, async (req, res) => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
+    return res.status(400).json({ error: 'A valid payment reference is required.' });
+  }
+  const { data: attempt, error: loadError } = await supabase!.from('provider_payment_attempts')
+    .select('id, status')
+    .eq('id', req.params.id)
+    .maybeSingle();
+  if (loadError) {
+    if (reportPaymentSchemaError('Provider payment cancel lookup', loadError, res)) return;
+    return res.status(500).json({ error: 'Could not cancel payment request.' });
+  }
+  if (!attempt) return res.status(404).json({ error: 'Payment request was not found.' });
+  if (attempt.status === 'paid') {
+    return res.status(409).json({ error: 'This payment has already been confirmed and cannot be cancelled.' });
+  }
+  if (attempt.status === 'awaiting_payment' || attempt.status === 'failed') {
+    return res.json({ status: attempt.status, message: 'No active payment request was running. You can retry now.' });
+  }
+  const { error: cancelError } = await supabase!.from('provider_payment_attempts').update({
+    status: 'failed',
+    result_code: null,
+    result_description: 'Payment prompt was cancelled. You can retry now.',
+    payment_receipt_number: null,
+    merchant_request_id: null,
+    checkout_request_id: null,
+    payment_config_snapshot: {},
+    updated_at: new Date().toISOString()
+  }).eq('id', req.params.id).in('status', ['initiating', 'pending']);
+  if (cancelError) {
+    console.error(`[API] Provider payment cancel failed for ${req.params.id}: ${cancelError.message}`);
+    return res.status(500).json({ error: 'Could not cancel payment request.' });
+  }
+  return res.json({ status: 'failed', message: 'Payment prompt cancelled. You can retry now.' });
+});
+
+app.get(['/api/admin/payment-settings', '/api/admin/mpesa-settings'], requireAdmin, async (_req, res) => {
+  const { data, error } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
   if (error) {
     if (reportPaymentSchemaError('Admin M-Pesa settings lookup', error, res)) return;
     return res.status(500).json({ error: 'Could not load M-Pesa settings.' });
   }
+  const baseFeeKes = Number.isInteger(Number(data?.fee_kes)) ? Number(data?.fee_kes) : 0;
   res.json({
     enabled: data?.enabled || false,
-    feeKes: data?.fee_kes || 0,
+    feeKes: baseFeeKes,
+    salaryBandFees: normalizeSalaryBandFees(data?.salary_band_fees, baseFeeKes),
     environment: data?.environment || 'sandbox',
     merchantType: data?.merchant_type || 'paybill',
     shortcode: data?.shortcode || '',
     accountReference: data?.account_reference || 'Tmommycare',
-    credentialsConfigured: Boolean(data?.consumer_key_ciphertext && data?.consumer_secret_ciphertext && data?.passkey_ciphertext),
-    encryptionKeyConfigured: /^[0-9a-f]{64}$/i.test(mpesaConfigEncryptionKey),
-    callbackConfigured: isMpesaCallbackConfigured()
+    credentialsConfigured: Boolean(data?.consumer_key_ciphertext && data?.consumer_secret_ciphertext),
+    encryptionKeyConfigured: /^[0-9a-f]{64}$/i.test(paymentConfigEncryptionKey),
+    callbackConfigured: isPaymentCallbackConfigured()
   });
 });
 
-app.put('/api/admin/mpesa-settings', requireAdmin, async (req, res) => {
+app.put(['/api/admin/payment-settings', '/api/admin/mpesa-settings'], requireAdmin, async (req, res) => {
   const input = req.body || {};
   const environment = input.environment;
   const merchantType = input.merchantType;
@@ -488,21 +661,30 @@ app.put('/api/admin/mpesa-settings', requireAdmin, async (req, res) => {
       !/^\d{5,7}$/.test(shortcode) || !/^[A-Za-z0-9]{1,12}$/.test(accountReference)) {
     return res.status(400).json({ error: 'Enter a valid fee, environment, merchant type, shortcode, and account reference (up to 12 letters or digits).' });
   }
+  if (input.salaryBandFees !== undefined && (!input.salaryBandFees || typeof input.salaryBandFees !== 'object' || Array.isArray(input.salaryBandFees))) {
+    return res.status(400).json({ error: 'Salary-band fees must be provided as an object.' });
+  }
+  if (input.salaryBandFees && providerSalaryBandLabels.some(band => {
+    const value = input.salaryBandFees[band];
+    return value !== undefined && (!Number.isInteger(value) || Number(value) < 0 || Number(value) > 1000000);
+  })) {
+    return res.status(400).json({ error: 'Each salary-band fee must be a whole number between 0 and 1,000,000.' });
+  }
   if ([input.consumerKey, input.consumerSecret, input.passkey].some(value => value !== undefined &&
       (typeof value !== 'string' || value.length > 512))) {
-    return res.status(400).json({ error: 'M-Pesa credential fields must be text no longer than 512 characters.' });
+    return res.status(400).json({ error: 'TinyPesa credential fields must be text no longer than 512 characters.' });
   }
   if (input.enabled) {
-    if (!isMpesaCallbackConfigured()) {
-      return res.status(400).json({ error: 'Configure MPESA_CALLBACK_URL as a public HTTPS callback URL on the API server before enabling payments.' });
+    if (!isPaymentCallbackConfigured()) {
+      return res.status(400).json({ error: 'Configure PAYMENT_CALLBACK_URL (or MPESA_CALLBACK_URL) as a public HTTPS callback URL on the API server before enabling payments.' });
     }
   }
-  try { getMpesaEncryptionKey(); }
+  try { getPaymentEncryptionKey(); }
   catch (keyError) {
     const message = keyError instanceof Error ? keyError.message : 'Payment credential encryption is not configured.';
     return res.status(503).json({ error: message });
   }
-  const { data: existing, error: loadError } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
+  const { data: existing, error: loadError } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
   if (loadError) {
     if (reportPaymentSchemaError('Admin M-Pesa credential lookup', loadError, res)) return;
     return res.status(500).json({ error: 'Could not load existing M-Pesa credentials.' });
@@ -514,14 +696,15 @@ app.put('/api/admin/mpesa-settings', requireAdmin, async (req, res) => {
     const field = credentialValues[index];
     const cipherField = cipherFields[index];
     const value = input[field];
-    if (typeof value === 'string' && value.trim()) encrypted[cipherField] = encryptMpesaSecret(value.trim());
+    if (typeof value === 'string' && value.trim()) encrypted[cipherField] = encryptPaymentSecret(value.trim());
     else encrypted[cipherField] = existing?.[cipherField] || '';
   }
-  if (input.enabled && Object.values(encrypted).some(value => !value)) {
-    return res.status(400).json({ error: 'Enter the Consumer Key, Consumer Secret, and Passkey before enabling payments.' });
+  if (input.enabled && (!encrypted.consumer_key_ciphertext || !encrypted.consumer_secret_ciphertext)) {
+    return res.status(400).json({ error: 'Enter the TinyPesa Username and Link API Key before enabling payments.' });
   }
-  const { error } = await supabase!.from('mpesa_settings').upsert({
+  const { error } = await supabase!.from('payment_settings').upsert({
     id: true, enabled: input.enabled, fee_kes: feeKes, environment, merchant_type: merchantType,
+    salary_band_fees: normalizeSalaryBandFees(input.salaryBandFees, feeKes),
     shortcode, account_reference: accountReference, ...encrypted, updated_at: new Date().toISOString()
   }, { onConflict: 'id' });
   if (error) {
@@ -696,6 +879,23 @@ const providerSalaryRanges: Record<string, { monthlySalaryKsh: number; registrat
   'KES 15,001–20,000': { monthlySalaryKsh: 17500, registrationFeeIncrementKes: 300 },
   'Above KES 20,000': { monthlySalaryKsh: 25000, registrationFeeIncrementKes: 500 }
 };
+const providerSalaryBandLabels = Object.keys(providerSalaryRanges);
+
+const getDefaultSalaryBandFees = (baseFeeKes: number) => providerSalaryBandLabels.reduce<Record<string, number>>((fees, band) => {
+  fees[band] = Math.max(0, baseFeeKes + providerSalaryRanges[band].registrationFeeIncrementKes);
+  return fees;
+}, {});
+
+const normalizeSalaryBandFees = (rawFees: unknown, baseFeeKes: number) => {
+  const defaults = getDefaultSalaryBandFees(baseFeeKes);
+  if (!rawFees || typeof rawFees !== 'object' || Array.isArray(rawFees)) return defaults;
+  const source = rawFees as Record<string, unknown>;
+  return providerSalaryBandLabels.reduce<Record<string, number>>((fees, band) => {
+    const value = source[band];
+    fees[band] = Number.isInteger(value) && Number(value) >= 0 ? Number(value) : defaults[band];
+    return fees;
+  }, {});
+};
 
 app.post('/api/provider-applications/draft', requireSupabase, async (req, res) => {
   const { id, profile, documents } = req.body || {};
@@ -746,25 +946,27 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
     return res.status(400).json({ error: 'Select a valid expected salary range.' });
   }
   const salaryBand = providerSalaryRanges[monthlySalaryRange];
-  const isFreeRegistration = salaryBand.registrationFeeIncrementKes === 0;
   let registrationFeeKes = 0;
+  const { data: paymentSettings, error: paymentSettingsError } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
+  if (paymentSettingsError) {
+    if (reportPaymentSchemaError('Provider application payment setup lookup', paymentSettingsError, res)) return;
+    return res.status(500).json({ error: 'Could not prepare provider registration payment.' });
+  }
+  const baseFeeKes = Number(paymentSettings?.fee_kes);
+  const configuredBandFees = normalizeSalaryBandFees(paymentSettings?.salary_band_fees, Number.isInteger(baseFeeKes) ? baseFeeKes : 0);
+  registrationFeeKes = configuredBandFees[monthlySalaryRange];
+  if (!Number.isInteger(registrationFeeKes) || registrationFeeKes < 0) {
+    return res.status(503).json({ error: 'Provider registration fees are not configured for the selected salary band. Please contact Tmommycare.' });
+  }
+  const isFreeRegistration = registrationFeeKes === 0;
   if (!isFreeRegistration) {
-    const { data: paymentSettings, error: paymentSettingsError } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
-    if (paymentSettingsError) {
-      if (reportPaymentSchemaError('Provider application payment setup lookup', paymentSettingsError, res)) return;
-      return res.status(500).json({ error: 'Could not prepare provider registration payment.' });
-    }
-    const baseFeeKes = Number(paymentSettings?.fee_kes);
-    if (!paymentSettings?.enabled || !Number.isInteger(baseFeeKes) || baseFeeKes < 0 ||
-        !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
-        !paymentSettings.passkey_ciphertext || !isMpesaCallbackConfigured()) {
+    if (!paymentSettings?.enabled || !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
+        !isPaymentCallbackConfigured()) {
       return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact Tmommycare.' });
     }
-    registrationFeeKes = baseFeeKes + salaryBand.registrationFeeIncrementKes;
     try {
-      decryptMpesaSecret(paymentSettings.consumer_key_ciphertext);
-      decryptMpesaSecret(paymentSettings.consumer_secret_ciphertext);
-      decryptMpesaSecret(paymentSettings.passkey_ciphertext);
+      decryptPaymentSecret(paymentSettings.consumer_key_ciphertext);
+      decryptPaymentSecret(paymentSettings.consumer_secret_ciphertext);
     } catch (configurationError) {
       const message = configurationError instanceof Error ? configurationError.message : 'M-Pesa credentials cannot be read.';
       console.error(`[API] Provider application draft blocked by M-Pesa configuration: ${message}`);
@@ -817,9 +1019,31 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
     signatureDataUrl: profile.signatureDataUrl,
     termsAcceptedAt: new Date().toISOString()
   };
+  const authenticatedProvider = await getAuthenticatedUserFromRequest(req);
+  const providerUserId = authenticatedProvider?.id || null;
+  const providerEmail = (authenticatedProvider?.email || submittedProfile.email || '').trim().toLowerCase() || null;
+  const providerPhone = normalizeProviderLookupPhone(submittedProfile.phone) || null;
+  let referenceCode = '';
+  try {
+    referenceCode = await allocateProviderReferenceCode(new Date());
+  } catch (referenceError) {
+    const message = referenceError instanceof Error ? referenceError.message : 'unknown error';
+    console.error(`[API] Provider reference generation failed: ${message}`);
+    if (message.includes('next_provider_reference_no') || message.includes('provider_reference_sequences')) {
+      return res.status(503).json({ error: 'Provider reference setup is missing. Apply migrations through 012_provider_reference_codes.sql, then retry.' });
+    }
+    return res.status(500).json({ error: 'Could not generate an application reference. Please try again.' });
+  }
   if (isFreeRegistration) {
     const { error } = await supabase!.from('provider_applications').insert({
-      id, profile: submittedProfile, documents: safeDocuments, status: 'pending'
+      id,
+      reference_code: referenceCode,
+      provider_user_id: providerUserId,
+      provider_email: providerEmail,
+      provider_phone: providerPhone,
+      profile: submittedProfile,
+      documents: safeDocuments,
+      status: 'pending'
     });
     if (error) {
       if (reportPaymentSchemaError('Free provider application save', error, res)) return;
@@ -828,17 +1052,26 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
       return res.status(500).json({ error: 'We could not submit your free application. Please try again.' });
     }
     await sendSubmissionNotification('free provider application', {
-      'Application reference': id,
+      'Application reference': referenceCode,
+      'Internal ID': id,
       Name: submittedProfile.name,
       Email: submittedProfile.email,
       Phone: submittedProfile.phone,
       'Expected salary': monthlySalaryRange,
       'Registration fee': 'Free'
     });
-    return res.status(201).json({ id, status: 'submitted', amountKes: 0 });
+    return res.status(201).json({ id, referenceCode, status: 'submitted', amountKes: 0 });
   }
   const { error } = await supabase!.from('provider_payment_attempts').insert({
-    id, profile: submittedProfile, documents: safeDocuments, status: 'awaiting_payment', amount_kes: registrationFeeKes
+    id,
+    reference_code: referenceCode,
+    provider_user_id: providerUserId,
+    provider_email: providerEmail,
+    provider_phone: providerPhone,
+    profile: submittedProfile,
+    documents: safeDocuments,
+    status: 'awaiting_payment',
+    amount_kes: registrationFeeKes
   });
   if (error) {
     if (reportPaymentSchemaError('Provider payment draft save', error, res)) return;
@@ -846,49 +1079,153 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
     console.error(`[API] Provider payment draft save failed: ${error.message}`);
     return res.status(500).json({ error: 'We could not save your application details. Please try again.' });
   }
-  res.status(201).json({ id, status: 'awaiting_payment' });
+  res.status(201).json({ id, referenceCode, status: 'awaiting_payment' });
+});
+
+app.post('/api/provider-payments/:id/salary-band', requireSupabase, async (req, res) => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
+    return res.status(400).json({ error: 'A valid payment reference is required.' });
+  }
+  const monthlySalaryRange = typeof req.body?.monthlySalaryRange === 'string' ? req.body.monthlySalaryRange : '';
+  if (!Object.prototype.hasOwnProperty.call(providerSalaryRanges, monthlySalaryRange)) {
+    return res.status(400).json({ error: 'Select a valid salary band before updating your application.' });
+  }
+  const { data: attempt, error: loadError } = await supabase!.from('provider_payment_attempts')
+    .select('id, reference_code, status, profile, documents, provider_user_id, provider_email, provider_phone')
+    .eq('id', req.params.id)
+    .maybeSingle();
+  if (loadError) {
+    if (reportPaymentSchemaError('Provider salary-band update lookup', loadError, res)) return;
+    return res.status(500).json({ error: 'Could not update the salary band.' });
+  }
+  if (!attempt) return res.status(404).json({ error: 'Payment request was not found.' });
+  if (attempt.status === 'paid') return res.status(409).json({ error: 'This payment is already confirmed and cannot be changed.' });
+  if (!attempt.profile || typeof attempt.profile !== 'object') {
+    return res.status(409).json({ error: 'This application draft can no longer be updated.' });
+  }
+
+  const { data: paymentSettings, error: paymentSettingsError } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
+  if (paymentSettingsError) {
+    if (reportPaymentSchemaError('Provider salary-band payment setup lookup', paymentSettingsError, res)) return;
+    return res.status(500).json({ error: 'Could not update the salary band.' });
+  }
+  const baseFeeKes = Number(paymentSettings?.fee_kes);
+  const configuredBandFees = normalizeSalaryBandFees(paymentSettings?.salary_band_fees, Number.isInteger(baseFeeKes) ? baseFeeKes : 0);
+  const nextFeeKes = configuredBandFees[monthlySalaryRange];
+  if (!Number.isInteger(nextFeeKes) || nextFeeKes < 0) {
+    return res.status(503).json({ error: 'Provider registration fees are not configured for this salary band yet.' });
+  }
+
+  const salaryBand = providerSalaryRanges[monthlySalaryRange];
+  const existingProfile = attempt.profile as Record<string, any>;
+  const updatedProfile: Record<string, any> = {
+    ...existingProfile,
+    monthlySalaryRange,
+    monthlySalaryKsh: salaryBand.monthlySalaryKsh
+  };
+
+  if (nextFeeKes === 0) {
+    const { error: insertError } = await supabase!.from('provider_applications').insert({
+      id: attempt.id,
+      reference_code: attempt.reference_code || attempt.id,
+      provider_user_id: attempt.provider_user_id || null,
+      provider_email: attempt.provider_email || null,
+      provider_phone: attempt.provider_phone || null,
+      profile: updatedProfile,
+      documents: Array.isArray(attempt.documents) ? attempt.documents : [],
+      status: 'pending'
+    });
+    if (insertError && insertError.code !== '23505') {
+      return res.status(500).json({ error: `Could not submit the updated application: ${insertError.message}` });
+    }
+    if (insertError?.code === '23505') {
+      const { data: existingApplication, error: existingError } = await supabase!.from('provider_applications').select('id').eq('id', attempt.id).maybeSingle();
+      if (existingError || !existingApplication) {
+        return res.status(500).json({ error: 'Could not confirm the updated application after changing salary band.' });
+      }
+    }
+    const { error: saveError } = await supabase!.from('provider_payment_attempts').update({
+      status: 'paid',
+      amount_kes: 0,
+      result_code: null,
+      result_description: 'No payment required for the selected salary band.',
+      payment_receipt_number: null,
+      merchant_request_id: null,
+      checkout_request_id: null,
+      payment_config_snapshot: {},
+      profile: {},
+      documents: [],
+      paid_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq('id', attempt.id);
+    if (saveError) {
+      return res.status(500).json({ error: `Application was submitted but payment state could not be updated: ${saveError.message}` });
+    }
+    await sendSubmissionNotification('free provider application', {
+      'Application reference': attempt.id,
+      Name: updatedProfile.name,
+      Email: updatedProfile.email,
+      Phone: updatedProfile.phone,
+      'Expected salary': monthlySalaryRange,
+      'Registration fee': 'Free'
+    });
+    return res.json({
+      status: 'paid',
+      amountKes: 0,
+      monthlySalaryRange,
+      message: 'Salary band updated. No payment is required for this band and your application has been submitted.'
+    });
+  }
+
+  if (!paymentSettings?.enabled || !paymentSettings.consumer_key_ciphertext || !paymentSettings.consumer_secret_ciphertext ||
+      !isPaymentCallbackConfigured()) {
+    return res.status(503).json({ error: 'Provider registration payments are not configured yet. Please contact Tmommycare.' });
+  }
+  try {
+    decryptPaymentSecret(paymentSettings.consumer_key_ciphertext);
+    decryptPaymentSecret(paymentSettings.consumer_secret_ciphertext);
+  } catch (configurationError) {
+    const message = configurationError instanceof Error ? configurationError.message : 'M-Pesa credentials cannot be read.';
+    return res.status(503).json({ error: `Payment settings need administrator attention: ${message}` });
+  }
+
+  const { error: saveError } = await supabase!.from('provider_payment_attempts').update({
+    profile: updatedProfile,
+    status: 'awaiting_payment',
+    amount_kes: nextFeeKes,
+    result_code: null,
+    result_description: 'Salary band updated. Start a new payment request.',
+    payment_receipt_number: null,
+    merchant_request_id: null,
+    checkout_request_id: null,
+    payment_config_snapshot: {},
+    updated_at: new Date().toISOString()
+  }).eq('id', attempt.id).in('status', ['awaiting_payment', 'failed', 'initiating', 'pending']);
+  if (saveError) return res.status(500).json({ error: `Could not update the salary band: ${saveError.message}` });
+  return res.json({
+    status: 'awaiting_payment',
+    amountKes: nextFeeKes,
+    monthlySalaryRange,
+    message: 'Salary band updated. Review the fee and request a new payment prompt.'
+  });
 });
 
 const verifyMpesaPaymentAndCreateApplication = async (attempt: Record<string, any>) => {
-  const snapshot = attempt.mpesa_config_snapshot as Record<string, any>;
-  if (!snapshot || !snapshot.consumerKeyCiphertext || !snapshot.consumerSecretCiphertext || !snapshot.passkeyCiphertext) {
+  const snapshot = attempt.payment_config_snapshot as Record<string, any>;
+  if (!snapshot || typeof snapshot !== 'object') {
     throw new Error('The payment configuration snapshot is missing.');
   }
-  const callbackPhone = normalizeMpesaPhoneNumber(attempt.phone_number);
-  if (!callbackPhone || Number(attempt.amount_kes) !== Number(snapshot.amountKes) || !attempt.mpesa_receipt_number) {
+  const callbackPhone = normalizePaymentPhoneNumber(attempt.phone_number);
+  if (!callbackPhone || Number(attempt.amount_kes) !== Number(snapshot.amountKes) || !attempt.payment_receipt_number) {
     throw new Error('The payment callback details could not be verified.');
   }
-  const consumerKey = decryptMpesaSecret(snapshot.consumerKeyCiphertext);
-  const consumerSecret = decryptMpesaSecret(snapshot.consumerSecretCiphertext);
-  const passkey = decryptMpesaSecret(snapshot.passkeyCiphertext);
-  const baseUrl = getDarajaBaseUrl(snapshot.environment);
-  const basicAuth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
-  const authResponse = await fetch(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-    headers: { Authorization: `Basic ${basicAuth}` },
-    signal: AbortSignal.timeout(15000)
-  });
-  const authResult = await authResponse.json() as { access_token?: string; error_description?: string };
-  if (!authResponse.ok || !authResult.access_token) throw new Error(authResult.error_description || 'Could not verify the M-Pesa payment.');
-  const timestamp = darajaTimestamp();
-  const queryResponse = await fetch(`${baseUrl}/mpesa/stkpushquery/v1/query`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${authResult.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      BusinessShortCode: snapshot.shortcode,
-      Password: getMpesaPassword(snapshot.shortcode, passkey, timestamp),
-      Timestamp: timestamp,
-      CheckoutRequestID: attempt.checkout_request_id
-    }),
-    signal: AbortSignal.timeout(15000)
-  });
-  const queryResult = await queryResponse.json() as { ResponseCode?: string; ResultCode?: string; ResultDesc?: string };
-  if (!queryResponse.ok || queryResult.ResponseCode !== '0') {
-    throw new Error(queryResult.ResultDesc || 'Safaricom has not confirmed the payment yet.');
-  }
-  if (String(queryResult.ResultCode) !== '0') return false;
 
   const application = {
     id: attempt.id,
+    reference_code: attempt.reference_code || attempt.id,
+    provider_user_id: attempt.provider_user_id || null,
+    provider_email: attempt.provider_email || null,
+    provider_phone: attempt.provider_phone || null,
     profile: attempt.profile,
     documents: attempt.documents,
     status: 'pending'
@@ -901,42 +1238,42 @@ const verifyMpesaPaymentAndCreateApplication = async (attempt: Record<string, an
   }
   const { error: updateError } = await supabase!.from('provider_payment_attempts').update({
     status: 'paid', result_description: 'Payment confirmed.', profile: {}, documents: [],
-    mpesa_config_snapshot: {}, paid_at: new Date().toISOString()
+    payment_config_snapshot: {}, paid_at: new Date().toISOString()
   }).eq('id', attempt.id);
   if (updateError) throw new Error(`Payment was confirmed but its status could not be saved: ${updateError.message}`);
   const profile = attempt.profile as Record<string, any>;
   await sendSubmissionNotification('paid provider application', {
-    'Application reference': attempt.id,
+    'Application reference': attempt.reference_code || attempt.id,
+    'Internal ID': attempt.id,
     Name: profile.name,
     Email: profile.email,
     Phone: profile.phone,
-    'M-Pesa receipt': attempt.mpesa_receipt_number,
+    'M-Pesa receipt': attempt.payment_receipt_number,
     'Registration fee': `KES ${attempt.amount_kes}`
   });
   return true;
 };
 
-app.post('/api/payments/mpesa/stk-push', requireSupabase, async (req, res) => {
+app.post(['/api/payments/stk-push', '/api/payments/mpesa/stk-push'], requireSupabase, async (req, res) => {
   const id = typeof req.body?.id === 'string' ? req.body.id : '';
-  const phoneNumber = normalizeMpesaPhoneNumber(req.body?.phoneNumber);
+  const phoneNumber = normalizePaymentPhoneNumber(req.body?.phoneNumber);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) || !phoneNumber) {
     return res.status(400).json({ error: 'Enter a valid Kenyan M-Pesa phone number.' });
   }
-  const { data: settings, error: settingsError } = await supabase!.from('mpesa_settings').select('*').eq('id', true).maybeSingle();
+  const { data: settings, error: settingsError } = await supabase!.from('payment_settings').select('*').eq('id', true).maybeSingle();
   if (settingsError) {
     if (reportPaymentSchemaError('M-Pesa STK settings lookup', settingsError, res)) return;
     return res.status(500).json({ error: 'Could not load M-Pesa settings.' });
   }
-  if (!settings?.enabled || !settings.consumer_key_ciphertext || !settings.consumer_secret_ciphertext || !settings.passkey_ciphertext) {
+  if (!settings?.enabled || !settings.consumer_key_ciphertext || !settings.consumer_secret_ciphertext) {
     return res.status(503).json({ error: 'M-Pesa registration payments are not available yet.' });
   }
-  if (!mpesaCallbackUrl) return res.status(503).json({ error: 'M-Pesa callback URL is not configured on the payment server.' });
-  let credentials: { consumerKey: string; consumerSecret: string; passkey: string };
+  if (!paymentCallbackUrl) return res.status(503).json({ error: 'M-Pesa callback URL is not configured on the payment server.' });
+  let credentials: { username: string; linkApiKey: string };
   try {
     credentials = {
-      consumerKey: decryptMpesaSecret(settings.consumer_key_ciphertext),
-      consumerSecret: decryptMpesaSecret(settings.consumer_secret_ciphertext),
-      passkey: decryptMpesaSecret(settings.passkey_ciphertext)
+      username: decryptPaymentSecret(settings.consumer_key_ciphertext),
+      linkApiKey: decryptPaymentSecret(settings.consumer_secret_ciphertext)
     };
   } catch (credentialError) {
     const message = credentialError instanceof Error ? credentialError.message : 'Could not decrypt M-Pesa credentials.';
@@ -955,9 +1292,8 @@ app.post('/api/payments/mpesa/stk-push', requireSupabase, async (req, res) => {
   }
   const amountKes = Number(attempt.amount_kes);
   if (!Number.isInteger(amountKes) || amountKes < 1) return res.status(503).json({ error: 'The provider registration fee is not configured.' });
-  if (!isMpesaCallbackConfigured()) return res.status(503).json({ error: 'The M-Pesa callback URL must be a public HTTPS URL.' });
-  const callbackUrl = new URL(mpesaCallbackUrl).toString();
-  const timestamp = darajaTimestamp();
+  if (!isPaymentCallbackConfigured()) return res.status(503).json({ error: 'The M-Pesa callback URL must be a public HTTPS URL.' });
+  const callbackUrl = new URL(paymentCallbackUrl).toString();
   const snapshot = {
     environment: settings.environment,
     merchantType: settings.merchant_type,
@@ -965,79 +1301,96 @@ app.post('/api/payments/mpesa/stk-push', requireSupabase, async (req, res) => {
     accountReference: settings.account_reference,
     amountKes,
     consumerKeyCiphertext: settings.consumer_key_ciphertext,
-    consumerSecretCiphertext: settings.consumer_secret_ciphertext,
-    passkeyCiphertext: settings.passkey_ciphertext
+    consumerSecretCiphertext: settings.consumer_secret_ciphertext
   };
   const { data: claimed, error: claimError } = await supabase!.from('provider_payment_attempts').update({
     status: 'initiating', phone_number: phoneNumber, amount_kes: amountKes,
-    mpesa_config_snapshot: snapshot, checkout_request_id: null, merchant_request_id: null,
-    result_code: null, result_description: '', mpesa_receipt_number: null
+    payment_config_snapshot: snapshot, checkout_request_id: null, merchant_request_id: null,
+    result_code: null, result_description: '', payment_receipt_number: null
   }).eq('id', id).in('status', ['awaiting_payment', 'failed']).select('id').maybeSingle();
   if (claimError) return res.status(500).json({ error: 'Could not start the M-Pesa payment.' });
   if (!claimed) return res.status(409).json({ error: 'A payment request for this application is already in progress or complete.' });
 
   try {
-    const baseUrl = getDarajaBaseUrl(settings.environment);
-    const basicAuth = Buffer.from(`${credentials.consumerKey}:${credentials.consumerSecret}`).toString('base64');
-    const authResponse = await fetch(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-      headers: { Authorization: `Basic ${basicAuth}` },
-      signal: AbortSignal.timeout(15000)
-    });
-    const authResult = await authResponse.json() as { access_token?: string; error_description?: string };
-    if (!authResponse.ok || !authResult.access_token) throw new Error(authResult.error_description || 'Could not connect to Safaricom Daraja.');
-    const checkoutResponse = await fetch(`${baseUrl}/mpesa/stkpush/v1/processrequest`, {
+    const baseUrl = getTinyPesaBaseUrl(settings.environment);
+    const checkoutResponse = await fetch(`${baseUrl}/express/initialize/?username=${encodeURIComponent(credentials.username)}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${authResult.access_token}`, 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', Apikey: credentials.linkApiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        BusinessShortCode: settings.shortcode,
-        Password: getMpesaPassword(settings.shortcode, credentials.passkey, timestamp),
-        Timestamp: timestamp,
-        TransactionType: settings.merchant_type === 'till' ? 'CustomerBuyGoodsOnline' : 'CustomerPayBillOnline',
-        Amount: amountKes,
-        PartyA: phoneNumber,
-        PartyB: settings.shortcode,
-        PhoneNumber: phoneNumber,
-        CallBackURL: callbackUrl,
-        AccountReference: settings.account_reference,
-        TransactionDesc: 'Provider fee'
+        amount: amountKes,
+        msisdn: phoneNumber,
+        account_no: id,
+        call_back_url: callbackUrl
       }),
       signal: AbortSignal.timeout(20000)
     });
-    const checkout = await checkoutResponse.json() as {
-      ResponseCode?: string; MerchantRequestID?: string; CheckoutRequestID?: string; CustomerMessage?: string; errorMessage?: string
-    };
-    if (!checkoutResponse.ok || checkout.ResponseCode !== '0' || !checkout.CheckoutRequestID || !checkout.MerchantRequestID) {
-      throw new Error(checkout.errorMessage || checkout.CustomerMessage || 'Safaricom could not start the STK Push.');
+    const checkout = await checkoutResponse.json().catch(() => ({})) as Record<string, any>;
+    const checkoutRequestId = typeof checkout.CheckoutRequestID === 'string' ? checkout.CheckoutRequestID :
+      typeof checkout.checkout_request_id === 'string' ? checkout.checkout_request_id :
+      typeof checkout.data?.CheckoutRequestID === 'string' ? checkout.data.CheckoutRequestID :
+      typeof checkout.data?.checkout_request_id === 'string' ? checkout.data.checkout_request_id : null;
+    const merchantRequestId = typeof checkout.MerchantRequestID === 'string' ? checkout.MerchantRequestID :
+      typeof checkout.merchant_request_id === 'string' ? checkout.merchant_request_id :
+      typeof checkout.data?.MerchantRequestID === 'string' ? checkout.data.MerchantRequestID :
+      typeof checkout.data?.merchant_request_id === 'string' ? checkout.data.merchant_request_id : null;
+    const customerMessage = typeof checkout.CustomerMessage === 'string' ? checkout.CustomerMessage :
+      typeof checkout.message === 'string' ? checkout.message :
+      typeof checkout.detail === 'string' ? checkout.detail : '';
+    if (!checkoutResponse.ok || checkout.success === false) {
+      throw new Error(
+        typeof checkout.errorMessage === 'string' ? checkout.errorMessage :
+          typeof checkout.error === 'string' ? checkout.error :
+            customerMessage || 'TinyPesa could not start the STK Push.'
+      );
     }
     const { error: updateError } = await supabase!.from('provider_payment_attempts').update({
-      status: 'pending', merchant_request_id: checkout.MerchantRequestID, checkout_request_id: checkout.CheckoutRequestID
+      status: 'pending', merchant_request_id: merchantRequestId, checkout_request_id: checkoutRequestId
     }).eq('id', id);
     if (updateError) throw new Error(`STK Push started but its request reference could not be saved: ${updateError.message}`);
-    res.json({ status: 'pending', message: checkout.CustomerMessage || 'Check your phone and enter your M-Pesa PIN.' });
+    res.json({ status: 'pending', message: customerMessage || 'Check your phone and enter your M-Pesa PIN.' });
   } catch (paymentError) {
     const message = paymentError instanceof Error ? paymentError.message : 'M-Pesa payment request failed.';
     console.error(`[API] M-Pesa STK Push failed for ${id}: ${message}`);
     await supabase!.from('provider_payment_attempts').update({
-      status: 'failed', result_description: 'Could not start the M-Pesa payment.', mpesa_config_snapshot: {}
+      status: 'failed', result_description: 'Could not start the M-Pesa payment.', payment_config_snapshot: {}
     }).eq('id', id);
     res.status(502).json({ error: 'Could not start the M-Pesa payment. Check the phone number and try again.' });
   }
 });
 
-app.post('/api/payments/mpesa/callback', requireSupabase, async (req, res) => {
-  const callback = req.body?.Body?.stkCallback;
-  if (!callback || typeof callback.CheckoutRequestID !== 'string' || !Number.isInteger(Number(callback.ResultCode))) {
+app.post(['/api/payments/callback', '/api/payments/mpesa/callback'], requireSupabase, async (req, res) => {
+  const callback = req.body?.Body?.stkCallback || req.body?.stkCallback || req.body;
+  const checkoutRequestId = typeof callback?.CheckoutRequestID === 'string' ? callback.CheckoutRequestID : '';
+  const merchantRequestId = typeof callback?.MerchantRequestID === 'string' ? callback.MerchantRequestID : '';
+  const externalReference = typeof callback?.ExternalReference === 'string' ? callback.ExternalReference : '';
+  if (!callback || !Number.isInteger(Number(callback.ResultCode)) ||
+      (!checkoutRequestId && !merchantRequestId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(externalReference))) {
     return res.status(400).json({ error: 'Invalid M-Pesa callback payload.' });
   }
-  const { data: attempt, error } = await supabase!.from('provider_payment_attempts').select('*')
-    .eq('checkout_request_id', callback.CheckoutRequestID).maybeSingle();
-  if (error) {
-    console.error(`[API] M-Pesa callback lookup failed: ${error.message}`);
+  const loadAttemptBy = async (field: 'checkout_request_id' | 'merchant_request_id' | 'id', value: string) => {
+    const response = await supabase!.from('provider_payment_attempts').select('*').eq(field, value).maybeSingle();
+    if (response.error) throw response.error;
+    return response.data;
+  };
+  let attempt: Record<string, any> | null = null;
+  try {
+    if (checkoutRequestId) attempt = await loadAttemptBy('checkout_request_id', checkoutRequestId);
+    if (!attempt && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(externalReference)) {
+      attempt = await loadAttemptBy('id', externalReference);
+    }
+    if (!attempt && merchantRequestId) attempt = await loadAttemptBy('merchant_request_id', merchantRequestId);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown callback lookup error.';
+    console.error(`[API] M-Pesa callback lookup failed: ${message}`);
     return res.status(500).json({ error: 'Could not process the M-Pesa callback.' });
   }
   if (!attempt) return res.status(404).json({ error: 'M-Pesa payment request was not found.' });
   if (attempt.status === 'paid') return res.json({ ResultCode: 0, ResultDesc: 'Payment already processed.' });
-  if (attempt.merchant_request_id && callback.MerchantRequestID !== attempt.merchant_request_id) {
+  if (checkoutRequestId && attempt.checkout_request_id && checkoutRequestId !== attempt.checkout_request_id) {
+    console.error(`[API] M-Pesa callback checkout reference mismatch for payment ${attempt.id}.`);
+    return res.status(400).json({ error: 'M-Pesa callback reference did not match.' });
+  }
+  if (merchantRequestId && attempt.merchant_request_id && merchantRequestId !== attempt.merchant_request_id) {
     console.error(`[API] M-Pesa callback merchant reference mismatch for payment ${attempt.id}.`);
     return res.status(400).json({ error: 'M-Pesa callback reference did not match.' });
   }
@@ -1046,27 +1399,32 @@ app.post('/api/payments/mpesa/callback', requireSupabase, async (req, res) => {
     const { error: failureError } = await supabase!.from('provider_payment_attempts').update({
       status: 'failed', result_code: resultCode,
       result_description: typeof callback.ResultDesc === 'string' ? callback.ResultDesc.slice(0, 300) : 'M-Pesa payment was not completed.',
-      mpesa_config_snapshot: {}
+      payment_config_snapshot: {}
     }).eq('id', attempt.id);
     if (failureError) console.error(`[API] M-Pesa failed payment status save failed: ${failureError.message}`);
     return res.json({ ResultCode: 0, ResultDesc: 'Payment failure recorded.' });
   }
   const items = Array.isArray(callback.CallbackMetadata?.Item) ? callback.CallbackMetadata.Item : [];
   const metadata = Object.fromEntries(items.map((item: any) => [item.Name, item.Value]));
-  const paidAmount = Number(metadata.Amount);
-  const receiptNumber = typeof metadata.MpesaReceiptNumber === 'string' ? metadata.MpesaReceiptNumber : '';
-  const paidPhone = normalizeMpesaPhoneNumber(String(metadata.PhoneNumber || ''));
+  const paidAmount = Number(metadata.Amount ?? callback.Amount);
+  const receiptValue = metadata.MpesaReceiptNumber ?? callback.MpesaReceiptNumber;
+  const receiptNumber = typeof receiptValue === 'string' ? receiptValue : '';
+  const paidPhone = normalizePaymentPhoneNumber(String(metadata.PhoneNumber ?? callback.Msisdn ?? callback.PhoneNumber ?? ''));
   if (paidAmount !== Number(attempt.amount_kes) || paidPhone !== attempt.phone_number || !receiptNumber) {
     console.error(`[API] M-Pesa callback values failed validation for payment ${attempt.id}.`);
     const { error: mismatchError } = await supabase!.from('provider_payment_attempts').update({
       status: 'failed', result_code: resultCode, result_description: 'Payment details did not match the requested amount and phone.',
-      mpesa_config_snapshot: {}
+      payment_config_snapshot: {}
     }).eq('id', attempt.id);
     if (mismatchError) console.error(`[API] M-Pesa callback mismatch status save failed: ${mismatchError.message}`);
     return res.json({ ResultCode: 0, ResultDesc: 'Payment details did not match.' });
   }
   const { error: recordError } = await supabase!.from('provider_payment_attempts').update({
-    result_code: 0, result_description: 'Safaricom payment reported; verifying transaction.', mpesa_receipt_number: receiptNumber
+    result_code: 0,
+    result_description: 'TinyPesa payment reported; verifying transaction.',
+    payment_receipt_number: receiptNumber,
+    merchant_request_id: merchantRequestId || attempt.merchant_request_id,
+    checkout_request_id: checkoutRequestId || attempt.checkout_request_id
   }).eq('id', attempt.id);
   if (recordError) {
     console.error(`[API] M-Pesa callback details save failed: ${recordError.message}`);
@@ -1074,7 +1432,7 @@ app.post('/api/payments/mpesa/callback', requireSupabase, async (req, res) => {
   }
   res.json({ ResultCode: 0, ResultDesc: 'Payment callback received.' });
   try {
-    await verifyMpesaPaymentAndCreateApplication({ ...attempt, result_code: 0, mpesa_receipt_number: receiptNumber });
+    await verifyMpesaPaymentAndCreateApplication({ ...attempt, result_code: 0, payment_receipt_number: receiptNumber });
   } catch (verificationError) {
     const message = verificationError instanceof Error ? verificationError.message : 'Payment verification is still pending.';
     console.error(`[API] M-Pesa payment verification is pending for ${attempt.id}: ${message}`);
@@ -1093,6 +1451,33 @@ app.get('/api/admin/provider-applications', requireAdmin, async (_req, res) => {
     return { ...application, documents };
   }));
   res.json({ applications });
+});
+
+app.get('/api/admin/provider-transactions', requireAdmin, async (_req, res) => {
+  const { data, error } = await supabase!
+    .from('provider_payment_attempts')
+    .select('id, reference_code, status, amount_kes, phone_number, payment_receipt_number, result_description, created_at, updated_at, paid_at, profile')
+    .order('created_at', { ascending: false });
+  if (error) {
+    if (reportPaymentSchemaError('Admin provider transactions lookup', error, res)) return;
+    return res.status(500).json({ error: 'Could not load provider transactions.' });
+  }
+  return res.json({
+    transactions: (data || []).map((transaction: Record<string, any>) => ({
+      id: transaction.id,
+      referenceCode: typeof transaction.reference_code === 'string' ? transaction.reference_code : transaction.id,
+      status: transaction.status,
+      amountKes: Number(transaction.amount_kes) || 0,
+      phoneNumber: transaction.phone_number || '',
+      paymentReceiptNumber: transaction.payment_receipt_number || '',
+      message: transaction.result_description || '',
+      createdAt: transaction.created_at || null,
+      updatedAt: transaction.updated_at || null,
+      paidAt: transaction.paid_at || null,
+      providerName: typeof transaction.profile?.name === 'string' ? transaction.profile.name : '',
+      providerPhone: typeof transaction.profile?.phone === 'string' ? transaction.profile.phone : ''
+    }))
+  });
 });
 
 app.post('/api/admin/provider-applications/:id/:action', requireAdmin, async (req, res) => {

@@ -183,7 +183,8 @@ export const ProviderApplicationPage: React.FC = () => {
       <section className="w-full max-w-xl rounded-[2rem] border border-[#E8DFD3] bg-white p-8 text-center shadow-[0_24px_70px_rgba(42,35,25,0.08)] sm:p-10">
         <BadgeCheck className="mx-auto h-14 w-14 text-[#1D432D]" />
         <h1 className="mt-5 font-['Outfit'] text-3xl font-extrabold text-[#1A201C]">Free application submitted</h1>
-        <p className="mt-4 text-sm leading-7 text-[#635E59]">Your application has been submitted to the Tmommycare review team. No registration payment is required for the KES 6,000–8,000 salary band.</p>
+        <p className="mt-4 text-sm leading-7 text-[#635E59]">Your application has been submitted to the Tmommycare review team. No registration payment was required for your selected salary band.</p>
+        <a href="/provider/applications" className="mt-4 block text-sm font-bold text-[#1D432D] underline underline-offset-4">View my applications</a>
         <a href="/" className="mt-7 inline-block rounded-xl bg-[#1D432D] px-6 py-3.5 text-sm font-bold text-white">Return to Tmommycare</a>
       </section>
     </main>;
@@ -195,7 +196,7 @@ export const ProviderApplicationPage: React.FC = () => {
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm"><Sparkles className="h-4 w-4" /> PROVIDER APPLICATIONS</div>
           <h1 className="max-w-3xl font-['Outfit'] text-4xl font-extrabold leading-[1.05] tracking-tight text-[#1A201C] sm:text-5xl lg:text-6xl">Your next chapter in <span className="text-[#D96B43]">homecare</span> starts here.</h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Registration is free for the KES 6,000–8,000 salary band; other bands continue to secure M-Pesa payment. Paid applications enter review after payment is confirmed.</p>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Registration fees depend on the salary band selected during application. Paid applications enter review after payment is confirmed.</p>
         </div>
         <aside className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white/80 p-5 shadow-[0_12px_32px_rgba(42,35,25,0.05)]">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><LockKeyhole className="h-5 w-5" /></span>

@@ -23,6 +23,7 @@ import { CoreServiceCategories } from './components/CoreServiceCategories';
 import { HiringGuide } from './components/HiringGuide';
 import { ProviderApplicationPage } from './components/ProviderApplicationPage';
 import { ProviderPaymentPage } from './components/ProviderPaymentPage';
+import { ProviderApplicationsPage } from './components/ProviderApplicationsPage';
 import { InfoPage } from './components/InfoPage';
 import { NairobiEstate, NannyProfile, NannyType } from './types';
 
@@ -138,6 +139,11 @@ function MainWebsite() {
       '/provider-payment': {
         title: 'Provider Payment | Tmommycare Nairobi',
         description: 'Complete your Tmommycare provider registration payment.',
+        robots: 'noindex, nofollow'
+      },
+      '/provider/applications': {
+        title: 'My Provider Applications | Tmommycare Nairobi',
+        description: 'Sign in to track your Tmommycare provider applications and payment drafts.',
         robots: 'noindex, nofollow'
       }
     };
@@ -264,6 +270,10 @@ function MainWebsite() {
 
     if (pathname === '/provider-payment') {
       return <ProviderPaymentPage />;
+    }
+
+    if (pathname === '/provider/applications') {
+      return <ProviderApplicationsPage />;
     }
 
     if (pathname === '/pricing') {

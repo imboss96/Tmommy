@@ -156,6 +156,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Users className="w-4 h-4 text-[#1D432D]" />
               <span className="whitespace-nowrap">Apply to Work</span>
             </a>
+            <a href="/provider/applications" className="nav-link flex shrink-0 items-center gap-1.5 hover:text-[#D96B43] transition-colors">
+              <HeartHandshake className="w-4 h-4 text-[#1D432D]" />
+              <span className="whitespace-nowrap">My Applications</span>
+            </a>
           </nav>
 
           {/* Action CTAs */}
@@ -225,6 +229,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a href="/provider-apply" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]">
               <Users className="w-5 h-5 text-[#1D432D]" />
               <span>Apply as a Provider</span>
+            </a>
+            <a href="/provider/applications" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-semibold text-[#1A201C] hover:bg-[#F2EDE4]">
+              <HeartHandshake className="w-5 h-5 text-[#1D432D]" />
+              <span>My Applications</span>
             </a>
           </div>
 
