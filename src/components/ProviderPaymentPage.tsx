@@ -178,7 +178,7 @@ export const ProviderPaymentPage: React.FC = () => {
         <a href="/provider/applications" className="mt-3 block text-center text-xs font-bold text-[#1D432D] underline underline-offset-4">View my applications</a>
         <a href="/" className="mt-7 block rounded-xl bg-[#1D432D] px-5 py-3.5 text-center text-sm font-bold text-white">Return to Tmommycare</a>
       </> : isPending ? <>
-        <p className="mt-4 text-center text-sm leading-7 text-[#635E59]">An M-Pesa STK Push was sent to <strong>{phoneNumber}</strong>. Enter your M-Pesa PIN on your phone. This page will update after TinyPesa confirms the payment.</p>
+        <p className="mt-4 text-center text-sm leading-7 text-[#635E59]">An M-Pesa STK Push was sent to <strong>{phoneNumber}</strong>. Enter your M-Pesa PIN on your phone. This page will update after Tmommycares confirms the payment.</p>
         {(message || error) && <p role={error ? 'alert' : 'status'} className={`mt-4 rounded-xl p-3 text-center text-sm ${error ? 'border border-red-200 bg-red-50 text-red-800' : 'bg-[#FAF7F2] text-[#635E59]'}`}>{error || message}</p>}
         <button type="button" onClick={() => void checkStatus().catch(statusError => setError(statusError instanceof Error ? statusError.message : 'Could not check payment status.'))} className="mt-6 w-full rounded-xl border border-[#D5C9BA] px-5 py-3 text-sm font-bold text-[#1D432D]">Check payment status</button>
         <button type="button" onClick={() => void cancelPaymentPrompt()} disabled={cancelling} className="mt-3 w-full rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 disabled:cursor-not-allowed disabled:opacity-60">
