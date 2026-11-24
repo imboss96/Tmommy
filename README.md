@@ -68,6 +68,16 @@ To run the Express API separately:
 npm run server
 ```
 
+Admin invitation links return to `/admin`; password creation is completed in the admin sign-in screen using the valid session from accepting the invitation. In Supabase **Authentication → URL Configuration**, allow the production URL and each local Vite origin you use, for example:
+
+```text
+https://www.tmommycares.com/**
+http://localhost:3000/**
+http://localhost:3001/**
+```
+
+Keep the production `APP_URL` set to `https://www.tmommycares.com` on the deployed API.
+
 ## Validation
 
 ```bash

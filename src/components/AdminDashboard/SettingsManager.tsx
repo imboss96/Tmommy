@@ -288,7 +288,7 @@ export const SettingsManager: React.FC = () => {
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-[#E8DFD3] p-5 shadow-sm space-y-2">
             <h3 className="font-bold text-sm text-[#1A201C]">Administrator sign-in security</h3>
-            <p className="text-xs text-[#635E59] leading-relaxed">A fresh one-time email code is required each time you open the administrator console in a new browser session. Invite only trusted administrator email addresses below.</p>
+            <p className="text-xs text-[#635E59] leading-relaxed">Administrators can sign in with an email code or password. New invitees confirm their account, then can create a password from the password sign-in screen. Invite only trusted email addresses.</p>
           </div>
 
 
@@ -296,7 +296,7 @@ export const SettingsManager: React.FC = () => {
             <h3 className="font-bold text-sm text-[#1A201C] flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#1D432D]" /> Invite an administrator
             </h3>
-            <p className="text-xs text-[#635E59] leading-relaxed">Send an invitation to a trusted email address. They can accept the invitation, then sign in with a one-time email code.</p>
+            <p className="text-xs text-[#635E59] leading-relaxed">Send an invitation to a trusted email address. After accepting it, they can sign in with an email code or create a password from the password sign-in screen.</p>
             <form onSubmit={handleInviteAdmin} className="space-y-2">
               <input
                 type="text"

@@ -12,16 +12,16 @@ dotenv.config({ path: path.join(projectRoot, '.env') });
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
-const appUrl = process.env.APP_URL || 'http://localhost:3000';
+const appUrl = process.env.APP_URL || 'https://www.tmommycares.com';
 const publicAppUrl = (() => {
   try {
     const configuredUrl = new URL(appUrl);
     if (['localhost', '127.0.0.1', '0.0.0.0'].includes(configuredUrl.hostname)) {
-      return 'https://tTmommycares.com';
+      return 'https://www.tmommycares.com';
     }
     return configuredUrl.origin;
   } catch {
-    return 'https://tTmommycares.com';
+    return 'https://www.tmommycares.com';
   }
 })();
 const configuredAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
@@ -1839,8 +1839,8 @@ app.post('/api/admin/invite', requireAdmin, async (req, res) => {
     invited: !existingAccount,
     existingAccount,
     message: existingAccount
-      ? 'This email already has a Supabase account. Administrator access is enabled; they can sign in with an email code.'
-      : 'Invitation sent. After accepting it, the administrator can sign in using an email code.'
+      ? 'This email already has a Supabase account. Administrator access is enabled; they can sign in with an email code or create a password from the password sign-in screen.'
+      : 'Invitation sent. After accepting it, the administrator can sign in with an email code or create a password from the password sign-in screen.'
   });
 });
 
