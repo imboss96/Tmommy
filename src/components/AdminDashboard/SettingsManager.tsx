@@ -7,9 +7,7 @@ import {
   ShieldAlert, 
   Download, 
   Upload, 
-  RotateCcw, 
   Check, 
-  AlertTriangle,
   LoaderCircle,
   RefreshCw,
   UserPlus
@@ -29,7 +27,7 @@ type Administrator = {
 };
 
 export const SettingsManager: React.FC = () => {
-  const { siteConfig, updateSiteConfig, resetAllData, nannies, insights, bookings, emergencyRequests, mediaItems } = useContent();
+  const { siteConfig, updateSiteConfig, nannies, insights, bookings, emergencyRequests, mediaItems } = useContent();
 
   const [formConfig, setFormConfig] = useState(siteConfig);
   const [isSaved, setIsSaved] = useState(false);
@@ -480,28 +478,6 @@ export const SettingsManager: React.FC = () => {
             >
               <Download className="w-4 h-4 text-[#1D432D]" />
               <span>Download Site Backup (JSON)</span>
-            </button>
-          </div>
-
-          {/* Danger Zone: Factory Reset */}
-          <div className="bg-white rounded-2xl border border-red-200 p-5 shadow-sm space-y-3">
-            <h3 className="font-bold text-sm text-red-700 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span>Reset Content to Defaults</span>
-            </h3>
-            <p className="text-xs text-[#635E59] leading-relaxed">
-              Reset all domestic staff profiles, parenting insight articles, and form submissions back to the original vetted directory seeds.
-            </p>
-            <button
-              onClick={() => {
-                if (confirm('Are you sure you want to reset all site content and submissions back to factory defaults?')) {
-                  resetAllData();
-                }
-              }}
-              className="w-full py-2.5 px-3 bg-red-50 hover:bg-red-100 border border-red-300 rounded-xl font-bold text-xs text-red-700 flex items-center justify-center gap-2 transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Restore Factory Defaults</span>
             </button>
           </div>
 

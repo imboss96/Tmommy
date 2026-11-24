@@ -72,9 +72,6 @@ interface ContentContextType {
   siteConfig: SiteConfig;
   updateSiteConfig: (updates: Partial<SiteConfig>) => void;
 
-  // Global reset
-  resetAllData: () => void;
-
   // Toast / Activity alerts
   recentAlert: string | null;
   dismissAlert: () => void;
@@ -875,28 +872,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     triggerAlert('Site settings updated');
   };
 
-  // Global reset
-  const resetAllData = () => {
-    setNannies(VETTED_NANNIES.map(staff => ({ ...staff, avatar: '' })));
-    setInsights(PARENTING_INSIGHTS.map(post => ({
-      ...post,
-      coverImage: '',
-      author: { ...post.author, avatar: '' }
-    })));
-    setBookings(DEFAULT_BOOKINGS);
-    setEmergencyRequests(DEFAULT_EMERGENCY_REQUESTS);
-    setMediaItems([]);
-    void fetch(`${apiUrl}/api/media`).then(async response => {
-      if (!response.ok) throw new Error(`Media request failed with status ${response.status}`);
-      return await response.json() as Record<string, unknown>[];
-    }).then(rows => setMediaItems(rows.map(mapMediaRow))).catch(error => {
-      triggerAlert(`Unable to reload images from Supabase: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    });
-    setReviews(DEFAULT_REVIEWS);
-    setSiteConfig(DEFAULT_SITE_CONFIG);
-    triggerAlert('All frontend data and submissions restored to initial state');
-  };
-
   return (
     <ContentContext.Provider value={{
       nannies,
@@ -938,8 +913,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       siteConfig,
       updateSiteConfig,
-
-      resetAllData,
 
       recentAlert,
       dismissAlert
