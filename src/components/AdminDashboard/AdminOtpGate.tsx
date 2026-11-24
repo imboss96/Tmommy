@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Lock, Mail, ShieldAlert } from 'lucide-react';
-import { TmommycareLogo } from '../MommyCareLogo';
+import { TmommycareLogo } from '../TmommycareLogo';
 import { supabase } from '../../lib/supabase';
 import { getApiBaseUrl } from '../../lib/api';
 
@@ -32,7 +32,7 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
       });
       if (!response.ok) {
         await supabase?.auth.signOut();
-        setError('This account does not have an active administrator invitation.');
+        setError('This account does not have active administrator access.');
         return false;
       }
       return true;
@@ -149,13 +149,13 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
       if (session) {
         const sessionEmail = session.user.email?.toLowerCase();
         if (!sessionEmail || sessionEmail !== emailAddress) {
-          setError('Use the email address that received and accepted the administrator invitation.');
+          setError('Use the email address that received the administrator password setup link.');
           return;
         }
         await saveAdminPassword(session.access_token);
         return;
       }
-      setError('Accept the administrator invitation in this browser first. Password setup does not use an email code.');
+      setError('Open the password setup link sent to your email in this browser first. If it has expired, ask an administrator to send another.');
     } catch (setupError) {
       console.error('[Admin password setup] Could not start password setup:', setupError);
       setError('Could not start password setup. Check your connection and try again.');
@@ -191,7 +191,7 @@ export const AdminOtpGate: React.FC<AdminOtpGateProps> = ({ onSuccess, onCancel 
         <div className="flex justify-center mb-5"><TmommycareLogo colorScheme="white" size="lg" showTagline showLocationBadge={false} /></div>
         <div className="inline-flex items-center gap-2 text-emerald-300 text-xs font-bold mb-3"><Lock className="w-4 h-4 text-[#F4A261]" /> Restricted Coordinator Console</div>
         <h1 className="text-2xl font-bold font-['Outfit']">{isPasswordSetup ? 'Set your administrator password' : 'Administrator sign in'}</h1>
-        <p className="text-sm text-[#A8C2B0] mt-2 mb-6">{isPasswordSetup ? 'Accept your administrator invitation in this browser first. Only an active invited administrator can save a password.' : 'Use the email address associated with your active administrator account.'}</p>
+        <p className="text-sm text-[#A8C2B0] mt-2 mb-6">{isPasswordSetup ? 'Open the secure password setup link sent to your email. Only an active administrator can set a password.' : 'Use the email address associated with your active administrator account.'}</p>
         {isPasswordSetup ? (
           <form onSubmit={beginPasswordSetup} className="space-y-4">
             <label className="block text-xs font-bold uppercase tracking-wider text-[#A8C2B0]">Administrator email

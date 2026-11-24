@@ -68,10 +68,11 @@ To run the Express API separately:
 npm run server
 ```
 
-Admin invitation links return to `/admin`; password creation is completed in the admin sign-in screen using the valid session from accepting the invitation. In Supabase **Authentication → URL Configuration**, allow the production URL and each local Vite origin you use, for example:
+Admin account setup and password-reset emails return to `/admin?setup-password=1`. New administrators do not need to accept a separate invitation; the one-time setup link sent to their email verifies access and lets them choose a password. In Supabase **Authentication → URL Configuration**, allow the production URL and each local Vite origin you use, for example:
 
 ```text
 https://www.tmommycares.com/**
+https://tmommycares.com/**
 http://localhost:3000/**
 http://localhost:3001/**
 ```
@@ -138,7 +139,7 @@ git push origin main
 The deployment files are in `deploy/`:
 
 - `deploy/README.md` Full Ubuntu, Namecheap DNS, Nginx, PM2, and HTTPS instructions
-- `deploy/nginx-Tmommycare.conf` Nginx configuration
+- `deploy/nginx-tmommycare.conf` Nginx configuration
 - `ecosystem.config.cjs` PM2 configuration for the Express API
 
 The production setup uses Nginx for the Vite `dist` frontend and proxies `/api` requests to the Express server on port `5000`.

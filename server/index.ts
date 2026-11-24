@@ -38,8 +38,8 @@ const paymentCallbackUrl = process.env.PAYMENT_CALLBACK_URL || process.env.MPESA
 const tinyPesaApiUrl = (process.env.TINYPESA_API_URL || 'https://api.tinypesa.com/api/v1').trim().replace(/\/+$/, '');
 const tinyPesaSandboxApiUrl = (process.env.TINYPESA_SANDBOX_API_URL || tinyPesaApiUrl).trim().replace(/\/+$/, '');
 const brevoApiKey = process.env.BREVO_API_KEY;
-const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tTmommycares.com';
-const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tTmommycares.com';
+const notificationEmail = process.env.NOTIFICATION_EMAIL || 'info@tmommycares.com';
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'app@tmommycares.com';
 const brevoSenderName = process.env.BREVO_SENDER_NAME || 'Tmommycare';
 
 const hasRealValue = (...values: Array<string | undefined>) =>
@@ -73,7 +73,7 @@ async function sendSubmissionNotification(
     .map(([label, value]) => `<tr><td style="width:38%;padding:12px 14px;border-bottom:1px solid #eee7df;color:#635e59;font-size:13px;font-weight:700;vertical-align:top">${escapeHtml(label)}</td><td style="padding:12px 14px;border-bottom:1px solid #eee7df;color:#1a201c;font-size:14px;line-height:1.5;vertical-align:top;white-space:pre-wrap;word-break:break-word">${escapeHtml(value)}</td></tr>`)
     .join('');
   const textDetails = fields.map(([label, value]) => `${label}: ${value}`).join('\n');
-  const logoUrl = `${publicAppUrl}/Tmommycare-logo-transparent.png`;
+  const logoUrl = `${publicAppUrl}/tmommycare-logo-transparent.png`;
   const htmlContent = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background-color:#f7f3ef;font-family:Arial,Helvetica,sans-serif;color:#1a201c">
@@ -169,6 +169,19 @@ const supabase: SupabaseClient | null = hasRealValue(supabaseUrl, supabaseServic
       auth: { autoRefreshToken: false, persistSession: false }
     })
   : null;
+
+const findAuthUserByEmail = async (email: string) => {
+  if (!supabase) throw new Error('Supabase server configuration is missing.');
+  const normalizedEmail = email.toLowerCase();
+  const perPage = 1000;
+  for (let page = 1; ; page += 1) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const user = data.users.find(candidate => candidate.email?.toLowerCase() === normalizedEmail);
+    if (user) return user;
+    if (data.users.length < perPage) return null;
+  }
+};
 
 const getPaymentEncryptionKey = () => {
   if (!/^[0-9a-f]{64}$/i.test(paymentConfigEncryptionKey)) {
@@ -338,10 +351,10 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://tTmommycares.com',
-  'https://www.tTmommycares.com',
-  'http://tTmommycares.com',
-  'http://www.tTmommycares.com',
+  'https://tmommycares.com',
+  'https://www.tmommycares.com',
+  'http://tmommycares.com',
+  'http://www.tmommycares.com',
   'https://179.198.201.64',
   'http://179.198.201.64',
   'https://179.198.201.64:3000',
@@ -413,18 +426,23 @@ const requireAdmin = async (req: Request, res: Response, next: NextFunction) => 
   const { data, error } = await supabase.auth.getUser(token);
   const role = data.user?.app_metadata?.role;
   const email = data.user?.email?.toLowerCase();
-  let isInvitedAdmin = false;
+  let adminStatus: string | null = null;
   if (email && !error) {
-    const { data: admin } = await supabase
+    const { data: admin, error: adminLookupError } = await supabase
       .from('admin_users')
       .select('status')
       .eq('email', email)
-      .eq('status', 'active')
       .maybeSingle();
-    isInvitedAdmin = Boolean(admin);
+    if (adminLookupError) {
+      console.error(`[API] Admin access lookup failed: ${adminLookupError.message}`);
+      return res.status(500).json({ error: 'Unable to verify administrator access.' });
+    }
+    adminStatus = admin?.status || null;
   }
 
-  if (error || !data.user || (role !== 'admin' && !isInvitedAdmin)) {
+  const isInvitedAdmin = adminStatus === 'active';
+  const isSuspendedAdmin = adminStatus === 'disabled';
+  if (error || !data.user || isSuspendedAdmin || (role !== 'admin' && !isInvitedAdmin)) {
     return res.status(403).json({ error: 'Administrator access required.' });
   }
 
@@ -1780,7 +1798,7 @@ app.post('/api/cloudinary/signature', requireAdmin, (req, res) => {
   });
 });
 
-app.get('/api/admin/users', requireAdmin, async (_req, res) => {
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
   const { data, error } = await supabase!
     .from('admin_users')
     .select('email, display_name, invited_by, status, created_at')
@@ -1789,7 +1807,89 @@ app.get('/api/admin/users', requireAdmin, async (_req, res) => {
     console.error(`[API] Admin user list failed: ${error.message}`);
     return res.status(500).json({ error: 'Unable to load administrator accounts.' });
   }
-  res.json({ administrators: data || [] });
+  const currentUser = await getAuthenticatedUserFromRequest(req);
+  res.json({
+    administrators: data || [],
+    currentUserEmail: currentUser?.email?.toLowerCase() || null
+  });
+});
+
+app.patch('/api/admin/users/:email/status', requireAdmin, async (req, res) => {
+  const email = typeof req.params.email === 'string' ? req.params.email.trim().toLowerCase() : '';
+  const status = req.body?.status;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid administrator email address.' });
+  }
+  if (status !== 'active' && status !== 'disabled') {
+    return res.status(400).json({ error: 'Status must be active or disabled.' });
+  }
+
+  const actor = await getAuthenticatedUserFromRequest(req);
+  if (!actor?.email) return res.status(401).json({ error: 'Authentication required.' });
+  if (actor.email.toLowerCase() === email) {
+    return res.status(400).json({ error: 'You cannot suspend or reactivate your own administrator account.' });
+  }
+
+  const { data, error } = await supabase!
+    .from('admin_users')
+    .update({ status })
+    .eq('email', email)
+    .select('email, status')
+    .maybeSingle();
+  if (error) {
+    console.error(`[API] Admin status update failed: ${error.message}`);
+    return res.status(500).json({ error: 'Unable to update administrator access.' });
+  }
+  if (!data) return res.status(404).json({ error: 'Administrator account not found.' });
+
+  console.log(`[API] Administrator access ${status === 'disabled' ? 'suspended' : 'restored'}: ${email}`);
+  res.json({ administrator: data });
+});
+
+app.post('/api/admin/users/:email/password-reset', requireAdmin, async (req, res) => {
+  const email = typeof req.params.email === 'string' ? req.params.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid administrator email address.' });
+  }
+
+  const actor = await getAuthenticatedUserFromRequest(req);
+  if (!actor?.email) return res.status(401).json({ error: 'Authentication required.' });
+  if (actor.email.toLowerCase() === email) {
+    return res.status(400).json({ error: 'Use the self-service password reset to reset your own account.' });
+  }
+
+  const { data: administrator, error: lookupError } = await supabase!
+    .from('admin_users')
+    .select('status')
+    .eq('email', email)
+    .maybeSingle();
+  if (lookupError) {
+    console.error(`[API] Admin password reset lookup failed: ${lookupError.message}`);
+    return res.status(500).json({ error: 'Unable to verify administrator account.' });
+  }
+  if (!administrator) return res.status(404).json({ error: 'Administrator account not found.' });
+  if (administrator.status !== 'active') {
+    return res.status(409).json({ error: 'Restore this administrator before sending a password setup link.' });
+  }
+
+  try {
+    const authUser = await findAuthUserByEmail(email);
+    if (!authUser) return res.status(404).json({ error: 'No Supabase login exists for this administrator.' });
+  } catch (error) {
+    console.error(`[API] Admin password reset account lookup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return res.status(502).json({ error: 'Unable to verify the administrator login with Supabase.' });
+  }
+
+  const { error: resetError } = await supabase!.auth.resetPasswordForEmail(email, {
+    redirectTo: `${publicAppUrl}/admin?setup-password=1`
+  });
+  if (resetError) {
+    console.error(`[API] Admin password reset email failed: ${resetError.message}`);
+    return res.status(502).json({ error: 'Supabase could not send the password setup email. Check Auth SMTP settings and try again.' });
+  }
+
+  console.log(`[API] Admin password setup email sent: ${email}`);
+  res.json({ message: `A one-time password setup link was sent to ${email}.` });
 });
 
 app.post('/api/admin/invite', requireAdmin, async (req, res) => {
@@ -1813,14 +1913,35 @@ app.post('/api/admin/invite', requireAdmin, async (req, res) => {
   const authorization = req.headers.authorization!;
   const token = authorization.slice('Bearer '.length);
   const { data: inviter } = await supabase!.auth.getUser(token);
-  const { error: inviteError } = await supabase!.auth.admin.inviteUserByEmail(email, {
-    data: { display_name: displayName },
-    redirectTo: `${publicAppUrl}/admin`
+  const { error: createError } = await supabase!.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: displayName ? { display_name: displayName } : {}
   });
-  const existingAccount = inviteError?.code === 'email_exists' || Boolean(inviteError?.message.toLowerCase().includes('already'));
-  if (inviteError && !existingAccount) {
-    console.error(`[API] Admin invite failed: ${inviteError.message}`);
-    return res.status(502).json({ error: 'Supabase could not send the invitation email. Check Auth SMTP settings and try again.' });
+  const existingAccount = createError?.code === 'email_exists' || Boolean(createError?.message.toLowerCase().includes('already'));
+  if (createError && !existingAccount) {
+    console.error(`[API] Admin account creation failed: ${createError.message}`);
+    return res.status(502).json({ error: 'Supabase could not create the administrator login.' });
+  }
+  if (existingAccount) {
+    try {
+      const authUser = await findAuthUserByEmail(email);
+      if (!authUser) {
+        return res.status(502).json({ error: 'A Supabase account was reported but could not be found.' });
+      }
+      if (!authUser.email_confirmed_at) {
+        const { error: confirmError } = await supabase!.auth.admin.updateUserById(authUser.id, {
+          email_confirm: true
+        });
+        if (confirmError) {
+          console.error(`[API] Existing admin account confirmation failed: ${confirmError.message}`);
+          return res.status(502).json({ error: 'Supabase could not prepare the existing account for email sign-in.' });
+        }
+      }
+    } catch (error) {
+      console.error(`[API] Existing admin account lookup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return res.status(502).json({ error: 'Unable to verify the existing Supabase account.' });
+    }
   }
 
   const { error: rowError } = await supabase!.from('admin_users').upsert({
@@ -1831,16 +1952,27 @@ app.post('/api/admin/invite', requireAdmin, async (req, res) => {
   }, { onConflict: 'email' });
   if (rowError) {
     console.error(`[API] Admin access record save failed for ${email}: ${rowError.message}`);
-    return res.status(500).json({ error: 'The invitation was processed, but administrator access could not be saved.' });
+    return res.status(500).json({ error: 'The administrator login was created, but access could not be saved.' });
   }
-  console.log(`[API] Administrator access granted: ${email}`);
+
+  const { error: setupEmailError } = await supabase!.auth.resetPasswordForEmail(email, {
+    redirectTo: `${publicAppUrl}/admin?setup-password=1`
+  });
+  if (setupEmailError) {
+    console.error(`[API] Admin password setup email failed for ${email}: ${setupEmailError.message}`);
+    return res.status(502).json({
+      administratorCreated: true,
+      error: 'Administrator access is enabled, but the password setup email could not be sent. Refresh the list and use Reset password to retry.'
+    });
+  }
+  console.log(`[API] Administrator access granted and setup email sent: ${email}`);
   res.status(existingAccount ? 200 : 201).json({
     email,
-    invited: !existingAccount,
+    created: !existingAccount,
     existingAccount,
     message: existingAccount
-      ? 'This email already has a Supabase account. Administrator access is enabled; they can sign in with an email code or create a password from the password sign-in screen.'
-      : 'Invitation sent. After accepting it, the administrator can sign in with an email code or create a password from the password sign-in screen.'
+      ? 'Administrator access is enabled. A password setup email has been sent; no invitation acceptance is required.'
+      : 'Administrator account created. A password setup email has been sent; no invitation acceptance is required.'
   });
 });
 

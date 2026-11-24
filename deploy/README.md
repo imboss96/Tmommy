@@ -1,6 +1,6 @@
 # GitHub -> Hostinger VPS deployment
 
-For a domain-specific Ubuntu VPS walkthrough for `tTmommycares.com`, see [TTmommycareS_VPS_SETUP.md](./TTmommycareS_VPS_SETUP.md).
+For a domain-specific Ubuntu VPS walkthrough for `tmommycares.com`, see [TMOMMYCARES_VPS_SETUP.md](./TMOMMYCARES_VPS_SETUP.md).
 
 ## 1. Push the project to GitHub
 
@@ -87,7 +87,7 @@ Run the command printed by `pm2 startup`, then run `pm2 save` again.
 ## 5. Configure Nginx
 
 ```bash
-sudo cp deploy/nginx-Tmommycare.conf /etc/nginx/sites-available/Tmommycare
+sudo cp deploy/nginx-tmommycare.conf /etc/nginx/sites-available/Tmommycare
 sudo sed -i 's/example.com/your-real-domain.com/g' /etc/nginx/sites-available/Tmommycare
 sudo ln -s /etc/nginx/sites-available/Tmommycare /etc/nginx/sites-enabled/Tmommycare
 sudo rm -f /etc/nginx/sites-enabled/default

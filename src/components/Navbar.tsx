@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { NairobiEstate } from '../types';
 import { useContent } from '../context/ContentContext';
-import { TmommycareLogo } from './MommyCareLogo';
+import { TmommycareLogo } from './TmommycareLogo';
 
 interface NavbarProps {
   onOpenBooking: () => void;

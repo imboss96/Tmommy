@@ -27,7 +27,7 @@ import { SubmissionsManager } from './SubmissionsManager';
 import { MediaManager } from './MediaManager';
 import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
-import { TmommycareLogo } from '../MommyCareLogo';
+import { TmommycareLogo } from '../TmommycareLogo';
 import { ProviderApplicationsManager } from './ProviderApplicationsManager';
 import { ProviderTransactionsManager } from './ProviderTransactionsManager';
 

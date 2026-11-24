@@ -50,7 +50,7 @@ export const TmommycareLogo: React.FC<TmommycareLogoProps> = ({
       className={`inline-flex items-center cursor-pointer group select-none ${className}`}
     >
       <img
-        src="/mommycare-logo.svg"
+        src="/tmommycare-logo.svg"
         alt="Tmommycare - Quality Care. Safer Homes."
         className={`${logoDimensions} object-contain object-left`}
       />
