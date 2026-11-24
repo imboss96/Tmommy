@@ -39,7 +39,7 @@ const languageOptions = ['English', 'Kiswahili', 'Swahili', 'French', 'Arabic', 
 const inputClass = 'mt-2 w-full rounded-xl border border-[#E7E1D9] bg-[#FCFBF9] px-4 py-3.5 text-sm text-[#1A201C] outline-none transition placeholder:text-[#A39B91] hover:border-[#CFC5B8] focus:border-[#1D432D] focus:bg-white focus:ring-4 focus:ring-[#1D432D]/10';
 
 export const ProviderApplicationPage: React.FC = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', gender: '' as '' | 'male' | 'female', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: '', age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', identityNumber: '', contactAddress: '', referenceName: '', referenceRelationship: '', referencePhone: '', emergencyContactName: '', emergencyContactPhone: '', gender: '' as '' | 'male' | 'female', role: 'nanny' as HomecareRole, nannyType: 'live-in' as NannyType, primaryEstate: '', age: '', experienceYears: '', monthlySalaryRange: '', languages: '', skills: '', dciGoodConductNumber: '', bio: '' });
   const [documents, setDocuments] = useState<Record<DocumentKind, File | null>>({ 'profile-photo': null, identity: null, 'good-conduct': null, training: null, cv: null, other: null });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState('');
@@ -200,7 +200,7 @@ export const ProviderApplicationPage: React.FC = () => {
         </div>
         <aside className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white/80 p-5 shadow-[0_12px_32px_rgba(42,35,25,0.05)]">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] text-[#1D432D]"><LockKeyhole className="h-5 w-5" /></span>
-          <div><h2 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Your information stays protected</h2><p className="mt-1.5 text-sm leading-6 text-[#635E59]">Your contact details and uploaded documents are private and only shared with our review team.</p></div>
+          <div><h2 className="font-['Outfit'] text-base font-bold text-[#1A201C]">Your information stays protected</h2><p className="mt-1.5 text-sm leading-6 text-[#635E59]">Your ID number, contact details, and uploaded documents are private and only shared with our review team.</p></div>
         </aside>
       </header>
 
@@ -220,6 +220,7 @@ export const ProviderApplicationPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#514B44]">Full legal name *<input required autoComplete="name" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Phone / WhatsApp *<input required type="tel" autoComplete="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Email address *<input required type="email" autoComplete="email" value={form.email} onChange={e => setField('email', e.target.value)} className={inputClass} /></label>
+                <label className="text-xs font-bold text-[#514B44]">National ID / Passport number *<input required type="text" minLength={5} maxLength={32} autoComplete="off" autoCapitalize="characters" value={form.identityNumber} onChange={e => setField('identityNumber', e.target.value)} placeholder="Enter the number shown on your ID document" className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Age *<input required type="number" min="18" max="75" value={form.age} onChange={e => setField('age', e.target.value)} className={inputClass} /></label>
                 <label className="text-xs font-bold text-[#514B44]">Gender *<select required value={form.gender} onChange={e => setField('gender', e.target.value as typeof form.gender)} className={inputClass}><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option></select></label>
               </div>
@@ -332,7 +333,7 @@ export const ProviderApplicationPage: React.FC = () => {
                     }}
                     className="mt-1 h-4 w-4 shrink-0 accent-[#1D432D]"
                   />
-                  <span>I confirm that the information I have provided is accurate, consent to Tmommycare reviewing my application and supporting documents, and agree to the provider application terms. If approved, I consent to my name, role, area, arrangement, experience, skills, introduction, and expected salary appearing in the public directory. My contact details and documents remain private.</span>
+                  <span>I confirm that the information I have provided is accurate, consent to Tmommycare reviewing my application and supporting documents, and agree to the provider application terms. If approved, I consent to my name, role, area, arrangement, experience, skills, introduction, and expected salary appearing in the public directory. My ID number, contact details, and documents remain private.</span>
                 </label>
                 <div className="mt-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">

@@ -917,12 +917,14 @@ const normalizeSalaryBandFees = (rawFees: unknown, baseFeeKes: number) => {
 
 app.post('/api/provider-applications/draft', requireSupabase, async (req, res) => {
   const { id, profile, documents } = req.body || {};
+  const identityNumber = typeof profile?.identityNumber === 'string' ? profile.identityNumber.trim() : '';
   if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     return res.status(400).json({ error: 'A valid application reference is required.' });
   }
   if (!profile || typeof profile !== 'object' || typeof profile.name !== 'string' || profile.name.trim().length < 2 ||
       typeof profile.phone !== 'string' || profile.phone.trim().length < 7 ||
       typeof profile.email !== 'string' || !profile.email.includes('@') ||
+      identityNumber.length < 5 || identityNumber.length > 32 ||
       typeof profile.contactAddress !== 'string' || profile.contactAddress.trim().length < 5 ||
       typeof profile.emergencyContactName !== 'string' || profile.emergencyContactName.trim().length < 2 ||
       typeof profile.emergencyContactPhone !== 'string' || profile.emergencyContactPhone.trim().length < 7 ||
@@ -930,7 +932,7 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
       !providerRoles.has(profile.role) || !providerArrangements.has(profile.nannyType) ||
       typeof profile.primaryEstate !== 'string' || profile.primaryEstate.trim().length < 2 ||
       profile.primaryEstate.trim().length > 100 || !Array.isArray(documents) || documents.length < 2 || documents.length > 6) {
-    return res.status(400).json({ error: 'Complete the required contact address, emergency contact, gender, role, availability, and document fields.' });
+    return res.status(400).json({ error: 'Complete the required ID or passport number, contact address, emergency contact, gender, role, availability, and document fields.' });
   }
   const referenceName = typeof profile.referenceName === 'string' ? profile.referenceName.trim() : '';
   const referenceRelationship = typeof profile.referenceRelationship === 'string' ? profile.referenceRelationship.trim() : '';
@@ -1018,6 +1020,7 @@ app.post('/api/provider-applications/draft', requireSupabase, async (req, res) =
 
   const submittedProfile = {
     name: profile.name.trim().slice(0, 100), email: profile.email.trim().slice(0, 160), phone: profile.phone.trim().slice(0, 40),
+    identityNumber: identityNumber.slice(0, 32),
     contactAddress: profile.contactAddress.trim().slice(0, 500),
     referenceName: referenceName.slice(0, 100),
     referenceRelationship: referenceRelationship.slice(0, 100),
