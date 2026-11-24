@@ -3,12 +3,9 @@ import {
   ShieldCheck, 
   FileCheck, 
   Activity, 
-  HeartPulse, 
   PhoneCall, 
-  Sparkles, 
   GraduationCap, 
   CheckCircle2, 
-  AlertTriangle,
   ChevronRight,
   Building2,
   Lock
@@ -24,9 +21,7 @@ export const VettingProcess: React.FC = () => {
       case 'ShieldCheck': return <ShieldCheck className="w-5 h-5 text-[#D96B43]" />;
       case 'FileCheck': return <FileCheck className="w-5 h-5 text-[#1D432D]" />;
       case 'Activity': return <Activity className="w-5 h-5 text-[#D96B43]" />;
-      case 'HeartPulse': return <HeartPulse className="w-5 h-5 text-[#1D432D]" />;
       case 'PhoneCall': return <PhoneCall className="w-5 h-5 text-[#D96B43]" />;
-      case 'Sparkles': return <Sparkles className="w-5 h-5 text-[#1D432D]" />;
       case 'GraduationCap': return <GraduationCap className="w-5 h-5 text-[#D96B43]" />;
       default: return <ShieldCheck className="w-5 h-5 text-[#D96B43]" />;
     }
@@ -42,21 +37,21 @@ export const VettingProcess: React.FC = () => {
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#F5D7C9] bg-white/55 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#D96B43] shadow-[0_8px_24px_rgba(217,107,67,0.08)] backdrop-blur-xl">
             <Lock className="w-3.5 h-3.5" />
-            <span>Forensic Trust Standard</span>
+            <span>Candidate Vetting Process</span>
           </div>
           <h2 className="font-['Outfit'] text-3xl font-extrabold tracking-[-0.04em] text-[#1A201C] sm:text-4xl lg:text-[3rem]">
-            Our 7-Pillar Vetting Architecture
+            Our {VETTING_PILLARS.length}-Stage Vetting Architecture
           </h2>
           <p className="mt-4 text-base text-[#635E59] sm:text-lg">
-            Only <strong>13% of applicants</strong> pass our rigorous 7-stage screening protocol. 
-            Here is the forensic due diligence performed before any caregiver steps through your front door.
+            Our {VETTING_PILLARS.length}-stage review looks at identity, role fit, references, and readiness before introductions.
+            Any health screening is optional and discussed with candidates only when requested for a placement.
           </p>
         </div>
 
         {/* Interactive Vetting Tabs & Detail View */}
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
           
-          {/* Left Column: 7 Pillar Selector Buttons */}
+          {/* Left Column: Vetting Stage Selector Buttons */}
           <div className="space-y-2.5 lg:col-span-5">
             {VETTING_PILLARS.map((pillar, index) => {
               const isSelected = activePillarIndex === index;
@@ -108,7 +103,7 @@ export const VettingProcess: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#D96B43]">
-                        Stage {activePillarIndex + 1} of 7
+                        Stage {activePillarIndex + 1} of {VETTING_PILLARS.length}
                       </span>
                       <h3 className="font-['Outfit'] text-xl font-bold text-[#1A201C] sm:text-2xl">
                         {activePillar.title}
@@ -118,7 +113,11 @@ export const VettingProcess: React.FC = () => {
 
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F0EA] px-3 py-1 text-xs font-bold text-[#1D432D]">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    {activePillar.status === 'mandatory' ? 'Non-Negotiable Mandatory' : activePillar.status === 'annual-renew' ? 'Renewed Annually' : 'Forensic Phone Audit'}
+                    {activePillar.status === 'mandatory'
+                      ? 'Required for all candidates'
+                      : activePillar.status === 'voluntary'
+                        ? 'Optional — candidate consent required'
+                        : 'Reference Audit'}
                   </span>
                 </div>
 

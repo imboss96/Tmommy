@@ -3,18 +3,21 @@ import { BadgeCheck, ExternalLink, FileText, LoaderCircle, RefreshCw, UserRoundX
 import { getApiBaseUrl } from '../../lib/api';
 import { getAdminAuthHeaders } from '../../lib/adminAuth';
 import { getProviderRoleName, ProviderContractButton, ProviderCvButton } from './ProviderDocuments';
+import { AdminFollowUpPanel, useActiveAdministrators } from './AdminFollowUpPanel';
 
 type ProviderDocument = { path: string; name: string; kind: string; signedUrl: string };
 type ProviderApplication = {
   id: string; profile: { name: string; email: string; phone: string; contactAddress?: string; referenceName?: string; referenceRelationship?: string; referencePhone?: string; emergencyContactName?: string; emergencyContactPhone?: string; gender?: 'male' | 'female'; role: string; nannyType: string; primaryEstate: string; age: number; experienceYears: number; monthlySalaryKsh: number; monthlySalaryRange?: string; languages: string[]; skills: string[]; bio: string; dciGoodConductNumber: string; termsAccepted?: boolean; termsAcceptedAt?: string; signatureDataUrl?: string };
-  documents: ProviderDocument[]; status: 'pending' | 'approved' | 'rejected' | 'disabled'; admin_notes: string; submitted_at: string; staff_profile_id: string | null;
+  documents: ProviderDocument[]; status: 'pending' | 'approved' | 'rejected' | 'disabled'; admin_notes: string; submitted_at: string; staff_profile_id: string | null; assigned_admin_email?: string | null; follow_up_at?: string | null;
 };
 export const ProviderApplicationsManager: React.FC = () => {
   const [applications, setApplications] = useState<ProviderApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState('');
   const [error, setError] = useState('');
+  const [overdueOnly, setOverdueOnly] = useState(false);
   const api = getApiBaseUrl();
+  const { administrators, loading: administratorsLoading, error: administratorsError } = useActiveAdministrators();
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -28,6 +31,16 @@ export const ProviderApplicationsManager: React.FC = () => {
   }, [api]);
 
   useEffect(() => { void load(); }, [load]);
+
+  const overdueApplications = applications.filter(application => (
+    (application.status === 'pending' || application.status === 'rejected')
+    && application.follow_up_at
+    && new Date(application.follow_up_at).getTime() < Date.now()
+  ));
+  const overdueApplicationIds = new Set(overdueApplications.map(application => application.id));
+  const visibleApplications = applications.filter(application => (
+    !overdueOnly || overdueApplicationIds.has(application.id)
+  ));
 
   const act = async (application: ProviderApplication, action: string, extra: Record<string, unknown> = {}) => {
     setBusyId(application.id); setError('');
@@ -45,11 +58,22 @@ export const ProviderApplicationsManager: React.FC = () => {
   return <section className="space-y-5">
     <header className="flex flex-wrap items-center justify-between gap-3">
       <div><h2 className="font-['Outfit'] text-2xl font-extrabold text-[#1A201C]">Provider applications</h2><p className="mt-1 text-sm text-[#635E59]">Review submitted details and private documents before publishing a provider in the directory.</p></div>
-      <button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-[#D5C9BA] bg-white px-3 py-2 text-xs font-bold text-[#1A201C]"><RefreshCw className="h-4 w-4" /> Refresh</button>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          aria-pressed={overdueOnly}
+          onClick={() => setOverdueOnly(value => !value)}
+          className={`rounded-xl border px-3 py-2 text-xs font-bold ${overdueOnly ? 'border-red-300 bg-red-50 text-red-800' : 'border-[#D5C9BA] bg-white text-[#1A201C]'}`}
+        >
+          Overdue follow-ups ({overdueApplications.length})
+        </button>
+        <button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-[#D5C9BA] bg-white px-3 py-2 text-xs font-bold text-[#1A201C]"><RefreshCw className="h-4 w-4" /> Refresh</button>
+      </div>
     </header>
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-    {loading ? <div className="flex items-center gap-2 rounded-2xl bg-white p-8 text-sm text-[#635E59]"><LoaderCircle className="h-5 w-5 animate-spin" /> Loading applications…</div> : applications.length === 0 ? <div className="rounded-2xl border border-dashed border-[#D5C9BA] bg-white p-10 text-center text-sm text-[#635E59]">No provider applications yet.</div> :
-      <div className="space-y-4">{applications.map(application => {
+    {administratorsError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">Could not load active administrators for assignment: {administratorsError}</p>}
+    {loading ? <div className="flex items-center gap-2 rounded-2xl bg-white p-8 text-sm text-[#635E59]"><LoaderCircle className="h-5 w-5 animate-spin" /> Loading applications…</div> : visibleApplications.length === 0 ? <div className="rounded-2xl border border-dashed border-[#D5C9BA] bg-white p-10 text-center text-sm text-[#635E59]">{overdueOnly ? 'No overdue provider follow-ups.' : 'No provider applications yet.'}</div> :
+      <div className="space-y-4">{visibleApplications.map(application => {
         const applicant = application.profile;
         const waiting = application.status === 'pending' || application.status === 'rejected';
         const profilePhoto = application.documents.find(document => document.kind === 'profile-photo');
@@ -104,6 +128,23 @@ export const ProviderApplicationsManager: React.FC = () => {
           </div>
           <div className="mt-4"><p className="mb-2 text-[10px] font-extrabold uppercase tracking-wider text-[#7D766D]">Private documents · links expire after 15 minutes</p><div className="flex flex-wrap gap-2">{application.documents.map(document => <a key={document.path} href={document.signedUrl || undefined} target="_blank" rel="noreferrer" className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold ${document.signedUrl ? 'border-[#D5C9BA] text-[#1D432D] hover:bg-[#FAF7F2]' : 'cursor-not-allowed border-red-200 text-red-700'}`}><FileText className="h-4 w-4" />{document.kind}: {document.name}<ExternalLink className="h-3 w-3" /></a>)}</div></div>
           <label className="mt-4 block text-xs font-bold text-[#635E59]">Internal admin note<textarea key={`${application.id}-${application.admin_notes}`} defaultValue={application.admin_notes} rows={2} placeholder="Add a private review note…" onBlur={event => { if (event.target.value !== application.admin_notes) void act(application, 'note', { adminNotes: event.target.value }); }} className="mt-1.5 w-full rounded-xl border border-[#D5C9BA] bg-[#FAF7F2] p-3 text-sm font-normal text-[#1A201C]" /></label>
+          <div className="mt-3">
+            <AdminFollowUpPanel
+              type="provider-application"
+              recordId={application.id}
+              assignedAdminEmail={application.assigned_admin_email || undefined}
+              followUpAt={application.follow_up_at || undefined}
+              isOpen={application.status === 'pending' || application.status === 'rejected'}
+              administrators={administrators}
+              administratorsLoading={administratorsLoading}
+              administratorsError={administratorsError}
+              onSaved={(assignedAdminEmail, followUpAt) => setApplications(previous => previous.map(item => (
+                item.id === application.id
+                  ? { ...item, assigned_admin_email: assignedAdminEmail, follow_up_at: followUpAt }
+                  : item
+              )))}
+            />
+          </div>
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#E8DFD3] pt-4">
             {waiting && <>
               <label className="mr-auto flex items-center gap-2 text-xs font-semibold text-[#3D3A36]"><input id={`reviewed-${application.id}`} type="checkbox" className="accent-[#1D432D]" /> I reviewed and verified the submitted documents</label>

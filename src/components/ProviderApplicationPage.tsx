@@ -1,5 +1,5 @@
 import React, { FormEvent, PointerEvent, useRef, useState } from 'react';
-import { ArrowRight, BadgeCheck, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, Sparkles, UploadCloud, UserRound } from 'lucide-react';
+import { ArrowRight, BadgeCheck, BriefcaseBusiness, FileLock2, LoaderCircle, LockKeyhole, UploadCloud, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getApiBaseUrl } from '../lib/api';
 import { HomecareRole, NannyType } from '../types';
@@ -194,7 +194,7 @@ export const ProviderApplicationPage: React.FC = () => {
     <div className="mx-auto max-w-6xl">
       <header className="mb-9 grid gap-7 lg:mb-12 lg:grid-cols-[1fr_340px] lg:items-end">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm"><Sparkles className="h-4 w-4" /> PROVIDER APPLICATIONS</div>
+          <div className="mb-5 inline-flex items-center rounded-full border border-[#DCE7DE] bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-[#1D432D] shadow-sm">PROVIDER APPLICATIONS</div>
           <h1 className="max-w-3xl font-['Outfit'] text-4xl font-extrabold leading-[1.05] tracking-tight text-[#1A201C] sm:text-5xl lg:text-6xl">Your next chapter in <span className="text-[#D96B43]">homecare</span> starts here.</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[#635E59]">Share your experience and the kind of work you’re looking for. Registration fees depend on the salary band selected during application. Paid applications enter review after payment is confirmed.</p>
         </div>

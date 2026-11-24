@@ -9,7 +9,6 @@ import {
   CheckCircle, 
   Search, 
   Filter, 
-  Sparkles,
   FileBadge,
   BadgeCheck,
   Check,
@@ -141,15 +140,14 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
         <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF0EB] text-[#D96B43] text-xs font-bold uppercase tracking-wider mb-3">
             <BadgeCheck className="w-3.5 h-3.5" />
-            <span>Nairobi Verified Domestic & Homecare Registry</span>
+            <span>Kenya-wide Placement Support</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A201C] tracking-tight font-['Outfit']">
             Meet Our Vetted Homecare Professionals
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
-            From nurturing infant nannies and executive house managers to private chefs, professional family drivers, 
-            meticulous housekeepers, groundskeepers (shamba boys), and caretakers.
-            All 100% DCI fingerprint cleared, medically screened, and background verified.
+            Browse nannies, house managers, chefs, drivers, housekeepers, groundskeepers, and caretakers. Public profiles currently show Nairobi-based availability; contact us to check placement options elsewhere in Kenya.
+            Candidate identity and references are reviewed by our team. Any client-requested medical screening is voluntary and requires the candidate’s informed consent.
           </p>
         </div>
 
@@ -202,7 +200,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
                 type="text"
                 value={selectedEstate}
                 onChange={(e) => setSelectedEstate(e.target.value)}
-                placeholder="All city neighbourhoods"
+                placeholder="Search by town, county, or Nairobi estate"
                 className="w-full px-3.5 py-2.5 bg-white border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
               />
             </div>
@@ -270,7 +268,10 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
         {filteredStaff.length === 0 ? (
           <div className="text-center py-16 bg-[#FAF7F2] rounded-3xl border border-dashed border-[#D5C9BA]">
             <p className="text-lg font-bold text-[#1A201C]">No staff profiles match your exact criteria.</p>
-            <p className="text-sm text-[#635E59] mt-1">Try selecting "All Professionals" or widening your estate selection.</p>
+            <p className="text-sm text-[#635E59] mt-1">Try widening your filters. The public directory currently shows Nairobi profiles; contact us to ask about placement availability elsewhere in Kenya.</p>
+            <a href="/contact" className="mt-3 inline-block text-sm font-bold text-[#1D432D] underline underline-offset-2">
+              Ask about availability in your area
+            </a>
             <button
               onClick={() => {
                 setSelectedRole('all');
@@ -287,7 +288,7 @@ export const NannyDirectory: React.FC<NannyDirectoryProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredStaff.map((staff) => (
               <div 
                 key={staff.id}

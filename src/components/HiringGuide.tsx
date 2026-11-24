@@ -9,7 +9,7 @@ const steps = [
   {
     number: '01',
     title: 'Tell us what your household needs',
-    description: 'Choose a role and share your Nairobi area, preferred live-in or day arrangement, start date, and any important skills or duties.'
+    description: 'Choose a role and share your town, county, or neighbourhood, preferred live-in or day arrangement, start date, and any important skills or duties.'
   },
   {
     number: '02',
@@ -30,7 +30,7 @@ const steps = [
 
 export const HiringGuide: React.FC<HiringGuideProps> = ({ onOpenBooking }) => (
   <section className="border-y border-[#E8DFD3] bg-[#FAF7F2] py-16 sm:py-20" aria-labelledby="hiring-guide-title">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl text-center">
         <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1D432D]">
           <ClipboardList className="h-4 w-4" /> A clear path to placement
@@ -39,19 +39,17 @@ export const HiringGuide: React.FC<HiringGuideProps> = ({ onOpenBooking }) => (
         <p className="mt-4 text-base leading-relaxed text-[#635E59]">Start with your household needs, get the details confirmed, then decide whether a candidate is the right fit.</p>
       </div>
 
-      <ol className="mt-10 grid gap-4 md:grid-cols-2">
+      <ol className="mt-10 grid items-stretch gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {steps.map((step) => (
-          <li key={step.number} className="flex gap-4 rounded-2xl border border-[#E8DFD3] bg-white p-5 sm:p-6">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E8F0EA] font-['Outfit'] text-sm font-extrabold text-[#1D432D]">{step.number}</span>
-            <div>
-              <h3 className="font-['Outfit'] text-lg font-bold text-[#1A201C]">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#635E59]">{step.description}</p>
-            </div>
+          <li key={step.number} className="flex h-full flex-col rounded-2xl border border-[#E8DFD3] bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0EA] font-['Outfit'] text-sm font-extrabold text-[#1D432D]">{step.number}</span>
+            <h3 className="mt-5 font-['Outfit'] text-lg font-bold leading-snug text-[#1A201C]">{step.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#635E59]">{step.description}</p>
           </li>
         ))}
       </ol>
 
-      <div className="mt-6 grid gap-4 rounded-3xl bg-[#1D432D] p-6 text-white sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+      <div className="mt-8 grid gap-6 rounded-3xl bg-[#1D432D] p-6 text-white sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
         <div className="flex gap-4">
           <BadgeCheck className="mt-1 h-6 w-6 shrink-0 text-[#F4A261]" />
           <div>

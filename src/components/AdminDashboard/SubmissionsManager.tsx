@@ -25,6 +25,13 @@ import {
 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { BookingSubmission, ContactInquiry, EmergencySubmission, BookingStatus, EmergencyStatus } from '../../types';
+import { AdminFollowUpPanel, useActiveAdministrators } from './AdminFollowUpPanel';
+
+const isOverdueFollowUp = (followUpAt?: string, isOpen = true) => {
+  if (!isOpen || !followUpAt) return false;
+  const timestamp = new Date(followUpAt).getTime();
+  return !Number.isNaN(timestamp) && timestamp < Date.now();
+};
 
 export const SubmissionsManager: React.FC = () => {
   const { 
@@ -34,12 +41,16 @@ export const SubmissionsManager: React.FC = () => {
     emergencyRequests,
     updateEmergencyStatus,
     deleteEmergencyRequest,
-    contactInquiries
+    contactInquiries,
+    updateSubmissionFollowUp,
+    updateContactInquiryStatus
   } = useContent();
+  const { administrators, loading: administratorsLoading, error: administratorsError } = useActiveAdministrators();
 
   const [activeTab, setActiveTab] = useState<'bookings' | 'emergency' | 'contacts'>('bookings');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [overdueOnly, setOverdueOnly] = useState(false);
   
   // Selected submission for full detail modal
   const [selectedBooking, setSelectedBooking] = useState<BookingSubmission | null>(null);
@@ -64,7 +75,7 @@ export const SubmissionsManager: React.FC = () => {
       b.email.toLowerCase().includes(q) ||
       b.estate.toLowerCase().includes(q) ||
       (b.nannyName && b.nannyName.toLowerCase().includes(q));
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch && (!overdueOnly || isOverdueFollowUp(b.followUpAt, b.status !== 'Completed' && b.status !== 'Archived'));
   });
 
   const filteredEmergency = emergencyRequests.filter(e => {
@@ -75,19 +86,25 @@ export const SubmissionsManager: React.FC = () => {
       e.phone.toLowerCase().includes(q) || 
       e.estate.toLowerCase().includes(q) ||
       (e.requestedRole && e.requestedRole.toLowerCase().includes(q));
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch && (!overdueOnly || isOverdueFollowUp(e.followUpAt, e.status !== 'Resolved' && e.status !== 'Archived'));
   });
 
   const filteredContacts = contactInquiries.filter(inquiry => {
     const matchesStatus = statusFilter === 'All' || inquiry.status === statusFilter;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q || inquiry.name.toLowerCase().includes(q) || inquiry.phone.toLowerCase().includes(q) || inquiry.email.toLowerCase().includes(q) || inquiry.message.toLowerCase().includes(q);
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch && (!overdueOnly || isOverdueFollowUp(inquiry.followUpAt, inquiry.status !== 'Resolved' && inquiry.status !== 'Archived'));
   });
+
+  const overdueCount = activeTab === 'bookings'
+    ? bookings.filter(booking => isOverdueFollowUp(booking.followUpAt, booking.status !== 'Completed' && booking.status !== 'Archived')).length
+    : activeTab === 'emergency'
+      ? emergencyRequests.filter(request => isOverdueFollowUp(request.followUpAt, request.status !== 'Resolved' && request.status !== 'Archived')).length
+      : contactInquiries.filter(inquiry => isOverdueFollowUp(inquiry.followUpAt, inquiry.status !== 'Resolved' && inquiry.status !== 'Archived')).length;
 
   const exportCSV = () => {
     if (activeTab === 'bookings') {
-      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Email', 'Estate', 'Role', 'Selected Staff', 'Start Date', 'Children', 'Notes'];
+      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Email', 'Estate', 'Role', 'Selected Staff', 'Start Date', 'Children', 'Notes', 'Assigned Admin', 'Follow-up Due'];
       const rows = bookings.map(b => [
         b.id,
         b.submittedAt,
@@ -100,7 +117,9 @@ export const SubmissionsManager: React.FC = () => {
         `"${(b.nannyName || '').replace(/"/g, '""')}"`,
         b.startDate,
         b.numberOfChildren,
-        `"${(b.additionalNotes || '').replace(/"/g, '""')}"`
+        `"${(b.additionalNotes || '').replace(/"/g, '""')}"`,
+        b.assignedAdminEmail || '',
+        b.followUpAt || ''
       ]);
       const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
       const encodedUri = encodeURI(csvContent);
@@ -111,7 +130,7 @@ export const SubmissionsManager: React.FC = () => {
       link.click();
       document.body.removeChild(link);
     } else if (activeTab === 'emergency') {
-      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Estate', 'Requested Role', 'Required Time', 'Days', 'Notes'];
+      const headers = ['ID', 'Date', 'Status', 'Parent Name', 'Phone', 'Estate', 'Requested Role', 'Required Time', 'Days', 'Notes', 'Assigned Admin', 'Follow-up Due'];
       const rows = emergencyRequests.map(e => [
         e.id,
         e.submittedAt,
@@ -122,7 +141,9 @@ export const SubmissionsManager: React.FC = () => {
         e.requestedRole || 'nanny',
         `"${e.requiredTime}"`,
         e.durationDays,
-        `"${(e.urgentNotes || '').replace(/"/g, '""')}"`
+        `"${(e.urgentNotes || '').replace(/"/g, '""')}"`,
+        e.assignedAdminEmail || '',
+        e.followUpAt || ''
       ]);
       const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
       const encodedUri = encodeURI(csvContent);
@@ -133,8 +154,8 @@ export const SubmissionsManager: React.FC = () => {
       link.click();
       document.body.removeChild(link);
     } else {
-      const headers = ['ID', 'Date', 'Status', 'Name', 'Phone', 'Email', 'Message'];
-      const rows = contactInquiries.map(inquiry => [inquiry.id, inquiry.submittedAt, inquiry.status, `"${inquiry.name.replace(/"/g, '""')}"`, inquiry.phone, inquiry.email, `"${inquiry.message.replace(/"/g, '""')}"`]);
+      const headers = ['ID', 'Date', 'Status', 'Name', 'Phone', 'Email', 'Message', 'Assigned Admin', 'Follow-up Due'];
+      const rows = contactInquiries.map(inquiry => [inquiry.id, inquiry.submittedAt, inquiry.status, `"${inquiry.name.replace(/"/g, '""')}"`, inquiry.phone, inquiry.email, `"${inquiry.message.replace(/"/g, '""')}"`, inquiry.assignedAdminEmail || '', inquiry.followUpAt || '']);
       const link = document.createElement('a');
       link.setAttribute('href', encodeURI(`data:text/csv;charset=utf-8,${[headers.join(','), ...rows.map(row => row.join(','))].join('\n')}`));
       link.setAttribute('download', `Tmommycare-contact-inquiries-${new Date().toISOString().split('T')[0]}.csv`);
@@ -185,6 +206,12 @@ export const SubmissionsManager: React.FC = () => {
           <span>Export {activeTab === 'bookings' ? 'Bookings' : activeTab === 'emergency' ? 'Emergency' : 'Contact inquiries'} to CSV</span>
         </button>
       </div>
+
+      {administratorsError && (
+        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+          Could not load active administrators for assignment: {administratorsError}
+        </p>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-3 border-b border-[#E8DFD3] pb-1">
@@ -252,6 +279,14 @@ export const SubmissionsManager: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            aria-pressed={overdueOnly}
+            onClick={() => setOverdueOnly(value => !value)}
+            className={`rounded-xl border px-3 py-1.5 text-xs font-bold ${overdueOnly ? 'border-red-300 bg-red-50 text-red-800' : 'border-[#E8DFD3] bg-white text-[#635E59]'}`}
+          >
+            Overdue ({overdueCount})
+          </button>
           <span className="text-xs font-semibold text-[#7D766D]">Status:</span>
           <select
             value={statusFilter}
@@ -437,6 +472,18 @@ export const SubmissionsManager: React.FC = () => {
                 </div>
               </div>
 
+              <AdminFollowUpPanel
+                type="booking"
+                recordId={b.id}
+                assignedAdminEmail={b.assignedAdminEmail}
+                followUpAt={b.followUpAt}
+                isOpen={b.status !== 'Completed' && b.status !== 'Archived'}
+                administrators={administrators}
+                administratorsLoading={administratorsLoading}
+                administratorsError={administratorsError}
+                onSaved={(assignedAdminEmail, followUpAt) => updateSubmissionFollowUp('booking', b.id, assignedAdminEmail, followUpAt)}
+              />
+
             </div>
           ))}
 
@@ -543,6 +590,18 @@ export const SubmissionsManager: React.FC = () => {
                 </div>
               )}
 
+              <AdminFollowUpPanel
+                type="emergency"
+                recordId={e.id}
+                assignedAdminEmail={e.assignedAdminEmail}
+                followUpAt={e.followUpAt}
+                isOpen={e.status !== 'Resolved' && e.status !== 'Archived'}
+                administrators={administrators}
+                administratorsLoading={administratorsLoading}
+                administratorsError={administratorsError}
+                onSaved={(assignedAdminEmail, followUpAt) => updateSubmissionFollowUp('emergency', e.id, assignedAdminEmail, followUpAt)}
+              />
+
               {/* Actions & Delete */}
               <div className="flex items-center justify-between pt-1 text-xs">
                 <a
@@ -585,9 +644,36 @@ export const SubmissionsManager: React.FC = () => {
             <article key={inquiry.id} className="rounded-2xl border border-[#E8DFD3] bg-white p-4 shadow-sm sm:p-5">
               <div className="flex flex-col gap-3 border-b border-[#F2ECE1] pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2.5"><div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E8DFD3] bg-[#FAF0EB] text-[#D96B43]"><Mail className="h-5 w-5" /></div><div><div className="flex items-center gap-2"><span className="text-sm font-bold text-[#1A201C]">{inquiry.name}</span><span className={`rounded-full border px-2 py-0.5 text-[10px] ${getStatusBadge(inquiry.status)}`}>{inquiry.status}</span></div><p className="text-[11px] text-[#7D766D]">Submitted {new Date(inquiry.submittedAt).toLocaleDateString()} at {new Date(inquiry.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p></div></div>
-                <div className="flex gap-2"><a href={`tel:${inquiry.phone}`} className="rounded-lg bg-[#1D432D] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#143020]">Call</a><a href={`mailto:${inquiry.email}`} className="rounded-lg border border-[#D5C9BA] px-3 py-1.5 text-xs font-bold text-[#1A201C] hover:bg-[#FAF7F2]">Email</a></div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    aria-label={`Update status for ${inquiry.name}`}
+                    value={inquiry.status}
+                    onChange={event => updateContactInquiryStatus(inquiry.id, event.target.value as ContactInquiry['status'])}
+                    className="rounded-lg border border-[#D5C9BA] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#1A201C]"
+                  >
+                    <option value="New">New</option>
+                    <option value="Contacted">Contacted</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Archived">Archived</option>
+                  </select>
+                  <a href={`tel:${inquiry.phone}`} className="rounded-lg bg-[#1D432D] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#143020]">Call</a>
+                  <a href={`mailto:${inquiry.email}`} className="rounded-lg border border-[#D5C9BA] px-3 py-1.5 text-xs font-bold text-[#1A201C] hover:bg-[#FAF7F2]">Email</a>
+                </div>
               </div>
               <div className="mt-3 grid gap-3 text-xs sm:grid-cols-2"><div className="rounded-xl border border-[#E8DFD3] bg-[#FAF7F2] p-3"><p className="text-[10px] font-bold uppercase text-[#7D766D]">Contact details</p><p className="mt-1 font-semibold text-[#1A201C]">{inquiry.phone}</p><p className="mt-1 break-all text-[#635E59]">{inquiry.email}</p></div><div className="rounded-xl border border-[#E8DFD3] bg-[#FAF7F2] p-3"><p className="text-[10px] font-bold uppercase text-[#7D766D]">Message</p><p className="mt-1 whitespace-pre-wrap leading-relaxed text-[#3D3A36]">{inquiry.message}</p></div></div>
+              <div className="mt-3">
+                <AdminFollowUpPanel
+                  type="contact"
+                  recordId={inquiry.id}
+                  assignedAdminEmail={inquiry.assignedAdminEmail}
+                  followUpAt={inquiry.followUpAt}
+                  isOpen={inquiry.status !== 'Resolved' && inquiry.status !== 'Archived'}
+                  administrators={administrators}
+                  administratorsLoading={administratorsLoading}
+                  administratorsError={administratorsError}
+                  onSaved={(assignedAdminEmail, followUpAt) => updateSubmissionFollowUp('contact', inquiry.id, assignedAdminEmail, followUpAt)}
+                />
+              </div>
             </article>
           ))}
           {filteredContacts.length === 0 && <div className="rounded-2xl border border-dashed border-[#D5C9BA] bg-white p-12 text-center"><Mail className="mx-auto mb-2 h-10 w-10 text-[#D5C9BA]" /><p className="text-sm font-bold text-[#1A201C]">No contact enquiries found</p><p className="mt-1 text-xs text-[#7D766D]">New messages from the contact page will appear here.</p></div>}

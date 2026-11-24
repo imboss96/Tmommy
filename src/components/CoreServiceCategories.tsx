@@ -7,7 +7,6 @@ import {
   ChefHat,
   Home,
   Leaf,
-  Sparkles,
   UserCheck,
   Wrench
 } from 'lucide-react';
@@ -15,7 +14,7 @@ import { DEFAULT_CORE_SERVICE_CATEGORIES, getCoreServiceCategories } from '../da
 
 const iconMap = {
   nannies: Baby,
-  'house-girls': Sparkles,
+  'house-girls': Home,
   'house-boys': UserCheck,
   caretakers: Wrench,
   gardeners: Leaf,
@@ -39,11 +38,6 @@ export const CoreServiceCategories: React.FC = () => {
     <section className="border-b border-[#E8DFD3] bg-[#FCFAF7] py-12 sm:py-16" aria-labelledby="core-services-title">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center sm:mb-10">
-          <div className="mx-auto mb-3 flex max-w-xs items-center gap-3 text-[#B82958]" aria-hidden="true">
-            <span className="h-px flex-1 bg-[#B82958]/50" />
-            <span className="text-sm">✦</span>
-            <span className="h-px flex-1 bg-[#B82958]/50" />
-          </div>
           <h2 id="core-services-title" className="font-['Outfit'] text-2xl font-extrabold uppercase tracking-wide text-[#31513E] sm:text-3xl">
             Core Service Categories
           </h2>
@@ -53,7 +47,7 @@ export const CoreServiceCategories: React.FC = () => {
           {serviceCategories.map(({ title, description, action, icon: Icon, image, href }) => (
             <article key={title} className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#E8DFD3] bg-white shadow-sm transition-shadow hover:shadow-lg">
               <div className="relative aspect-[4/3] overflow-hidden bg-[#F2EDE4]">
-                {image && <img src={image} alt={`${title} in Nairobi`} className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy" />}
+                {image && <img src={image} alt={`${title} in Kenya`} className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy" />}
                 <div className="absolute left-3 top-3 rounded-full bg-white/95 p-2 text-[#B82958] shadow-sm">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>

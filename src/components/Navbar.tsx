@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="site-header sticky top-0 z-40 backdrop-blur-md transition-all">
-      {/* Top Notification Bar for Nairobi Residents */}
+      {/* Top notification bar with location-specific emergency availability */}
       <div className="bg-[#25D366] text-[#075E54] text-[10px] sm:text-xs lg:text-sm py-1.5 px-3 sm:px-4 font-medium">
         <div className="w-full flex items-center gap-2 sm:gap-3 overflow-hidden">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="inline-flex max-w-[145px] sm:max-w-[190px] items-center gap-1 text-[#075E54] hover:text-[#128C7E] font-semibold text-[10px] sm:text-xs transition-colors xl:max-w-none"
             >
               <AlertCircle className="w-3.5 h-3.5 animate-pulse text-[#128C7E]" />
-              <span className="truncate whitespace-nowrap">Emergency Standby Staff (2-4h Dispatch)</span>
+              <span className="truncate whitespace-nowrap">Nairobi Emergency Backup (2–4h)</span>
             </button>
             <a 
               href={`tel:${siteConfig.hotlinePhone}`} 

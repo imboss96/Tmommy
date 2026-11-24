@@ -5,8 +5,7 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   Send, 
-  Award,
-  Sparkles
+  Award
 } from 'lucide-react';
 
 export const NannyAcademySection: React.FC = () => {
@@ -21,33 +20,35 @@ export const NannyAcademySection: React.FC = () => {
   };
 
   return (
-    <section className="py-16 lg:py-20 bg-gradient-to-br from-[#1D432D] to-[#142F1F] text-white relative overflow-hidden">
-      {/* Glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#D96B43]/15 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative isolate overflow-hidden bg-[#F1F5EF] py-16 text-[#1A201C] lg:py-20">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-[28rem] top-[72%] h-[42rem] w-[42rem] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_32%_35%,#3A7950_0%,#25603C_48%,#133C28_100%)] sm:-right-[25rem] sm:top-1/2 sm:h-[62rem] sm:w-[62rem]"
+      />
 
       <div className="w-full px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           {/* Left Text */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#F4A261] text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E4ECE4] text-[#31513E] text-xs font-bold uppercase tracking-wider">
               <GraduationCap className="w-4 h-4" />
               <span>Tmommycare Professional Academy • Fast-Growing Care Network</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-['Outfit'] leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-['Outfit'] leading-tight text-[#1A201C]">
               Are You a Passionate Childcare Professional in Kenya? <br />
               <span className="text-[#F4A261]">Join East Africa's Fast-Growing Childcare Network.</span>
             </h2>
 
-            <p className="text-base sm:text-lg text-white/90 leading-relaxed max-w-2xl">
-              Tmommycare is rapidly expanding across Nairobi to redefine domestic childcare standards. 
+            <p className="text-base sm:text-lg text-[#4D5A50] leading-relaxed max-w-2xl">
+              Tmommycare is building a professional homecare network across Kenya.
               We never deduct commissions from a nanny’s hard-earned salary. We provide free Red Cross infant CPR 
               training, fair living wages, written legal contracts with paid leave days,
               statutory NSSF/SHA medical cover, and direct placements with verified, respectful families.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-white/90 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-[#34463A] pt-2">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#F4A261]" />
                     <span>No Placement Deductions from Salary</span>
@@ -58,7 +59,7 @@ export const NannyAcademySection: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#F4A261]" />
-                <span>Fast-Growing Family Network in Nairobi</span>
+                <span>Growing Care Network Across Kenya</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#F4A261]" />
@@ -89,8 +90,7 @@ export const NannyAcademySection: React.FC = () => {
                 </div>
               ) : (
                 <form onSubmit={handleApply} className="space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#EFE9DF] pb-3">
-                    <Sparkles className="w-5 h-5 text-[#D96B43]" />
+                  <div className="border-b border-[#EFE9DF] pb-3">
                     <h3 className="font-bold text-base font-['Outfit']">
                       Quick Nanny & Caregiver Registration
                     </h3>

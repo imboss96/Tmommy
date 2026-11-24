@@ -27,13 +27,13 @@ export const Testimonials: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F0EA] text-[#1D432D] text-xs font-bold uppercase tracking-wider mb-3">
             <Heart className="w-3.5 h-3.5 text-[#D96B43]" />
-            <span>Nairobi Family Testimonials</span>
+            <span>Tmommycare Family Testimonials</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A201C] tracking-tight font-['Outfit']">
-            Trusted in Over 280 Homes Across Nairobi
+            Trusted in Over 280 Homes
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#635E59]">
-            Read verified reviews from parents in Karen, Westlands, Kilimani, and Runda who found peace of mind with Tmommycare.
+            These published reviews come from Nairobi placements. We also support families across Kenya—contact us to confirm availability in your area.
           </p>
         </div>
 

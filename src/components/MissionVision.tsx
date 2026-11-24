@@ -13,11 +13,11 @@ export const MissionVision: React.FC = () => {
             <span>The Tmommycare Difference</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-[3.15rem] font-extrabold text-[#1A201C] tracking-[-0.04em] font-['Outfit'] leading-[1.04]">
-            Elevating Childcare in Nairobi Through Clear, Trusted Standards
+            Supporting Kenyan Families With Trusted Homecare Standards
           </h2>
           <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#635E59] leading-relaxed">
-            Nairobi parents deserve clear choices, reliable information, and support throughout the homecare journey.
-            Tmommycare was established to bring radical safety, institutional trust, and human dignity to Kenyan homes.
+            Families across Kenya deserve clear choices, reliable information, and support throughout the homecare journey.
+            Tmommycare was established to bring safety, trust, and dignity to homes and care professionals across the country.
           </p>
         </div>
 
@@ -36,7 +36,7 @@ export const MissionVision: React.FC = () => {
               Our Mission
             </h3>
             <p className="text-base sm:text-lg text-[#3D3A36] leading-relaxed font-medium">
-              “To provide Nairobi families with verified, uncompromised peace of mind by transforming domestic 
+              “To provide families across Kenya with trusted homecare support and peace of mind by transforming domestic
               childcare into a respected, certified profession—anchored in forensic criminal vetting, continuous 
               pediatric emergency training, and dignified, transparent compensation for our caregivers.”
             </p>

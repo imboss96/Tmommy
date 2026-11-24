@@ -88,7 +88,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <p className="text-xs text-[#635E59]">
                 {preSelectedNanny 
                   ? `Selected: ${preSelectedNanny.name} (${preSelectedNanny.categoryLabel})` 
-                  : 'Request customized homecare matching for your Nairobi residence'}
+                  : 'Request a homecare placement anywhere in Kenya; availability is confirmed by area'}
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 Booking Request Received!
               </h3>
               <p className="text-sm text-[#524D47] max-w-md mx-auto leading-relaxed">
-                Thank you, <strong>{formData.parentName}</strong>. Our senior Nairobi placement coordinator 
+                Thank you, <strong>{formData.parentName}</strong>. Our placement coordinator
                 will call you on <strong>{formData.phone}</strong> within 30–45 minutes to confirm staff
                 availability, share verification details, and coordinate your requested start date.
               </p>
@@ -124,7 +124,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <span className="font-bold text-[#1A201C] capitalize">{formData.role?.replace('-', ' ')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#635E59]">Neighbourhood:</span>
+                  <span className="text-[#635E59]">Location:</span>
                   <span className="font-bold text-[#1A201C]">{formData.estate}</span>
                 </div>
                 <div className="flex justify-between">
@@ -259,7 +259,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     maxLength={100}
                     value={formData.estate}
                     onChange={(e) => setFormData({ ...formData, estate: e.target.value })}
-                    placeholder="Enter your estate or neighbourhood"
+                    placeholder="Enter your town, county, or neighbourhood"
                     className="w-full px-3.5 py-2.5 bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl text-sm font-semibold text-[#1A201C] focus:ring-2 focus:ring-[#D96B43]"
                   />
                 </div>

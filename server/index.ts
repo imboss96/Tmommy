@@ -1608,15 +1608,21 @@ app.get('/api/site-config', requireSupabase, async (_req, res) => {
 });
 
 app.get('/api/admin/submissions', requireAdmin, async (_req, res) => {
-  const [bookingsResult, emergencyResult, reviewsResult] = await Promise.all([
+  const [bookingsResult, emergencyResult, contactInquiriesResult, reviewsResult] = await Promise.all([
     supabase!.from('bookings').select('*').order('submitted_at', { ascending: false }),
     supabase!.from('emergency_requests').select('*').order('submitted_at', { ascending: false }),
+    supabase!.from('contact_inquiries').select('*').order('submitted_at', { ascending: false }),
     supabase!.from('reviews').select('*').order('submitted_at', { ascending: false })
   ]);
 
-  const error = bookingsResult.error || emergencyResult.error || reviewsResult.error;
+  const error = bookingsResult.error || emergencyResult.error || contactInquiriesResult.error || reviewsResult.error;
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ bookings: bookingsResult.data || [], emergencyRequests: emergencyResult.data || [], reviews: reviewsResult.data || [] });
+  res.json({
+    bookings: bookingsResult.data || [],
+    emergencyRequests: emergencyResult.data || [],
+    contactInquiries: contactInquiriesResult.data || [],
+    reviews: reviewsResult.data || []
+  });
 });
 
 app.get('/api/admin/reviews', requireAdmin, async (_req, res) => {
@@ -1657,7 +1663,6 @@ app.post('/api/bookings', requireSupabase, async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   await sendSubmissionNotification('client service request', {
-    'Request reference': data.id,
     'Parent or guardian': booking.parentName,
     Phone: booking.phone,
     Email: booking.email,
@@ -1811,6 +1816,74 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   res.json({
     administrators: data || [],
     currentUserEmail: currentUser?.email?.toLowerCase() || null
+  });
+});
+
+app.patch('/api/admin/work-items/:type/:id', requireAdmin, async (req, res) => {
+  const workItemTables = {
+    booking: 'bookings',
+    emergency: 'emergency_requests',
+    contact: 'contact_inquiries',
+    'provider-application': 'provider_applications'
+  } as const;
+  const table = workItemTables[req.params.type as keyof typeof workItemTables];
+  if (!table) return res.status(400).json({ error: 'Unsupported work item type.' });
+
+  const assignedAdminEmail = req.body?.assignedAdminEmail;
+  const followUpAt = req.body?.followUpAt;
+  if (assignedAdminEmail !== null && typeof assignedAdminEmail !== 'string') {
+    return res.status(400).json({ error: 'Assigned admin must be an email address or empty.' });
+  }
+  if (followUpAt !== null && typeof followUpAt !== 'string') {
+    return res.status(400).json({ error: 'Follow-up date must be a valid date or empty.' });
+  }
+
+  const normalizedEmail = typeof assignedAdminEmail === 'string' && assignedAdminEmail.trim()
+    ? assignedAdminEmail.trim().toLowerCase()
+    : null;
+  if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return res.status(400).json({ error: 'Enter a valid active administrator email address.' });
+  }
+  if (normalizedEmail) {
+    const { data: administrator, error: adminError } = await supabase!
+      .from('admin_users')
+      .select('email')
+      .eq('email', normalizedEmail)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (adminError) {
+      console.error(`[API] Work item assignee lookup failed: ${adminError.message}`);
+      return res.status(500).json({ error: 'Unable to verify the selected administrator.' });
+    }
+    if (!administrator) return res.status(409).json({ error: 'Only active administrators can be assigned.' });
+  }
+
+  let normalizedFollowUpAt: string | null = null;
+  if (typeof followUpAt === 'string') {
+    const parsedDate = new Date(followUpAt);
+    if (Number.isNaN(parsedDate.getTime())) return res.status(400).json({ error: 'Enter a valid follow-up date.' });
+    normalizedFollowUpAt = parsedDate.toISOString();
+  }
+
+  const { data, error } = await supabase!
+    .from(table)
+    .update({
+      assigned_admin_email: normalizedEmail,
+      follow_up_at: normalizedFollowUpAt
+    })
+    .eq('id', req.params.id)
+    .select('id, assigned_admin_email, follow_up_at')
+    .maybeSingle();
+  if (error) {
+    console.error(`[API] Work item follow-up update failed for ${table}: ${error.message}`);
+    return res.status(500).json({ error: 'Unable to save the assignment and follow-up date.' });
+  }
+  if (!data) return res.status(404).json({ error: 'Work item not found.' });
+
+  res.json({
+    id: data.id,
+    assignedAdminEmail: data.assigned_admin_email,
+    followUpAt: data.follow_up_at
   });
 });
 
@@ -1981,6 +2054,7 @@ const adminTables = {
   insights: 'insights',
   bookings: 'bookings',
   emergencyRequests: 'emergency_requests',
+  contactInquiries: 'contact_inquiries',
   media: 'media_items',
   siteConfig: 'site_config',
   reviews: 'reviews'

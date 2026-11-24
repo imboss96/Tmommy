@@ -109,7 +109,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   emergencyDispatchPhone: '+254 700 666 227',
   whatsappPhone: '+254 700 666 227',
   whatsappMessage: 'Hello Tmommycare, I would like help finding vetted homecare staff.',
-  notificationBanner: 'Serving Karen, Westlands, Kilimani, Lavington, Runda, Muthaiga & Greater Nairobi',
+  notificationBanner: 'Homecare placement support across Kenya • Nairobi emergency backup available',
   headquartersAddress: 'The Promenade, General Mathenge Drive, Westlands, Nairobi',
   conciergeEmail: 'concierge@Tmommycare.co.ke',
   replacementWarrantyDays: 90

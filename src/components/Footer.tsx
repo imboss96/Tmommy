@@ -25,7 +25,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
         {/* Main 4-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
           
-          {/* Col 1: Brand & Nairobi Mission (4 cols) */}
+          {/* Col 1: Brand & Kenya-wide service (4 cols) */}
           <div className="space-y-4 rounded-2xl border border-white/70 bg-white/45 p-5 shadow-[0_10px_30px_rgba(29,67,45,0.07)] backdrop-blur-xl lg:col-span-4">
             <div className="inline-flex rounded-2xl border border-white/60 bg-white/95 px-2 py-1 shadow-sm">
               <TmommycareLogo 
@@ -37,9 +37,7 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
             </div>
 
             <p className="text-xs sm:text-sm text-[#5D7061] leading-relaxed">
-              Nairobi’s gold-standard vetted childcare and homecare staff agency. Transforming domestic employment into a certified, 
-              dignified profession through forensic DCI biometric screening, hospital clinical diagnostics, verified employer audits, 
-              and our signature {siteConfig.replacementWarrantyDays}-day free replacement guarantee.
+              A Kenyan homecare placement agency supporting families across the country. We help build a dignified profession through documented DCI background checks, verified employer references, and optional health screening arranged only with a candidate’s consent when requested for a placement. We also offer our signature {siteConfig.replacementWarrantyDays}-day free replacement guarantee.
             </p>
 
             <div className="space-y-2 text-xs pt-1">
@@ -80,6 +78,10 @@ export const Footer: React.FC<{ onOpenBooking: () => void }> = ({
             <h4 className="font-['Outfit'] text-xs font-bold uppercase tracking-widest text-[#B85A36]">
               Areas We Cover
             </h4>
+            <p className="text-[11px] leading-relaxed text-[#5D7061]">
+              Placement enquiries are welcome from across Kenya. Availability is confirmed by area.
+            </p>
+            <p className="text-[11px] font-bold text-[#34483A]">Current Nairobi service areas:</p>
             <div className="grid grid-cols-2 gap-1.5 text-xs text-[#5D7061]">
               {NAIROBI_ESTATES.map(estate => (
                 <span key={estate.name} className="cursor-pointer transition-colors hover:text-[#1D432D]">

@@ -123,7 +123,7 @@ If Brevo is not configured or rejects a send, the form submission remains saved 
 
 ## 5. Apply database migrations
 
-In the Supabase SQL Editor or using your established Supabase migration workflow, apply the SQL files in `supabase/migrations/` in order. Include the provider applications migration (`006_provider_applications.sql`) if you use provider applications and their private document storage.
+In the Supabase SQL Editor or using your established Supabase migration workflow, apply the SQL files in `supabase/migrations/` in order. Apply `013_admin_work_queue.sql` before using administrator assignment and follow-up dates. Include `006_provider_applications.sql` for provider applications and private document storage.
 
 ## 6. Build the frontend and start the API
 

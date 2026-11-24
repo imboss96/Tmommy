@@ -11,7 +11,7 @@ export const CompetitorComparison: React.FC<{ onBookConsultation: () => void }> 
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF0EB] text-[#D96B43] text-xs font-bold uppercase tracking-wider mb-3">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Nairobi Market Reality</span>
+            <span>Kenyan Homecare Options</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A201C] tracking-tight font-['Outfit']">
             How Tmommycare Compares With Other Care Options

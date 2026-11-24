@@ -9,8 +9,9 @@ import {
   MediaItem, 
   SiteConfig,
   BookingFormData,
-  EmergencyRequestData
-  ,ContactInquiry,
+  EmergencyRequestData,
+  ContactInquiry,
+  ContactInquiryStatus,
   Review,
   ReviewStatus
 } from '../types';
@@ -41,6 +42,7 @@ interface ContentContextType {
   bookings: BookingSubmission[];
   addBooking: (booking: BookingFormData) => string;
   updateBookingStatus: (id: string, status: BookingStatus, notes?: string, coordinator?: string) => void;
+  updateSubmissionFollowUp: (type: 'booking' | 'emergency' | 'contact', id: string, assignedAdminEmail: string | null, followUpAt: string | null) => void;
   deleteBooking: (id: string) => void;
 
   // Emergency Dispatches
@@ -51,6 +53,7 @@ interface ContentContextType {
 
   // Contact enquiries
   contactInquiries: ContactInquiry[];
+  updateContactInquiryStatus: (id: string, status: ContactInquiryStatus) => void;
 
   // Public reviews
   reviews: Review[];
@@ -176,7 +179,9 @@ function mapBookingRow(row: Record<string, unknown>): BookingSubmission {
     submittedAt: row.submitted_at as string,
     status: normalizeBookingStatus(row.status),
     internalNotes: (row.internal_notes as string | null) || undefined,
-    assignedCoordinator: (row.assigned_coordinator as string | null) || undefined
+    assignedCoordinator: (row.assigned_coordinator as string | null) || undefined,
+    assignedAdminEmail: (row.assigned_admin_email as string | null) || undefined,
+    followUpAt: (row.follow_up_at as string | null) || undefined
   };
 }
 
@@ -198,7 +203,9 @@ function mapEmergencyRow(row: Record<string, unknown>): EmergencySubmission {
     submittedAt: row.submitted_at as string,
     status: row.status as EmergencySubmission['status'],
     internalNotes: (row.internal_notes as string | null) || undefined,
-    assignedStaffName: (row.assigned_staff_name as string | null) || undefined
+    assignedStaffName: (row.assigned_staff_name as string | null) || undefined,
+    assignedAdminEmail: (row.assigned_admin_email as string | null) || undefined,
+    followUpAt: (row.follow_up_at as string | null) || undefined
   };
 }
 
@@ -210,7 +217,9 @@ function mapContactInquiryRow(row: Record<string, unknown>): ContactInquiry {
     phone: row.phone as string,
     message: row.message as string,
     status: row.status as ContactInquiry['status'],
-    submittedAt: row.submitted_at as string
+    submittedAt: row.submitted_at as string,
+    assignedAdminEmail: (row.assigned_admin_email as string | null) || undefined,
+    followUpAt: (row.follow_up_at as string | null) || undefined
   };
 }
 
@@ -562,7 +571,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       id,
       slug,
       title: data.title || 'Untitled Post',
-      excerpt: data.excerpt || 'Insight overview and household guidance for Nairobi parents and estates.',
+      excerpt: data.excerpt || 'Insight overview and household guidance for families across Kenya.',
       category: data.category || 'Childcare & Safety',
       author: data.author || {
         name: 'Dr. Stella Njoki, MD',
@@ -572,15 +581,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       readTime: data.readTime || '5 min read',
       publishedDate: data.publishedDate || new Date().toISOString().split('T')[0],
       coverImage: data.coverImage || '',
-      tags: data.tags && data.tags.length > 0 ? data.tags : ['Nairobi Parenting', 'Household Safety'],
+      tags: data.tags && data.tags.length > 0 ? data.tags : ['Kenyan Parenting', 'Household Safety'],
       keyTakeaways: data.keyTakeaways && data.keyTakeaways.length > 0 ? data.keyTakeaways : [
         'Establish standard operating procedures for household staff.',
         'Prioritize certified pediatric first aid and verified background checks.'
       ],
       content: data.content && data.content.length > 0 ? data.content : [
-        'Providing clear guidelines and proper training for domestic staff is the cornerstone of a peaceful home in Nairobi.'
+        'Providing clear guidelines and proper training for domestic staff supports safer, more peaceful homes across Kenya.'
       ],
-      relatedNairobiTopic: data.relatedNairobiTopic || 'Nairobi Household Management & Child Wellbeing'
+      relatedNairobiTopic: data.relatedNairobiTopic || 'Kenyan Household Management & Child Wellbeing'
     };
 
     setInsights(prev => [newPost, ...prev]);
@@ -654,6 +663,25 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     triggerAlert(`Booking ${id} status updated to: ${status}`);
   };
 
+  const updateSubmissionFollowUp = (
+    type: 'booking' | 'emergency' | 'contact',
+    id: string,
+    assignedAdminEmail: string | null,
+    followUpAt: string | null
+  ) => {
+    const updates = {
+      assignedAdminEmail: assignedAdminEmail || undefined,
+      followUpAt: followUpAt || undefined
+    };
+    if (type === 'booking') {
+      setBookings(prev => prev.map(booking => booking.id === id ? { ...booking, ...updates } : booking));
+    } else if (type === 'emergency') {
+      setEmergencyRequests(prev => prev.map(request => request.id === id ? { ...request, ...updates } : request));
+    } else {
+      setContactInquiries(prev => prev.map(inquiry => inquiry.id === id ? { ...inquiry, ...updates } : inquiry));
+    }
+  };
+
   const deleteBooking = (id: string) => {
     setBookings(prev => prev.filter(b => b.id !== id));
     if (supabase) void adminMutation('bookings', 'delete', undefined, id).catch(error => triggerAlert(error.message));
@@ -705,6 +733,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEmergencyRequests(prev => prev.filter(e => e.id !== id));
     if (supabase) void adminMutation('emergencyRequests', 'delete', undefined, id).catch(error => triggerAlert(error.message));
     triggerAlert('Emergency dispatch record removed');
+  };
+
+  const updateContactInquiryStatus = (id: string, status: ContactInquiryStatus) => {
+    setContactInquiries(prev => prev.map(inquiry => inquiry.id === id ? { ...inquiry, status } : inquiry));
+    if (supabase) void adminMutation('contactInquiries', 'update', { id, status }).catch(error => triggerAlert(error.message));
+    triggerAlert(`Contact enquiry ${id} status updated to: ${status}`);
   };
 
   // Review operations
@@ -880,6 +914,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       bookings,
       addBooking,
       updateBookingStatus,
+      updateSubmissionFollowUp,
       deleteBooking,
 
       emergencyRequests,
@@ -888,6 +923,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       deleteEmergencyRequest,
 
       contactInquiries,
+      updateContactInquiryStatus,
 
       reviews,
       addReview,

@@ -73,15 +73,15 @@ function MainWebsite() {
   useEffect(() => {
     const routeSeo: Record<string, { title: string; description: string; robots?: string }> = {
       '/': {
-        title: 'Tmommycare Nairobi | Nannies & Homecare Professionals',
-        description: 'Find nannies, house managers, caregivers, and domestic professionals in Nairobi with guided placement support and replacement options.'
+        title: 'Tmommycare Kenya | Nannies & Homecare Professionals',
+        description: 'Find vetted nannies, caregivers, and household professionals with placement support across Kenya; availability varies by location.'
       },
       '/nannies': {
-        title: 'Nannies & Domestic Staff in Nairobi | Tmommycare',
-        description: 'Browse nannies, house managers, housekeepers, cooks, drivers, gardeners, and caretakers serving Nairobi.'
+        title: 'Nannies & Domestic Staff in Kenya | Tmommycare',
+        description: 'Explore homecare professionals and request placement support across Kenya. Public profiles currently show Nairobi-based availability.'
       },
       '/vetting': {
-        title: 'Nanny Care Standards in Nairobi | Tmommycare',
+        title: 'Homecare Vetting Standards in Kenya | Tmommycare',
         description: 'See how Tmommycare supports quality care through thoughtful screening, reference checks, training, and household support.'
       },
       '/salary-guide': {
@@ -89,60 +89,60 @@ function MainWebsite() {
         description: 'Estimate fair private-agreement take-home salaries for nannies, house managers, cooks, drivers, gardeners, and other domestic professionals in Nairobi.'
       },
       '/mission-vision': {
-        title: 'Our Mission & Vision | Tmommycare Nairobi',
-        description: 'Learn how Tmommycare is raising the standard for trusted childcare, dignified domestic employment, and safer Nairobi homes.'
+        title: 'Our Mission & Vision | Tmommycare Kenya',
+        description: 'Learn how Tmommycare supports trusted childcare, dignified domestic employment, and safer homes across Kenya.'
       },
       '/insights': {
-        title: 'Nairobi Parenting & Childcare Insights | Tmommycare',
-        description: 'Read practical Nairobi childcare, infant nutrition, safety, developmental milestone, and nanny-management guides.'
+        title: 'Kenyan Parenting & Childcare Insights | Tmommycare',
+        description: 'Read practical childcare, infant nutrition, safety, developmental milestone, and nanny-management guides for families in Kenya.'
       },
       '/reviews': {
-        title: 'Parent Reviews of Tmommycare Nairobi | Trusted Homecare',
-        description: 'Read verified family reviews about Tmommycare nanny placement, newborn care, household support, and domestic staffing in Nairobi.'
+        title: 'Family Reviews | Tmommycare Kenya',
+        description: 'Read family reviews from Nairobi placements and learn about Tmommycare homecare placement support across Kenya.'
       },
       '/compare-care': {
-        title: 'Tmommycare vs Other Nanny Options in Nairobi',
+        title: 'Compare Homecare Options in Kenya | Tmommycare',
         description: 'Compare managed nanny placement, household support, first aid training, replacement support, and informal childcare options.'
       },
       '/academy': {
-        title: 'Tmommycare Domestic & Homecare Academy | Nairobi',
+        title: 'Tmommycare Domestic & Homecare Academy | Kenya',
         description: 'Explore professional training and continuous learning for nannies, house managers, housekeepers, cooks, gardeners, and homecare staff.'
       },
       '/contact': {
-        title: 'Contact Tmommycare Nairobi | Nanny & Homecare Placement',
-        description: 'Contact Tmommycare for nanny placement, emergency backup staff, newborn care, house managers, and domestic professionals in Nairobi.'
+        title: 'Contact Tmommycare Kenya | Homecare Placement',
+        description: 'Contact Tmommycare about homecare placements across Kenya. Rapid emergency backup is currently available in Nairobi.'
       },
       '/pricing': {
-        title: 'Private Placement Pricing | Tmommycare Nairobi',
+        title: 'Private Placement Pricing | Tmommycare Kenya',
         description: 'Learn how Tmommycare structures private placement pricing and tailored household staffing quotes.'
       },
       '/careers': {
         title: 'Careers at Tmommycare | Domestic Staffing & Homecare Jobs',
-        description: 'Explore domestic staffing and homecare career opportunities with Tmommycare in Nairobi and beyond.'
+        description: 'Explore domestic staffing and homecare career opportunities with Tmommycare across Kenya.'
       },
       '/privacy-policy': {
-        title: 'Privacy Policy | Tmommycare Nairobi',
+        title: 'Privacy Policy | Tmommycare Kenya',
         description: 'Read how Tmommycare protects your personal data, householder information, and staff records.'
       },
       '/terms-of-placement': {
-        title: 'Terms of Placement | Tmommycare Nairobi',
+        title: 'Terms of Placement | Tmommycare Kenya',
         description: 'Review the placement, replacement, and service terms for nannies, household staff, and homecare professionals.'
       },
       '/safety-policy': {
-        title: 'Child & Household Safety Policy | Tmommycare Nairobi',
+        title: 'Child & Household Safety Policy | Tmommycare Kenya',
         description: 'Learn about Tmommycare’s safety commitments, vetting standards, and household care policies.'
       },
       '/provider-apply': {
-        title: 'Apply as a Homecare Provider | Tmommycare Nairobi',
+        title: 'Apply as a Homecare Provider | Tmommycare Kenya',
         description: 'Apply to be considered for the Tmommycare public directory. Submit your professional details and supporting documents for admin review.'
       },
       '/provider-payment': {
-        title: 'Provider Payment | Tmommycare Nairobi',
+        title: 'Provider Payment | Tmommycare Kenya',
         description: 'Complete your Tmommycare provider registration payment.',
         robots: 'noindex, nofollow'
       },
       '/provider/applications': {
-        title: 'My Provider Applications | Tmommycare Nairobi',
+        title: 'My Provider Applications | Tmommycare Kenya',
         description: 'Sign in to track your Tmommycare provider applications and payment drafts.',
         robots: 'noindex, nofollow'
       }
@@ -297,7 +297,7 @@ function MainWebsite() {
         <InfoPage
           kicker="Careers"
           title="Work with Tmommycare"
-          intro="We are building a more dignified, better-trained future for domestic and homecare professionals across Nairobi."
+          intro="We are building a more dignified, better-trained future for domestic and homecare professionals across Kenya."
           items={[
             'We hire vetted household professionals, nannies, caregivers, housekeepers, gardeners, cooks, and home managers.',
             'We look for professionalism, reliability, warmth, communication, and a commitment to family wellbeing.',

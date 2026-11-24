@@ -18,8 +18,8 @@ export const COMPETITOR_COMPARISON: CompetitorComparisonItem[] = [
     highlight: true
   },
   {
-    feature: 'Comprehensive Medical Screening (TB, Hep B, Stool & Blood Analysis)',
-    Tmommycare: 'Partner hospital verified panel (Gertrude’s, Aga Khan, Nairobi Hospital, MP Shah)',
+    feature: 'Optional, Client-Requested Health Screening',
+    Tmommycare: 'Arranged with a licensed healthcare provider only if the candidate is comfortable and consents',
     informalBrokers: 'Screening arrangements vary by individual',
     generalAgencies: 'Screening scope and coordination vary',
     whatsappGroups: 'Health information should be confirmed',
@@ -82,27 +82,17 @@ export const VETTING_PILLARS = [
   },
   {
     id: 'medical',
-    title: '3. Rigorous Clinical Health Screen',
-    shortDesc: 'Certified diagnostic health check at accredited Nairobi partner hospitals.',
-    fullDesc: 'Before entering any home, candidates complete a full clinical panel including Pulmonary Tuberculosis (Chest X-Ray / Sputum), Hepatitis B, Food Handler Salmonellosis, and sensory assessments at partner hospitals (Gertrude’s Children’s Hospital, Aga Khan, Nairobi Hospital, or MP Shah).',
-    verificationMethod: 'Certified laboratory panel stamped by registered medical officers',
-    issuingAuthority: 'Accredited Nairobi Hospital Laboratories',
+    title: '3. Optional, Client-Requested Health Screening',
+    shortDesc: 'We ask candidates if they are comfortable with a relevant medical check requested by a client.',
+    fullDesc: 'If a client requests a role-relevant health screening, we first ask whether the candidate is comfortable proceeding and obtain their informed consent. If they agree, screening is arranged with a licensed healthcare provider. Participation is voluntary, and any results are handled confidentially. Screening can help the client and candidate discuss health considerations relevant to the placement, but it is not a diagnosis or a guarantee of future health.',
+    verificationMethod: 'Arranged only with the candidate’s informed consent; results are shared only with permission',
+    issuingAuthority: 'A licensed healthcare provider agreed with the candidate',
     iconName: 'Activity',
-    status: 'annual-renew' as const
-  },
-  {
-    id: 'first-aid',
-    title: '4. Red Cross Infant CPR & First Aid',
-    shortDesc: 'Practical, hands-on pediatric life-saving, fire safety, and emergency response.',
-    fullDesc: 'All Tmommycare homecare professionals receive training in Pediatric & Workplace First Aid, Infant Choking Management, Burn Response, Fire Extinguisher Safety, and Emergency Dispatch Protocols through the Kenya Red Cross Society or St. John Ambulance.',
-    verificationMethod: 'Practical simulation assessment & official certification registry number',
-    issuingAuthority: 'Kenya Red Cross Society Training Institute',
-    iconName: 'HeartPulse',
-    status: 'annual-renew' as const
+    status: 'voluntary' as const
   },
   {
     id: 'reference',
-    title: '5. Deep Traceable Employer Reference Audit',
+    title: '4. Employer Reference Checks',
     shortDesc: 'In-depth phone and in-person interviews with at least 3 previous Nairobi employers.',
     fullDesc: 'Our placement team conducts thorough 30-minute structured reference interviews with past homeowners and expatriates, probing honesty, integrity with household valuables, work ethic, punctuality, compound vigilance, and reasons for departure.',
     verificationMethod: 'Direct phone & verified residential employer audit by Tmommycare senior coordinators',
@@ -112,17 +102,17 @@ export const VETTING_PILLARS = [
   },
   {
     id: 'psychometric',
-    title: '6. Psychometric & Integrity Assessment',
+    title: '5. Situational & Integrity Assessment',
     shortDesc: 'Structured evaluation of emotional regulation, household honesty, and reliability.',
     fullDesc: 'Domestic stewardship requires trust and emotional balance. Candidates complete our proprietary situational test: handling emergencies, conflict resolution, property confidentiality, and ethical family privacy boundaries.',
     verificationMethod: 'In-person behavioral simulation and scenario-based psychometric scoring',
     issuingAuthority: 'Tmommycare Domestic Academy Evaluators',
-    iconName: 'Sparkles',
+    iconName: 'Activity',
     status: 'mandatory' as const
   },
   {
     id: 'academy',
-    title: '7. Tmommycare Domestic & Homecare Academy',
+    title: '6. Tmommycare Domestic & Homecare Academy',
     shortDesc: 'Intensive upskilling in hygiene, modern equipment, estate security, and hospitality.',
     fullDesc: 'Candidates receive specialized training by profession: pediatric nutrition and Montessori milestones for Nannies; fine linen and steam cleaning for Housekeepers; organic horticulture and irrigation for Shamba Boys; technical facility upkeep for Caretakers; and executive estate supervision for House Managers.',
     verificationMethod: 'Graduation capstone exam and ongoing quarterly continuous learning credits',

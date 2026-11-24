@@ -24,7 +24,7 @@ export interface VettingPillar {
   verificationMethod: string;
   issuingAuthority: string;
   iconName: string;
-  status: 'mandatory' | 'annual-renew' | 'forensic';
+  status: 'mandatory' | 'forensic' | 'voluntary';
 }
 
 export interface NannyProfile {
@@ -173,6 +173,7 @@ export type BookingStatus = 'New' | 'Contacted' | 'Completed' | 'Archived';
 export type EmergencyStatus = 'Pending Dispatch' | 'Staff Contacted' | 'Dispatched' | 'Resolved' | 'Archived';
 export type ContactInquiryStatus = 'New' | 'Contacted' | 'Resolved' | 'Archived';
 export type ReviewStatus = 'pending' | 'published' | 'hidden';
+export type AdminWorkItemType = 'booking' | 'emergency' | 'contact' | 'provider-application';
 
 export interface Review {
   id: string;
@@ -195,6 +196,8 @@ export interface BookingSubmission extends BookingFormData {
   status: BookingStatus;
   internalNotes?: string;
   assignedCoordinator?: string;
+  assignedAdminEmail?: string;
+  followUpAt?: string;
 }
 
 export interface EmergencySubmission extends EmergencyRequestData {
@@ -203,6 +206,8 @@ export interface EmergencySubmission extends EmergencyRequestData {
   status: EmergencyStatus;
   internalNotes?: string;
   assignedStaffName?: string;
+  assignedAdminEmail?: string;
+  followUpAt?: string;
 }
 
 export interface ContactInquiry {
@@ -213,6 +218,8 @@ export interface ContactInquiry {
   message: string;
   status: ContactInquiryStatus;
   submittedAt: string;
+  assignedAdminEmail?: string;
+  followUpAt?: string;
 }
 
 export interface MediaItem {

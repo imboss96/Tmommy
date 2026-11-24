@@ -24,13 +24,13 @@ interface HeroProps {
 
 const heroSlides = [
   {
-    eyebrow: 'Trusted homecare for Nairobi families',
+    eyebrow: 'Trusted homecare for Kenyan families',
     headline: 'Vetted, Trained, Trusted and Experienced',
-    highlight: 'Homecare Professionals in the City',
-    description: 'Protect your home and family with trusted care from professionals selected around your household needs.',
+    highlight: 'Homecare Professionals Across Kenya',
+    description: 'Protect your home and family with trusted care matched to your needs, with availability confirmed for your area.',
     points: ['DCI Biometric Clearance', 'Reference Verified', '90-Day Replacement Support'],
     image: '',
-    alt: 'Tmommycare vetted homecare professional in Nairobi',
+    alt: 'Tmommycare vetted homecare professional in Kenya',
     caption: 'Care matched to your household',
     captionDetail: 'Nannies, household staff, and emergency cover'
   },
@@ -38,21 +38,21 @@ const heroSlides = [
     eyebrow: 'Professional childcare and family support',
     headline: 'Reliable Care for',
     highlight: 'Every Family Routine',
-    description: 'Meet trained nannies and household professionals who bring calm, capable support to busy Nairobi homes.',
+    description: 'Meet trained nannies and household professionals who bring calm, capable support to homes across Kenya.',
     points: ['Infant and Childcare', 'CPR and First Aid', 'Experienced Professionals'],
     image: '',
-    alt: 'Trusted care professional ready to support Nairobi families',
+    alt: 'Trusted care professional ready to support Kenyan families',
     caption: 'Support that fits your family',
     captionDetail: 'Childcare, household routines, and family care'
   },
   {
-    eyebrow: 'Flexible household support across Nairobi',
+    eyebrow: 'Flexible household support across Kenya',
     headline: 'Ready Help for',
     highlight: 'Home, Holidays and Busy Days',
-    description: 'Choose dependable professionals for daily care, holiday cover, household management, and urgent support.',
-    points: ['Holiday Relievers', 'Household Management', 'Emergency Availability'],
+    description: 'Choose dependable professionals for daily care, holiday cover, and household management. Emergency response times depend on your location.',
+    points: ['Holiday Relievers', 'Household Management', 'Nairobi Emergency Backup'],
     image: '',
-    alt: 'Experienced homecare professional for Nairobi households',
+    alt: 'Experienced homecare professional for Kenyan households',
     caption: 'Practical support when needed',
     captionDetail: 'Holiday relievers, household staff, and cover'
   }
@@ -183,17 +183,17 @@ export const Hero: React.FC<HeroProps> = ({
                   </select>
                 </div>
 
-                {/* City Neighbourhood */}
+                {/* Service Area */}
                 <div className="sm:col-span-4 text-left">
                   <label className="block text-[11px] uppercase font-bold text-[#7D766D] tracking-wider mb-1 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#D96B43]" />
-                    City Neighbourhood
+                    Area or Neighbourhood
                   </label>
                   <input
                     type="text"
                     value={selectedEstate}
                     onChange={(e) => setSelectedEstate(e.target.value)}
-                    placeholder="All city neighbourhoods"
+                    placeholder="e.g. Kisumu, Mombasa, or Nairobi"
                     className="w-full bg-[#FAF7F2] border border-[#D5C9BA] rounded-xl px-3 py-2.5 text-sm font-semibold text-[#1A201C] focus:outline-none focus:ring-2 focus:ring-[#D96B43]/50"
                   />
                 </div>
@@ -213,12 +213,12 @@ export const Hero: React.FC<HeroProps> = ({
 
             {/* Emergency and additional service links */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 text-xs sm:text-sm">
-              <span className="text-[#635E59]">Need emergency backup staff or weekend coverage?</span>
+              <span className="text-[#635E59]">Need urgent backup? 2–4 hour dispatch is available in Nairobi.</span>
               <button 
                 onClick={onOpenEmergency}
                 className="text-[#D96B43] hover:text-[#B8532F] font-bold underline inline-flex items-center gap-1"
               >
-                <span>Dispatch Backup in 2-4 Hours</span>
+                <span>Nairobi Emergency Dispatch</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -310,7 +310,7 @@ export const Hero: React.FC<HeroProps> = ({
 
         </div>
 
-        {/* Nairobi Stats Counter Bar */}
+        {/* Service and trust statistics */}
         <div className="mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-[#E8DFD3] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#1D432D] font-['Outfit']">1,200+</p>
@@ -318,7 +318,7 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#D96B43] font-['Outfit']">100%</p>
-            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">DCI Criminal & Medically Cleared</p>
+            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">Identity & DCI Checks</p>
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#1D432D] font-['Outfit']">99.2%</p>
@@ -326,7 +326,7 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-white/70 border border-[#EFE9DF]">
             <p className="text-xl sm:text-3xl font-extrabold text-[#D96B43] font-['Outfit']">&lt; 3 Hours</p>
-            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">Emergency Standby Dispatch</p>
+            <p className="text-[11px] sm:text-sm font-semibold text-[#635E59] mt-0.5">Nairobi Emergency Dispatch</p>
           </div>
         </div>
 

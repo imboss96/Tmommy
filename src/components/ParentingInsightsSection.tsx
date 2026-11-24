@@ -5,7 +5,6 @@ import {
   Tag, 
   ArrowRight, 
   Search, 
-  Sparkles, 
   CheckCircle2, 
   X, 
   Share2, 
@@ -71,7 +70,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
         <div className="max-w-3xl mx-auto text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E8F0EA] text-[#1D432D] text-xs font-bold uppercase tracking-wider mb-4 border border-[#C5DDCB]">
             <BookOpen className="w-3.5 h-3.5 text-[#D96B43]" />
-            <span>Nairobi Childcare Knowledge Base</span>
+            <span>Kenyan Childcare Knowledge Base</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A201C] tracking-tight font-['Outfit']">
@@ -80,7 +79,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
           
           <p className="mt-4 text-base sm:text-lg text-[#635E59] leading-relaxed">
             Evidence-grounded advice authored by Kenyan pediatricians, nutritionists, and Red Cross emergency instructors. 
-            Tailored specifically for modern Nairobi households.
+            Practical guidance for families across Kenya, with local examples and context.
           </p>
         </div>
 
@@ -223,7 +222,6 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
         <div className="mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#1D432D] to-[#142F1F] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
           <div className="space-y-2 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#F4A261] text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
               <span>Certified Nanny Implementation</span>
             </div>
             <h4 className="text-xl sm:text-2xl font-bold font-['Outfit']">
@@ -318,7 +316,7 @@ export const ParentingInsightsSection: React.FC<ParentingInsightsSectionProps> =
               <div className="p-5 rounded-2xl bg-[#E8F0EA] border border-[#C5DDCB] space-y-3">
                 <div className="flex items-center gap-2 text-[#1D432D] font-bold text-sm font-['Outfit']">
                   <CheckCircle2 className="w-4 h-4 text-[#D96B43]" />
-                  <span>Clinical & Practical Key Takeaways for Nairobi Families</span>
+                  <span>Clinical & Practical Key Takeaways for Kenyan Families</span>
                 </div>
                 <ul className="space-y-2 text-xs sm:text-sm text-[#23432F]">
                   {activeArticle.keyTakeaways.map((point, index) => (

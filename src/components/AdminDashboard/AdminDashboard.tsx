@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  Inbox, 
-  Image as ImageIcon, 
-  Settings, 
-  ArrowLeft, 
-  Plus, 
-  Sparkles, 
-  ShieldCheck, 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock, 
-  ExternalLink,
-  ChevronRight,
+import {
+  ArrowUpRight,
+  BookOpen,
+  Image as ImageIcon,
+  Inbox,
+  LayoutDashboard,
   Lock,
   MessageSquareQuote,
+  ReceiptText,
+  Search,
+  Settings,
   UserPlus,
-  ReceiptText
+  Users,
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
+import { TmommycareLogo } from '../TmommycareLogo';
 import { PostsManager } from './PostsManager';
 import { StaffManager } from './StaffManager';
 import { SubmissionsManager } from './SubmissionsManager';
 import { MediaManager } from './MediaManager';
 import { SettingsManager } from './SettingsManager';
 import { ReviewsManager } from './ReviewsManager';
-import { TmommycareLogo } from '../TmommycareLogo';
 import { ProviderApplicationsManager } from './ProviderApplicationsManager';
 import { ProviderTransactionsManager } from './ProviderTransactionsManager';
+import { AdminOverview } from './AdminOverview';
+
+type AdminTab = 'overview' | 'posts' | 'staff' | 'applications' | 'transactions' | 'submissions' | 'media' | 'reviews' | 'settings';
+type NavigationItem = { id: AdminTab; label: string; icon: LucideIcon; count?: number; alert?: number };
 
 interface AdminDashboardProps {
   onBackToWebsite: () => void;
@@ -37,386 +37,192 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToWebsite, onLockDashboard }) => {
-  const { 
-    nannies, 
-    insights, 
-    bookings, 
-    emergencyRequests, 
-    mediaItems, 
+  const {
+    nannies,
+    insights,
+    bookings,
+    emergencyRequests,
+    contactInquiries,
+    mediaItems,
     reviews,
-    recentAlert, 
-    dismissAlert 
+    recentAlert,
+    dismissAlert
   } = useContent();
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [navigationSearch, setNavigationSearch] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'staff' | 'applications' | 'transactions' | 'submissions' | 'media' | 'reviews' | 'settings'>('overview');
+  const newBookings = bookings.filter(booking => booking.status === 'New').length;
+  const pendingEmergency = emergencyRequests.filter(request => request.status === 'Pending Dispatch').length;
+  const newContacts = contactInquiries.filter(inquiry => inquiry.status === 'New').length;
+  const pendingReviews = reviews.filter(review => review.status === 'pending').length;
+  const submissionAlerts = newBookings + pendingEmergency + newContacts;
 
-  const newBookings = bookings.filter(b => b.status === 'New');
-  const pendingEmergency = emergencyRequests.filter(e => e.status === 'Pending Dispatch');
-  const totalSubmissions = bookings.length + emergencyRequests.length;
+  const navigationItems: NavigationItem[] = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'submissions', label: 'Requests & enquiries', icon: Inbox, alert: submissionAlerts },
+    { id: 'applications', label: 'Provider applications', icon: UserPlus },
+    { id: 'transactions', label: 'Transactions', icon: ReceiptText },
+    { id: 'staff', label: 'Staff directory', icon: Users, count: nannies.length },
+    { id: 'posts', label: 'Posts & articles', icon: BookOpen, count: insights.length },
+    { id: 'media', label: 'Photos & media', icon: ImageIcon, count: mediaItems.length },
+    { id: 'reviews', label: 'Reviews', icon: MessageSquareQuote, alert: pendingReviews },
+    { id: 'settings', label: 'Settings', icon: Settings }
+  ];
+  const visibleNavigationItems = navigationItems.filter(item => item.label.toLowerCase().includes(navigationSearch.trim().toLowerCase()));
+
+  const renderNavigation = (mobile = false) => visibleNavigationItems.map(item => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => setActiveTab(item.id)}
+        aria-current={isActive ? 'page' : undefined}
+        className={`group flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-colors ${mobile ? '' : 'w-full'} ${
+          isActive
+            ? 'bg-[#EEF3FF] text-[#2459CC] shadow-[inset_3px_0_0_#3478F6]'
+            : 'text-[#5F6672] hover:bg-[#F5F7FA] hover:text-[#202531]'
+        }`}
+      >
+        <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#3478F6]' : 'text-[#818895]'}`} />
+        <span className="whitespace-nowrap">{item.label}</span>
+        {item.alert ? (
+          <span className="ml-auto min-w-5 rounded-full bg-[#EAF7F0] px-1.5 py-0.5 text-center text-[9px] font-bold text-[#22865B]">{item.alert}</span>
+        ) : item.count !== undefined ? (
+          <span className="ml-auto rounded-full bg-[#F0F2F5] px-2 py-0.5 text-[10px] font-semibold text-[#737A86]">{item.count}</span>
+        ) : null}
+      </button>
+    );
+  });
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] text-[#1A201C] font-['Plus_Jakarta_Sans'] flex flex-col">
-      
-      {/* Toast alert notification */}
+    <div className="min-h-screen bg-[#F3F5F7] text-[#202531]">
       {recentAlert && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top duration-200">
-          <div className="bg-[#1D432D] text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-emerald-500/30">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="fixed right-4 top-4 z-[60] animate-in slide-in-from-top duration-200">
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-[#202531] shadow-xl">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
             <span className="text-xs font-semibold">{recentAlert}</span>
-            <button
-              onClick={dismissAlert}
-              className="text-white/70 hover:text-white ml-2 text-xs"
-            >
-              ✕
-            </button>
+            <button type="button" onClick={dismissAlert} className="ml-2 text-xs text-[#818895] hover:text-[#202531]" aria-label="Dismiss notification">✕</button>
           </div>
         </div>
       )}
 
-      {/* TOP BAR */}
-      <header className="bg-[#1D432D] text-white sticky top-0 z-40 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
-          <div className="flex items-center gap-3">
-            <TmommycareLogo 
-              variant="icon" 
-              colorScheme="white" 
-              size="sm" 
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold font-['Outfit'] tracking-tight">Tmommycare Operations</h1>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-                  Console
-                </span>
-              </div>
-              <p className="text-[11px] text-white/70">Frontend content, staff roster & submissions management</p>
+      <div className="flex min-h-screen">
+        <aside className="hidden w-[248px] shrink-0 flex-col border-r border-[#E8EBEF] bg-white px-4 py-5 lg:flex">
+          <div className="flex items-center gap-3 px-2 pb-7">
+            <TmommycareLogo variant="icon" colorScheme="default" size="sm" onClick={event => event.preventDefault()} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold tracking-tight text-[#1E2735]">Tmommycare</p>
+              <p className="mt-0.5 text-[10px] font-medium text-[#89909B]">Operations workspace</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.16em] text-[#9AA0AA]">Workspace</p>
+          <nav aria-label="Admin sections" className="flex flex-col gap-1">
+            {renderNavigation()}
+          </nav>
+
+          <div className="mt-auto space-y-3 pt-8">
+            <div className="rounded-2xl bg-[#F4F7FC] p-3.5">
+              <p className="text-xs font-bold text-[#29364B]">Operations console</p>
+              <p className="mt-1 text-[10px] leading-relaxed text-[#7B8492]">Manage requests, providers, and website content from one place.</p>
+            </div>
             <button
+              type="button"
               onClick={onBackToWebsite}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors border border-white/20"
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-[#5F6672] hover:bg-[#F5F7FA]"
             >
-              <ArrowLeft className="w-4 h-4 text-emerald-300" />
-              <span>Public Website</span>
+              <span className="inline-flex items-center gap-2"><ExternalLink className="h-4 w-4" /> Public website</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
             </button>
             {onLockDashboard && (
               <button
+                type="button"
                 onClick={onLockDashboard}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 hover:text-white text-xs font-bold transition-colors border border-red-500/30"
-                title="Lock admin session and return to public website"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-[#A34C4C] hover:bg-red-50"
               >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Lock Console</span>
+                <Lock className="h-4 w-4" /> Lock admin session
               </button>
             )}
           </div>
-
-        </div>
-
-      </header>
-
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col lg:flex-row">
-        {/* Side navigation; it becomes a horizontal menu on narrow screens. */}
-        <aside className="border-b border-[#E8DFD3] bg-white px-3 py-3 lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r lg:px-4 lg:py-6">
-          <p className="mb-3 hidden px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#8E877D] lg:block">Workspace</p>
-          <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto lg:sticky lg:top-20 lg:flex-col lg:overflow-visible">
-            {[
-              { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
-              { id: 'posts' as const, label: 'Posts & Articles', icon: BookOpen, count: insights.length },
-              { id: 'staff' as const, label: 'Domestic Staff Directory', icon: Users, count: nannies.length },
-              { id: 'applications' as const, label: 'Provider Applications', icon: UserPlus },
-              { id: 'transactions' as const, label: 'Transactions', icon: ReceiptText },
-              { id: 'submissions' as const, label: 'Form Submissions', icon: Inbox, alert: newBookings.length + pendingEmergency.length },
-              { id: 'media' as const, label: 'Photos & Media', icon: ImageIcon, count: mediaItems.length },
-              { id: 'reviews' as const, label: 'Reviews', icon: MessageSquareQuote, count: reviews.filter(review => review.status === 'pending').length },
-              { id: 'settings' as const, label: 'Site Settings', icon: Settings }
-            ].map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold transition-colors lg:w-full ${isActive ? 'bg-[#E8F0EA] text-[#1D432D] shadow-sm' : 'text-[#635E59] hover:bg-[#FAF7F2] hover:text-[#1A201C]'}`}
-                >
-                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#1D432D]' : 'text-[#8E877D]'}`} />
-                  <span className="whitespace-nowrap lg:whitespace-normal">{item.label}</span>
-                  {item.alert ? (
-                    <span className="ml-auto rounded-full bg-[#D96B43] px-2 py-0.5 text-[9px] font-extrabold text-white">{item.alert} NEW</span>
-                  ) : item.count !== undefined ? (
-                    <span className="ml-auto rounded-full bg-[#F2EDE4] px-2 py-0.5 text-[10px] font-bold text-[#635E59]">{item.count}</span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </nav>
         </aside>
 
-      {/* MAIN BODY CONTENT */}
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        
-        {/* OVERVIEW TAB */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            
-            {/* Metric KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              
-              <div 
-                onClick={() => setActiveTab('submissions')}
-                className="bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm hover:border-[#D96B43] transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7D766D]">New Submissions</span>
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-                    <Inbox className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-bold font-['Outfit'] text-[#1A201C]">
-                    {newBookings.length + pendingEmergency.length}
-                  </span>
-                  <span className="text-xs text-[#7D766D]">pending review</span>
-                </div>
-                <div className="mt-2 flex items-center gap-1 text-[11px] text-[#D96B43] font-bold group-hover:translate-x-1 transition-transform">
-                  <span>View client submissions</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-40 border-b border-[#E8EBEF] bg-white/95 backdrop-blur">
+            <div className="flex h-[68px] items-center justify-between gap-3 px-4 sm:px-6 xl:px-8">
+              <div className="flex min-w-0 items-center gap-2 lg:hidden">
+                <TmommycareLogo variant="icon" colorScheme="default" size="sm" onClick={event => event.preventDefault()} />
+                <span className="truncate text-sm font-bold text-[#1E2735]">Tmommycare Admin</span>
               </div>
-
-              <div 
-                onClick={() => setActiveTab('staff')}
-                className="bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm hover:border-[#1D432D] transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7D766D]">Vetted Staff</span>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                    <Users className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-bold font-['Outfit'] text-[#1A201C]">
-                    {nannies.length}
-                  </span>
-                  <span className="text-xs text-[#7D766D]">active candidates</span>
-                </div>
-                <div className="mt-2 flex items-center gap-1 text-[11px] text-[#1D432D] font-bold group-hover:translate-x-1 transition-transform">
-                  <span>Manage staff profiles</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-
-              <div 
-                onClick={() => setActiveTab('posts')}
-                className="bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm hover:border-[#D96B43] transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7D766D]">Published Posts</span>
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#D96B43] flex items-center justify-center">
-                    <BookOpen className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-bold font-['Outfit'] text-[#1A201C]">
-                    {insights.length}
-                  </span>
-                  <span className="text-xs text-[#7D766D]">articles live</span>
-                </div>
-                <div className="mt-2 flex items-center gap-1 text-[11px] text-[#D96B43] font-bold group-hover:translate-x-1 transition-transform">
-                  <span>Create & edit posts</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-
-              <div 
-                onClick={() => setActiveTab('media')}
-                className="bg-white p-5 rounded-2xl border border-[#E8DFD3] shadow-sm hover:border-blue-500 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7D766D]">Photo Library</span>
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
-                    <ImageIcon className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-bold font-['Outfit'] text-[#1A201C]">
-                    {mediaItems.length}
-                  </span>
-                  <span className="text-xs text-[#7D766D]">high-res photos</span>
-                </div>
-                <div className="mt-2 flex items-center gap-1 text-[11px] text-blue-700 font-bold group-hover:translate-x-1 transition-transform">
-                  <span>Upload & browse media</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-
-            </div>
-
-            {/* Quick Actions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => setActiveTab('posts')}
-                className="p-5 rounded-2xl bg-gradient-to-br from-white to-[#FAF7F2] border border-[#E8DFD3] text-left hover:shadow-md transition-all flex items-start gap-4"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#D96B43] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#D96B43]/20">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-[#1A201C]">Publish New Post</h3>
-                  <p className="text-xs text-[#635E59] mt-0.5 leading-relaxed">
-                    Write parenting advice, infant nutrition guidelines, or estate homecare best practices.
-                  </p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('staff')}
-                className="p-5 rounded-2xl bg-gradient-to-br from-white to-[#FAF7F2] border border-[#E8DFD3] text-left hover:shadow-md transition-all flex items-start gap-4"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#1D432D] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#1D432D]/20">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-[#1A201C]">Add Domestic Staff</h3>
-                  <p className="text-xs text-[#635E59] mt-0.5 leading-relaxed">
-                    Register a new nanny, house manager, cook, or groundskeeper with photo and DCI clearance.
-                  </p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('media')}
-                className="p-5 rounded-2xl bg-gradient-to-br from-white to-[#FAF7F2] border border-[#E8DFD3] text-left hover:shadow-md transition-all flex items-start gap-4"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20">
-                  <ImageIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-[#1A201C]">Post & Upload Photos</h3>
-                  <p className="text-xs text-[#635E59] mt-0.5 leading-relaxed">
-                    Add new photos to the media library to use anywhere across the live frontend.
-                  </p>
-                </div>
-              </button>
-            </div>
-
-            {/* Recent Submissions Feed */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Recent Bookings */}
-              <div className="bg-white rounded-2xl border border-[#E8DFD3] p-5 shadow-sm space-y-3">
-                <div className="flex items-center justify-between border-b border-[#F2ECE1] pb-3">
-                  <h3 className="font-bold text-sm text-[#1A201C] flex items-center gap-2">
-                    <Inbox className="w-4 h-4 text-[#D96B43]" />
-                    <span>Recent Bookings</span>
-                  </h3>
+              <label className="hidden max-w-[420px] flex-1 items-center gap-2 rounded-xl border border-[#E8EBEF] bg-[#F8F9FB] px-3 py-2 md:flex">
+                <Search className="h-4 w-4 shrink-0 text-[#9299A4]" />
+                <input
+                  type="search"
+                  value={navigationSearch}
+                  onChange={event => setNavigationSearch(event.target.value)}
+                  placeholder="Search dashboard sections..."
+                  aria-label="Search dashboard sections"
+                  className="w-full bg-transparent text-xs text-[#202531] outline-none placeholder:text-[#A0A6AF]"
+                />
+                {navigationSearch && <button type="button" onClick={() => setNavigationSearch('')} className="text-[10px] text-[#7B8492]">Clear</button>}
+              </label>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="hidden rounded-xl bg-[#F5F7FA] px-3 py-2 text-[10px] font-semibold text-[#717784] sm:inline-flex">
+                  {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+                <button
+                  type="button"
+                  onClick={onBackToWebsite}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#E5E8ED] bg-white px-3 py-2 text-[11px] font-semibold text-[#4C5563] hover:bg-[#F8F9FB]"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Website</span>
+                </button>
+                {onLockDashboard && (
                   <button
-                    onClick={() => setActiveTab('submissions')}
-                    className="text-xs font-bold text-[#D96B43] hover:underline"
+                    type="button"
+                    onClick={onLockDashboard}
+                    aria-label="Lock admin session"
+                    title="Lock admin session"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#E5E8ED] text-[#69717E] hover:bg-[#F8F9FB]"
                   >
-                    View All ({bookings.length})
+                    <Lock className="h-4 w-4" />
                   </button>
-                </div>
-
-                <div className="space-y-2.5">
-                  {bookings.slice(0, 3).map(b => (
-                    <div key={b.id} className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E8DFD3] flex items-center justify-between text-xs">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-[#1A201C]">{b.parentName}</span>
-                          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">
-                            {b.status}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#635E59] mt-0.5">
-                          {b.estate} • {b.role || 'nanny'} • Starts {b.startDate || 'date to be confirmed'}
-                        </p>
-                      </div>
-                      <a
-                        href={`tel:${b.phone}`}
-                        className="px-2.5 py-1 rounded-lg bg-white border border-[#D5C9BA] hover:bg-[#F2ECE1] font-bold text-[#1D432D]"
-                      >
-                        Call
-                      </a>
-                    </div>
-                  ))}
-                </div>
+                )}
               </div>
-
-              {/* Emergency Alerts */}
-              <div className="bg-white rounded-2xl border border-red-200 p-5 shadow-sm space-y-3">
-                <div className="flex items-center justify-between border-b border-red-100 pb-3">
-                  <h3 className="font-bold text-sm text-red-900 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-600" />
-                    <span>Emergency Standby Dispatches</span>
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('submissions')}
-                    className="text-xs font-bold text-red-700 hover:underline"
-                  >
-                    Manage Queue ({emergencyRequests.length})
-                  </button>
-                </div>
-
-                <div className="space-y-2.5">
-                  {emergencyRequests.slice(0, 3).map(e => (
-                    <div key={e.id} className="p-3 rounded-xl bg-red-50/50 border border-red-200 flex items-center justify-between text-xs">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-[#1A201C]">{e.parentName}</span>
-                          <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
-                            {e.status}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#635E59] mt-0.5">
-                          {e.estate} • Needed: {e.requiredTime}
-                        </p>
-                      </div>
-                      <a
-                        href={`tel:${e.phone}`}
-                        className="px-2.5 py-1 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700"
-                      >
-                        Dispatch
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
+          </header>
 
-          </div>
-        )}
+          <nav aria-label="Admin sections" className="flex gap-1 overflow-x-auto border-b border-[#E8EBEF] bg-white px-3 py-2 lg:hidden">
+            {renderNavigation(true)}
+          </nav>
 
-        {/* POSTS TAB */}
-        {activeTab === 'posts' && <PostsManager />}
-
-        {/* STAFF TAB */}
-        {activeTab === 'staff' && <StaffManager />}
-
-        {activeTab === 'applications' && <ProviderApplicationsManager />}
-
-        {activeTab === 'transactions' && <ProviderTransactionsManager />}
-
-        {/* SUBMISSIONS TAB */}
-        {activeTab === 'submissions' && <SubmissionsManager />}
-
-        {/* MEDIA TAB */}
-        {activeTab === 'media' && <MediaManager />}
-
-        {/* REVIEWS TAB */}
-        {activeTab === 'reviews' && <ReviewsManager />}
-
-        {/* SETTINGS TAB */}
-        {activeTab === 'settings' && <SettingsManager />}
-
-      </main>
+          <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 xl:px-8">
+            <div className="mx-auto w-full max-w-[1500px]">
+              {activeTab === 'overview' && (
+                <AdminOverview
+                  bookings={bookings}
+                  emergencyRequests={emergencyRequests}
+                  contactInquiries={contactInquiries}
+                  nannies={nannies}
+                  insights={insights}
+                  mediaItems={mediaItems}
+                  onViewSubmissions={() => setActiveTab('submissions')}
+                  onViewStaff={() => setActiveTab('staff')}
+                />
+              )}
+              {activeTab === 'posts' && <PostsManager />}
+              {activeTab === 'staff' && <StaffManager />}
+              {activeTab === 'applications' && <ProviderApplicationsManager />}
+              {activeTab === 'transactions' && <ProviderTransactionsManager />}
+              {activeTab === 'submissions' && <SubmissionsManager />}
+              {activeTab === 'media' && <MediaManager />}
+              {activeTab === 'reviews' && <ReviewsManager />}
+              {activeTab === 'settings' && <SettingsManager />}
+            </div>
+          </main>
+        </div>
       </div>
-
     </div>
   );
 };

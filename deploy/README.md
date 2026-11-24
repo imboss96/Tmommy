@@ -116,4 +116,4 @@ npm run build
 pm2 restart Tmommycare-api
 ```
 
-Apply Supabase migrations separately from the VPS using the Supabase dashboard or Supabase CLI, including `supabase/migrations/006_provider_applications.sql` for provider applications and private documents.
+Apply Supabase migrations separately from the VPS using the Supabase dashboard or Supabase CLI. Apply `supabase/migrations/013_admin_work_queue.sql` before using administrator assignment and follow-up dates; `006_provider_applications.sql` is required for provider applications and private documents.
